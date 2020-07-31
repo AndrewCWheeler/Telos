@@ -14,12 +14,13 @@ import {
   // AccordionDetails,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import CssBaseline from '@material-ui/core/CssBaseline';
 
 const useStyles = makeStyles(theme => ({
   root: {
     '& .MuiTextField-root': {
       margin: theme.spacing(1),
-      width: '35ch',
+      width: '36ch',
     },
   },
   fab: {
@@ -44,7 +45,8 @@ const DumpComponent = props => {
 
   return (
     <Container className={classes.layout}>
-      <Paper className={classes.paper} elevation={3}>
+      <CssBaseline />
+      <Paper className={classes.paper} elevation={5}>
         <form className={classes.root} noValidate autoComplete='off'>
           <Grid container direction='row' justify='center' alignItems='center'>
             <TextField

@@ -12,13 +12,31 @@ import Grid from '@material-ui/core/Grid';
 // import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import { createMuiTheme } from '@material-ui/core/styles';
+
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      light: '#757ce8',
+      main: '#3f50b5',
+      dark: '#002884',
+      contrastText: '#fff',
+    },
+    secondary: {
+      light: '#ff7961',
+      main: '#f44336',
+      dark: '#ba000d',
+      contrastText: '#000',
+    },
+  },
+});
 
 function Copyright() {
   return (
     <Typography variant='body2' color='textSecondary' align='center'>
       {'Copyright © '}
       <Link color='inherit' to='https://material-ui.com/'>
-        Your Website
+        Telos.com
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -29,6 +47,7 @@ function Copyright() {
 const useStyles = makeStyles(theme => ({
   root: {
     height: '100vh',
+    margin: theme.spacing(3, 0),
   },
   image: {
     backgroundImage: 'url(https://source.unsplash.com/random)',
@@ -57,6 +76,13 @@ const useStyles = makeStyles(theme => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
+  bottom: {
+    margin: theme.spacing(3),
+  },
+  title: {
+    margin: theme.spacing(4, 0, 2),
+    color: theme.palette.primary.main,
+  },
 }));
 
 export default function SignInSide() {
@@ -68,13 +94,12 @@ export default function SignInSide() {
       <Grid item xs={false} sm={4} md={7} className={classes.image} />
       <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
         <div className={classes.paper}>
-          <Typography>
-            <h1>Telos</h1>
-          </Typography>
+          <h1 className={classes.title}>{'\u03C4\u03AD\u03BB\u03BF\u03C2'}</h1>
           <i className='fa fa-2x fa-sign-in' aria-hidden='true'></i>
           {/* <Avatar className={classes.avatar}>
             <LockOutlinedIcon />
           </Avatar> */}
+
           <Typography component='h1' variant='h5'>
             Sign in
           </Typography>
@@ -125,6 +150,14 @@ export default function SignInSide() {
                   {"Don't have an account? Sign Up"}
                 </Link>
               </Grid>
+            </Grid>
+            <Grid
+              container
+              direction='row'
+              justify='center'
+              className={classes.bottom}
+            >
+              <Link to='/'>Sneak in...</Link>
             </Grid>
             <Box mt={5}>
               <Copyright />

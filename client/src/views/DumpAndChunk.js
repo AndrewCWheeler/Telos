@@ -2,13 +2,16 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { navigate } from '@reach/router';
 import DumpComponent from '../components/DumpComponent';
-// import AllDumpedList from '../components/AllDumpedList';
-import ChunkComponent from '../components/ChunkComponent';
+import AllDumpedList from '../components/AllDumpedList';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import BottomNavComponent from '../components/BottomNavComponent';
+
+// import ChunkComponent from '../components/ChunkComponent';
 
 const DumpAndChunk = () => {
   const [task, setTask] = useState({
     name: '',
-    chunkCategory: '',
+    category: '',
     chunked: false,
     scheduled: false,
     scheduledAt: '',
@@ -16,6 +19,7 @@ const DumpAndChunk = () => {
   });
   const [load, setLoad] = useState(0);
   const [allTasks, setAllTasks] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState([]);
 
   useEffect(() => {
     axios
@@ -38,12 +42,21 @@ const DumpAndChunk = () => {
     console.log(task);
   };
 
-  const onChunkHandler = e => {
-    setTask({
-      ...task,
-      [e.target.name]: e.target.value,
-    });
+  const onChunkHandler = (e, i) => {
+    console.log(e.target.value);
+    let categoryValue = e.target.value;
+    axios
+      .get('http://localhost:8000/api/tasks/' + i)
+      .then(res => {
+        if (res.data.message === 'success') {
+          let currTask = res.data.results;
+          currTask.category = categoryValue;
+          setTask(currTask);
+        }
+      })
+      .catch(err => console.log(err));
   };
+  console.log(task);
 
   const onSubmitHandler = e => {
     e.preventDefault();
@@ -52,7 +65,7 @@ const DumpAndChunk = () => {
       .then(res => {
         setTask({
           name: '',
-          chunkCategory: '',
+          category: '',
           chunked: false,
           scheduled: false,
           scheduledAt: '',
@@ -72,20 +85,32 @@ const DumpAndChunk = () => {
   };
 
   const onPatchHandler = (e, i) => {
-    axios.patch('http://localhost:8000/api/tasks/' + i).then(res => {
-      console.log(res.data.results);
-    });
+    e.preventDefault();
+    task.chunked = true;
+    axios
+      .patch('http://localhost:8000/api/tasks/' + i, task)
+      .then(res => {
+        console.log(res.data.results);
+        let count = load;
+        if (count >= 0) {
+          count++;
+          setLoad(count);
+        }
+        console.log(load);
+      })
+      .catch(err => console.log(err));
   };
 
   return (
     <div>
+      <CssBaseline />
       <DumpComponent
         onChangeHandler={onChangeHandler}
         onSubmitHandler={onSubmitHandler}
         data={task}
         setData={setTask}
       />
-      <ChunkComponent
+      {/* <ChunkComponent
         allTasks={allTasks}
         setAllTasks={setAllTasks}
         data={task}
@@ -94,12 +119,20 @@ const DumpAndChunk = () => {
         onChangeHandler={onChangeHandler}
         onPatchHandler={onPatchHandler}
         onChunkHandler={onChunkHandler}
-      />
-      {/* <AllDumpedList
+      /> */}
+      <AllDumpedList
+        onChangeHandler={onChangeHandler}
+        // onSubmitHandler={onSubmitHandler}
+        data={task}
+        setData={setTask}
         allTasks={allTasks}
         setAllTasks={setAllTasks}
         removeFromDom={removeFromDom}
-      /> */}
+        selectedIndex={selectedIndex}
+        setSelectedIndex={setSelectedIndex}
+        onChunkHandler={onChunkHandler}
+        onPatchHandler={onPatchHandler}
+      />
     </div>
   );
 };

@@ -19,7 +19,7 @@ function Copyright() {
     <Typography variant='body2' color='textSecondary' align='center'>
       {'Copyright © '}
       <Link color='inherit' to='https://material-ui.com/'>
-        Your Website
+        Telos.com
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -45,6 +45,9 @@ const useStyles = makeStyles(theme => ({
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
+  },
+  bottom: {
+    margin: theme.spacing(3, 0),
   },
 }));
 
@@ -113,7 +116,7 @@ export default function SignUp() {
             <Grid item xs={12}>
               <FormControlLabel
                 control={<Checkbox value='allowExtraEmails' color='primary' />}
-                label='I want to receive inspiration, marketing promotions and updates via email.'
+                label='I want to receive inspiring emails about how to stay productive!'
               />
             </Grid>
           </Grid>
@@ -135,7 +138,7 @@ export default function SignUp() {
           </Grid>
         </form>
       </div>
-      <Box mt={5}>
+      <Box mt={5} className={classes.bottom}>
         <Copyright />
       </Box>
     </Container>

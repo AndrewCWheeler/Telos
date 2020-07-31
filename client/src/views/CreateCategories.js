@@ -3,6 +3,7 @@ import axios from 'axios';
 import { navigate } from '@reach/router';
 import Container from '@material-ui/core/Container';
 import CategoryComponent from '../components/CategoryComponent';
+import BottomNavComponent from '../components/BottomNavComponent';
 
 const CreateCategories = () => {
   const [category, setCategory] = useState({
