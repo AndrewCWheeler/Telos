@@ -1,5 +1,4 @@
 const CategoryController = require('../controllers/category.controller');
-const { Category } = require('../models/category.model');
 
 module.exports = app => {
   app.get('/api/categories', CategoryController.allCategories);

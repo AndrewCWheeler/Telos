@@ -1,11 +1,18 @@
 const TaskController = require('../controllers/task.controller');
-const { Task } = require('../models/task.model');
+const { authenticate } = require('../config/jwt.config');
+const redirectLogin = (req, res, next) => {
+  if (!req.session.userId) {
+    res.json(err => ({ message: 'error', results: err }));
+  } else {
+    next();
+  }
+};
 
 module.exports = app => {
   app.get('/api', TaskController.index);
-  app.get('/api/tasks', TaskController.allTasks);
-  app.get('/api/tasks/:id', TaskController.oneTask);
-  app.post('/api/tasks', TaskController.newTask);
-  app.patch('/api/tasks/:id', TaskController.editTask);
-  app.delete('/api/tasks/:id', TaskController.deleteTask);
+  app.get('/api/tasks', authenticate, redirectLogin, TaskController.allTasks);
+  app.get('/api/tasks/:id', authenticate, TaskController.oneTask);
+  app.post('/api/tasks', authenticate, TaskController.newTask);
+  app.patch('/api/tasks/:id', authenticate, TaskController.editTask);
+  app.delete('/api/tasks/:id', authenticate, TaskController.deleteTask);
 };

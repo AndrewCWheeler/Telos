@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { makeStyles, withTheme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+// import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+// import ListItemIcon from '@material-ui/core/ListItemIcon';
+// import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
-import Avatar from '@material-ui/core/Avatar';
+// import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -16,34 +16,33 @@ import Container from '@material-ui/core/Container';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import DeleteComponent from './DeleteComponent';
-import FolderIcon from '@material-ui/icons/Folder';
+// import FolderIcon from '@material-ui/icons/Folder';
 import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
+// import MenuItem from '@material-ui/core/MenuItem';
+// import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import Axios from 'axios';
-import { createMuiTheme } from '@material-ui/core/styles';
+// import { createMuiTheme } from '@material-ui/core/styles';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import BottomNavComponent from './BottomNavComponent';
+// import BottomNavComponent from './BottomNavComponent';
 
-const theme = createMuiTheme({
-  palette: {
-    primary: {
-      light: '#757ce8',
-      main: '#3f50b5',
-      dark: '#002884',
-      contrastText: '#fff',
-    },
-    secondary: {
-      light: '#ff7961',
-      main: '#f44336',
-      dark: '#ba000d',
-      contrastText: '#000',
-    },
-  },
-});
+// const theme = createMuiTheme({
+//   palette: {
+//     primary: {
+//       light: '#757ce8',
+//       main: '#3f50b5',
+//       dark: '#002884',
+//       contrastText: '#fff',
+//     },
+//     secondary: {
+//       light: '#ff7961',
+//       main: '#f44336',
+//       dark: '#ba000d',
+//       contrastText: '#000',
+//     },
+//   },
+// });
 const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
@@ -58,6 +57,10 @@ const useStyles = makeStyles(theme => ({
   },
   text: {
     color: theme.palette.primary.contrastText,
+  },
+  select: {
+    color: theme.palette.primary.main,
+    backgroundColor: theme.palette.primary.contrastText,
   },
   paper: {
     maxWidth: 752,
@@ -87,12 +90,12 @@ const AllDumpedList = props => {
   const {
     allTasks,
     setAllTasks,
-    onChangeHandler,
+    // onChangeHandler,
     onChunkHandler,
     removeFromDom,
     onPatchHandler,
     selectedIndex,
-    setSelectedIndex,
+    // setSelectedIndex,
   } = props;
   const classes = useStyles();
   const [dense, setDense] = useState(false);
@@ -144,7 +147,7 @@ const AllDumpedList = props => {
                       {/* <i className='fa fa-folder-open-o' aria-hidden='true'></i> */}
 
                       <FormControl
-                        variant='outlined'
+                        variant='standard'
                         className={classes.formControl}
                       >
                         <InputLabel className={classes.text} htmlFor='category'>

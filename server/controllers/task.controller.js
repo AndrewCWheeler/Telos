@@ -1,4 +1,5 @@
 const { Task } = require('../models/task.model');
+const { User } = require('../models/user.model');
 
 module.exports = {
   index: (req, res) => {
@@ -6,9 +7,12 @@ module.exports = {
   },
 
   // Read methods --> app.get
-  allTasks: (req, res) => {
+  allTasks: async (req, res) => {
+    const user = await User.findOne({ _id: req.session.userId });
     Task.find({})
-      .then(tasks => res.json({ message: 'success', results: tasks }))
+      .then(tasks =>
+        res.json({ message: 'success', results: tasks, sessionUser: user })
+      )
       .catch(err => res.json({ message: 'error', results: err }));
   },
   oneTask: (req, res) => {
@@ -26,7 +30,7 @@ module.exports = {
 
   //Update methods --> app.put or app.patch
   editTask: (req, res) => {
-    Task.findOneAndUpdate({ _id: req.params.id }, req.body, {
+    Task.findBIAndUpdate({ _id: req.params.id }, req.body, {
       runValidators: true,
       new: true,
     })
@@ -36,7 +40,7 @@ module.exports = {
 
   //Delete methods --> app.delete
   deleteTask: (req, res) => {
-    Task.findOneAndDelete({ _id: req.params.id })
+    Task.findByIdAndDelete({ _id: req.params.id })
       .then(task => res.json({ message: 'success', results: task }))
       .catch(err => res.json({ message: 'error', results: err }));
   },

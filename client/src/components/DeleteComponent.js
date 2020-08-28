@@ -1,25 +1,25 @@
 import React from 'react';
 import axios from 'axios';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { createMuiTheme } from '@material-ui/core/styles';
-import { makeStyles, withTheme } from '@material-ui/core/styles';
+// import { createMuiTheme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 
-const theme = createMuiTheme({
-  palette: {
-    primary: {
-      light: '#757ce8',
-      main: '#3f50b5',
-      dark: '#002884',
-      contrastText: '#fff',
-    },
-    secondary: {
-      light: '#ff7961',
-      main: '#f44336',
-      dark: '#ba000d',
-      contrastText: '#000',
-    },
-  },
-});
+// const theme = createMuiTheme({
+//   palette: {
+//     primary: {
+//       light: '#757ce8',
+//       main: '#3f50b5',
+//       dark: '#002884',
+//       contrastText: '#fff',
+//     },
+//     secondary: {
+//       light: '#ff7961',
+//       main: '#f44336',
+//       dark: '#ba000d',
+//       contrastText: '#000',
+//     },
+//   },
+// });
 const useStyles = makeStyles(theme => ({
   white: {
     color: theme.palette.primary.contrastText,
@@ -37,9 +37,13 @@ const DeleteComponent = props => {
   const { taskId, successCallback } = props;
 
   const deleteTask = e => {
-    axios.delete('http://localhost:8000/api/tasks/' + taskId).then(res => {
-      successCallback();
-    });
+    axios
+      .delete('http://localhost:8000/api/tasks/' + taskId, {
+        withCredentials: true,
+      })
+      .then(res => {
+        successCallback();
+      });
   };
 
   return (

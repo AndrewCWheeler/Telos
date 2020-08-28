@@ -54,6 +54,7 @@ const CreateCategories = () => {
         data={category}
         setData={setCategory}
       />
+      <BottomNavComponent />
     </Container>
   );
 };

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
 // import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -6,7 +7,7 @@ import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 // import Paper from '@material-ui/core/Paper';
-import { Link } from '@reach/router';
+import { Link, navigate } from '@reach/router';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 // import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
@@ -49,14 +50,53 @@ const useStyles = makeStyles(theme => ({
   bottom: {
     margin: theme.spacing(3, 0),
   },
+  title: {
+    margin: theme.spacing(4, 0, 2),
+    color: theme.palette.primary.main,
+  },
 }));
 
 export default function SignUp() {
   const classes = useStyles();
+  const [user, setUser] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  const onChangeHandler = e => {
+    setUser({
+      ...user,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const onSubmitHandler = e => {
+    e.preventDefault();
+    axios
+      .post('http://localhost:8000/api/register', user, {
+        withCredentials: true,
+      })
+      .then(res => {
+        if (res.data.message === 'success') {
+          console.log('User successfully added:');
+          console.log(user);
+        }
+        navigate('/');
+      })
+      .catch(err => {
+        console.log('User was not successfully added:' + err.toString());
+      });
+  };
 
   return (
     <Container component='main' maxWidth='xs'>
       <CssBaseline />
+      <div className='center'>
+        <h1 className={classes.title}>{'\u03C4\u03AD\u03BB\u03BF\u03C2'}</h1>
+      </div>
       <div className={classes.paper}>
         <i className='fa fa-user-o fa-2x' aria-hidden='true'></i>
         {/* <Avatar className={classes.avatar}>
@@ -77,6 +117,7 @@ export default function SignUp() {
                 id='firstName'
                 label='First Name'
                 autoFocus
+                onChange={onChangeHandler}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -88,6 +129,7 @@ export default function SignUp() {
                 label='Last Name'
                 name='lastName'
                 autoComplete='lname'
+                onChange={onChangeHandler}
               />
             </Grid>
             <Grid item xs={12}>
@@ -99,6 +141,7 @@ export default function SignUp() {
                 label='Email Address'
                 name='email'
                 autoComplete='email'
+                onChange={onChangeHandler}
               />
             </Grid>
             <Grid item xs={12}>
@@ -111,8 +154,23 @@ export default function SignUp() {
                 type='password'
                 id='password'
                 autoComplete='current-password'
+                onChange={onChangeHandler}
               />
             </Grid>
+            <Grid item xs={12}>
+              <TextField
+                variant='outlined'
+                required
+                fullWidth
+                name='confirmPassword'
+                label='Confirm Password'
+                type='password'
+                id='confirmPassword'
+                // autoComplete='current-password'
+                onChange={onChangeHandler}
+              />
+            </Grid>
+
             <Grid item xs={12}>
               <FormControlLabel
                 control={<Checkbox value='allowExtraEmails' color='primary' />}
@@ -126,6 +184,7 @@ export default function SignUp() {
             variant='contained'
             color='primary'
             className={classes.submit}
+            onClick={onSubmitHandler}
           >
             Sign Up
           </Button>

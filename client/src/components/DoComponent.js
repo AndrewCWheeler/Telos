@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { makeStyles, withTheme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 // import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 // import ListItemIcon from '@material-ui/core/ListItemIcon';
 // import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
-import Avatar from '@material-ui/core/Avatar';
+// import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -23,42 +23,42 @@ import InputLabel from '@material-ui/core/InputLabel';
 // import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import { createMuiTheme } from '@material-ui/core/styles';
-import AddBoxIcon from '@material-ui/icons/AddBox';
+// import { createMuiTheme } from '@material-ui/core/styles';
+// import AddBoxIcon from '@material-ui/icons/AddBox';
 import CssBaseline from '@material-ui/core/CssBaseline';
 // import DatePicker from 'react-datepicker';
 // import 'react-datepicker/dist/react-datepicker.css';
 import CachedIcon from '@material-ui/icons/Cached';
 // import DateRangeIcon from '@material-ui/icons/DateRange';
 // import DatePickComponent from './DatePickComponent';
-import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
+// import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 import 'date-fns';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 
 import DateFnsUtils from '@date-io/date-fns';
 import {
   MuiPickersUtilsProvider,
-  KeyboardTimePicker,
+  // KeyboardTimePicker,
   KeyboardDatePicker,
 } from '@material-ui/pickers';
 import BottomNavComponent from './BottomNavComponent';
 
-const theme = createMuiTheme({
-  palette: {
-    primary: {
-      light: '#757ce8',
-      main: '#3f50b5',
-      dark: '#002884',
-      contrastText: '#fff',
-    },
-    secondary: {
-      light: '#ff7961',
-      main: '#f44336',
-      dark: '#ba000d',
-      contrastText: '#000',
-    },
-  },
-});
+// const theme = createMuiTheme({
+//   palette: {
+//     primary: {
+//       light: '#757ce8',
+//       main: '#3f50b5',
+//       dark: '#002884',
+//       contrastText: '#fff',
+//     },
+//     secondary: {
+//       light: '#ff7961',
+//       main: '#f44336',
+//       dark: '#ba000d',
+//       contrastText: '#000',
+//     },
+//   },
+// });
 const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
@@ -113,17 +113,17 @@ const DoComponent = () => {
   });
   const [allTasks, setAllTasks] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState([]);
-  const [selectedIndexId, setSelectedIndexId] = useState([]);
+  // const [selectedIndexId, setSelectedIndexId] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [dense, setDense] = useState(false);
   const [secondary, setSecondary] = useState(true);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  // const [selectedDate, setSelectedDate] = useState(new Date());
   const [dateParameter, setDateParameter] = useState(new Date());
   const classes = useStyles();
 
   useEffect(() => {
     axios
-      .get('http://localhost:8000/api/tasks')
+      .get('http://localhost:8000/api/tasks', { withCredentials: true })
       .then(response => {
         setAllTasks(response.data.results);
       })
@@ -138,7 +138,9 @@ const DoComponent = () => {
     e.preventDefault();
     if (task.chunked === true) {
       axios
-        .patch('http://localhost:8000/api/tasks/' + i, task)
+        .patch('http://localhost:8000/api/tasks/' + i, task, {
+          withCredentials: true,
+        })
         .then(res => {
           console.log(res.data.results);
           let count = load;
@@ -156,7 +158,7 @@ const DoComponent = () => {
     console.log(e.target.value);
     let categoryValue = e.target.value;
     axios
-      .get('http://localhost:8000/api/tasks/' + i)
+      .get('http://localhost:8000/api/tasks/' + i, { withCredentials: true })
       .then(res => {
         if (res.data.message === 'success') {
           let currTask = res.data.results;
@@ -173,44 +175,40 @@ const DoComponent = () => {
     setSelectedCategory(e.target.value);
   };
 
-  const handleDateChange = (date, id, i) => {
-    setSelectedDate(date);
-    let currScheduled = date;
-    axios
-      .get('http://localhost:8000/api/tasks/' + id)
-      .then(res => {
-        if (res.data.message === 'success') {
-          let currTask = res.data.results;
-          currTask.scheduledAt = currScheduled;
-          setTask(currTask);
-        }
-      })
-      .catch(err => console.log(err));
-    console.log(id);
-    console.log(i);
-    console.log(date);
-  };
-  console.log(task);
+  // const handleDateChange = (date, id, i) => {
+  //   setSelectedDate(date);
+  //   let currScheduled = date;
+  //   axios
+  //     .get('http://localhost:8000/api/tasks/' + id)
+  //     .then(res => {
+  //       if (res.data.message === 'success') {
+  //         let currTask = res.data.results;
+  //         currTask.scheduledAt = currScheduled;
+  //         setTask(currTask);
+  //       }
+  //     })
+  //     .catch(err => console.log(err));
+  // };
 
-  const onDateHandler = (e, id) => {
-    e.preventDefault();
-    if (task.scheduledAt !== null) {
-      task.scheduled = true;
-      axios
-        .patch('http://localhost:8000/api/tasks/' + id, task)
-        .then(res => {
-          console.log(res.data.results);
+  // const onDateHandler = (e, id) => {
+  //   e.preventDefault();
+  //   if (task.scheduledAt !== null) {
+  //     task.scheduled = true;
+  //     axios
+  //       .patch('http://localhost:8000/api/tasks/' + id, task)
+  //       .then(res => {
+  //         console.log(res.data.results);
 
-          let count = load;
-          if (count >= 0) {
-            count++;
-            setLoad(count);
-          }
-          console.log(load);
-        })
-        .catch(err => console.log(err));
-    }
-  };
+  //         let count = load;
+  //         if (count >= 0) {
+  //           count++;
+  //           setLoad(count);
+  //         }
+  //         console.log(load);
+  //       })
+  //       .catch(err => console.log(err));
+  //   }
+  // };
 
   const handleDateParameter = date => {
     console.log(date);
@@ -417,6 +415,7 @@ const DoComponent = () => {
           </div>
         </Grid>
       </Grid>
+      <BottomNavComponent />
     </Container>
   );
 };

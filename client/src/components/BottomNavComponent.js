@@ -2,17 +2,17 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import BottomNavigation from '@material-ui/core/BottomNavigation';
 import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
-import FolderIcon from '@material-ui/icons/Folder';
-import RestoreIcon from '@material-ui/icons/Restore';
-import FavoriteIcon from '@material-ui/icons/Favorite';
-import LocationOnIcon from '@material-ui/icons/LocationOn';
+// import FolderIcon from '@material-ui/icons/Folder';
+// import RestoreIcon from '@material-ui/icons/Restore';
+// import FavoriteIcon from '@material-ui/icons/Favorite';
+// import LocationOnIcon from '@material-ui/icons/LocationOn';
 import Grid from '@material-ui/core/Grid';
 import { navigate } from '@reach/router';
 import AddIcon from '@material-ui/icons/Add';
 import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import SettingsIcon from '@material-ui/icons/Settings';
-import Paper from '@material-ui/core/Paper';
+// import Paper from '@material-ui/core/Paper';
 
 const useStyles = makeStyles({
   root: {

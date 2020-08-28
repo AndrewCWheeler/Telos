@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { makeStyles, withTheme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+// import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+// import ListItemIcon from '@material-ui/core/ListItemIcon';
+// import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
-import Avatar from '@material-ui/core/Avatar';
+// import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -17,47 +17,49 @@ import Container from '@material-ui/core/Container';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import DeleteComponent from './DeleteComponent';
-import FolderIcon from '@material-ui/icons/Folder';
+// import FolderIcon from '@material-ui/icons/Folder';
 import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
+// import MenuItem from '@material-ui/core/MenuItem';
+// import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import { createMuiTheme } from '@material-ui/core/styles';
-import AddBoxIcon from '@material-ui/icons/AddBox';
+// import { createMuiTheme } from '@material-ui/core/styles';
+// import AddBoxIcon from '@material-ui/icons/AddBox';
 import CssBaseline from '@material-ui/core/CssBaseline';
 // import DatePicker from 'react-datepicker';
 // import 'react-datepicker/dist/react-datepicker.css';
 import CachedIcon from '@material-ui/icons/Cached';
-import DateRangeIcon from '@material-ui/icons/DateRange';
+// import DateRangeIcon from '@material-ui/icons/DateRange';
 // import DatePickComponent from './DatePickComponent';
 import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 import 'date-fns';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import DateFnsUtils from '@date-io/date-fns';
 import {
   MuiPickersUtilsProvider,
-  KeyboardTimePicker,
+  // KeyboardTimePicker,
   KeyboardDatePicker,
 } from '@material-ui/pickers';
 import BottomNavComponent from './BottomNavComponent';
+import { RootRef } from '@material-ui/core';
 
-const theme = createMuiTheme({
-  palette: {
-    primary: {
-      light: '#757ce8',
-      main: '#3f50b5',
-      dark: '#002884',
-      contrastText: '#fff',
-    },
-    secondary: {
-      light: '#ff7961',
-      main: '#f44336',
-      dark: '#ba000d',
-      contrastText: '#000',
-    },
-  },
-});
+// const theme = createMuiTheme({
+//   palette: {
+//     primary: {
+//       light: '#757ce8',
+//       main: '#3f50b5',
+//       dark: '#002884',
+//       contrastText: '#fff',
+//     },
+//     secondary: {
+//       light: '#ff7961',
+//       main: '#f44336',
+//       dark: '#ba000d',
+//       contrastText: '#000',
+//     },
+//   },
+// });
 const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
@@ -85,6 +87,7 @@ const useStyles = makeStyles(theme => ({
   },
   list: {
     margin: `${theme.spacing(2)}px auto`,
+    maxWidth: 752,
   },
   item: {
     margin: theme.spacing(0, 2),
@@ -108,11 +111,11 @@ const ScheduleComponent = props => {
     chunked: '',
     scheduled: '',
     scheduledAt: '',
-    complete: '',
+    completed: '',
   });
   const [allTasks, setAllTasks] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState([]);
-  const [selectedIndexId, setSelectedIndexId] = useState([]);
+  // const [selectedIndexId, setSelectedIndexId] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [dense, setDense] = useState(false);
   const [secondary, setSecondary] = useState(true);
@@ -127,6 +130,13 @@ const ScheduleComponent = props => {
       })
       .catch(err => console.log(err));
   }, [load]);
+
+  const reorder = (allTasks, startIndex, endIndex) => {
+    const result = Array.from(allTasks);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    return result;
+  };
 
   const removeFromDom = taskId => {
     setAllTasks(allTasks.filter(task => task._id !== taskId));
@@ -210,6 +220,28 @@ const ScheduleComponent = props => {
     }
   };
 
+  const onDragEnd = result => {
+    const { destination, source, draggableId } = result;
+    if (!result.destination) {
+      return;
+    }
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    const items = reorder(
+      allTasks,
+      result.source.index,
+      result.destination.index
+    );
+
+    setAllTasks(items);
+  };
+
   return (
     <Container>
       <CssBaseline />
@@ -270,63 +302,86 @@ const ScheduleComponent = props => {
               <option value='Social'>Social</option>
             </Select>
           </FormControl>
-          <div>
-            <List dense={dense}>
-              {allTasks.map((task, i) =>
-                selectedCategory === task.category &&
-                task.chunked &&
-                task.scheduled != true ? (
-                  <Paper key={i} elevation={5} className={classes.paper}>
-                    <ListItem
-                      className={classes.list}
-                      // button
-                      // selected={selectedIndex === 0}
-                      // onClick={event => handleListItemClick(event, 0)}
-                    >
-                      {/* <i className='fa fa-folder-open-o' aria-hidden='true'></i> */}
-                      <IconButton
-                        edge='start'
-                        aria-label='add chunked'
-                        onClick={e => {
-                          onPatchHandler(e, task._id);
-                        }}
-                      >
-                        <CachedIcon />
-                      </IconButton>
-                      <FormControl
-                        variant='outlined'
-                        className={classes.formControl}
-                      >
-                        <InputLabel className={classes.text} htmlFor='category'>
-                          Chunk...
-                        </InputLabel>
-                        <Select
-                          native
-                          className={classes.text}
-                          value={selectedIndex[i]}
-                          onChange={e => {
-                            onChunkHandler(e, task._id);
-                          }}
-                          label='Chunk...'
-                          name='category'
-                          // inputProps={{
-                          //   name: 'category',
-                          //   id: 'category',
-                          // }}
-                        >
-                          <option aria-label='None' value='' />
-                          <option value='Home'>Home</option>
-                          <option value='Health'>Health</option>
-                          <option value='Family'>Family</option>
-                          <option value='Friends'>Friends</option>
-                          <option value='Finance'>Finance</option>
-                          <option value='Creative'>Creative</option>
-                          <option value='Spiritual'>Spiritual</option>
-                          <option value='Social'>Social</option>
-                        </Select>
-                      </FormControl>
 
-                      {/* <ListItemAvatar>
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId='droppable'>
+              {provided => (
+                <RootRef
+                  rootRef={provided.innerRef}
+                  {...provided.droppableProps}
+                >
+                  <List
+                    className={classes.list}
+                    dense={dense}
+                    // id='droppable'
+                    // innerRef={provided.innerRef}
+                  >
+                    {allTasks.map((task, i) =>
+                      selectedCategory === task.category &&
+                      task.chunked &&
+                      task.scheduled !== true ? (
+                        <Draggable
+                          draggableId={task._id}
+                          index={i}
+                          key={task._id}
+                        >
+                          {provided => (
+                            <Paper
+                              ContainerProps={{ ref: provided.innerRef }}
+                              id='Task'
+                              elevation={5}
+                              className={classes.paper}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              innerRef={provided.innerRef}
+                            >
+                              <ListItem className={classes.list}>
+                                <IconButton
+                                  edge='start'
+                                  aria-label='add chunked'
+                                  onClick={e => {
+                                    onPatchHandler(e, task._id);
+                                  }}
+                                >
+                                  <CachedIcon />
+                                </IconButton>
+                                <FormControl
+                                  variant='outlined'
+                                  className={classes.formControl}
+                                >
+                                  <InputLabel
+                                    className={classes.text}
+                                    htmlFor='category'
+                                  >
+                                    Chunk...
+                                  </InputLabel>
+                                  <Select
+                                    native
+                                    className={classes.text}
+                                    value={selectedIndex[i]}
+                                    onChange={e => {
+                                      onChunkHandler(e, task._id);
+                                    }}
+                                    label='Chunk...'
+                                    name='category'
+                                    // inputProps={{
+                                    //   name: 'category',
+                                    //   id: 'category',
+                                    // }}
+                                  >
+                                    <option aria-label='None' value='' />
+                                    <option value='Home'>Home</option>
+                                    <option value='Health'>Health</option>
+                                    <option value='Family'>Family</option>
+                                    <option value='Friends'>Friends</option>
+                                    <option value='Finance'>Finance</option>
+                                    <option value='Creative'>Creative</option>
+                                    <option value='Spiritual'>Spiritual</option>
+                                    <option value='Social'>Social</option>
+                                  </Select>
+                                </FormControl>
+
+                                {/* <ListItemAvatar>
                         <Avatar>
                           <IconButton aria-label='delete'>
                             <FolderIcon taskId={task._id} />
@@ -334,33 +389,33 @@ const ScheduleComponent = props => {
                         </Avatar>
                       </ListItemAvatar> */}
 
-                      <ListItemText
-                        className={classes.item}
-                        primary={task.name}
-                        secondary={secondary ? task.category : null}
-                      />
+                                <ListItemText
+                                  className={classes.item}
+                                  primary={task.name}
+                                  secondary={secondary ? task.category : null}
+                                />
 
-                      <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                        <CssBaseline />
-                        <Grid container justify='space-around'>
-                          <KeyboardDatePicker
-                            className={classes.text}
-                            margin='normal'
-                            id='Selected a date...'
-                            label='Date picker dialog'
-                            format='MM/dd/yyyy'
-                            value={selectedDate}
-                            onChange={e => {
-                              handleDateChange(e, task._id, i);
-                            }}
-                            KeyboardButtonProps={{
-                              'aria-label': 'change date',
-                            }}
-                          />
-                        </Grid>
-                      </MuiPickersUtilsProvider>
+                                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                                  <CssBaseline />
+                                  <Grid container justify='space-around'>
+                                    <KeyboardDatePicker
+                                      className={classes.text}
+                                      margin='normal'
+                                      id='Selected a date...'
+                                      label='Date picker dialog'
+                                      format='MM/dd/yyyy'
+                                      value={selectedDate}
+                                      onChange={e => {
+                                        handleDateChange(e, task._id, i);
+                                      }}
+                                      KeyboardButtonProps={{
+                                        'aria-label': 'change date',
+                                      }}
+                                    />
+                                  </Grid>
+                                </MuiPickersUtilsProvider>
 
-                      {/* <DatePickComponent
+                                {/* <DatePickComponent
                         taskId={task._id}
                         selectedIndexId={selectedIndexId}
                         selectedDate={selectedDate}
@@ -368,34 +423,43 @@ const ScheduleComponent = props => {
                         handleDateChange={handleDateChange}
                       /> */}
 
-                      {/* <DateRangeIcon /> */}
+                                {/* <DateRangeIcon /> */}
 
-                      <IconButton
-                        className={classes.text}
-                        aria-label='add to calendar'
-                        onClick={e => {
-                          onDateHandler(e, task._id);
-                        }}
-                      >
-                        <LibraryAddIcon />
-                      </IconButton>
+                                <IconButton
+                                  className={classes.text}
+                                  aria-label='add to calendar'
+                                  onClick={e => {
+                                    onDateHandler(e, task._id);
+                                  }}
+                                >
+                                  <LibraryAddIcon />
+                                </IconButton>
 
-                      <IconButton edge='end' aria-label='delete'>
-                        <DeleteComponent
-                          taskId={task._id}
-                          successCallback={() => removeFromDom(task._id)}
-                        />
-                      </IconButton>
-                    </ListItem>
-                  </Paper>
-                ) : (
-                  <div></div>
-                )
+                                <IconButton edge='end' aria-label='delete'>
+                                  <DeleteComponent
+                                    taskId={task._id}
+                                    successCallback={() =>
+                                      removeFromDom(task._id)
+                                    }
+                                  />
+                                </IconButton>
+                              </ListItem>
+                            </Paper>
+                          )}
+                        </Draggable>
+                      ) : (
+                        <div></div>
+                      )
+                    )}
+                  </List>
+                  {provided.placeholder}
+                </RootRef>
               )}
-            </List>
-          </div>
+            </Droppable>
+          </DragDropContext>
         </Grid>
       </Grid>
+      <BottomNavComponent />
     </Container>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -12,7 +12,7 @@ const useStyles = makeStyles(theme => ({
   root: {
     '& > *': {
       margin: theme.spacing(1),
-      width: '35ch',
+      width: '48ch',
     },
   },
   paper: {
@@ -26,7 +26,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const CategoryComponent = props => {
-  const { onChangeHandler, onSubmitHandler, data, setData } = props;
+  const { onChangeHandler, onSubmitHandler, data } = props;
   const classes = useStyles();
 
   return (
