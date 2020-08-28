@@ -24,12 +24,12 @@ const UserSchema = new mongoose.Schema(
       required: [true, 'Password is required'],
       minlength: [8, 'Password must be 8 characters or longer'],
     },
-    // tasks: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Task',
-    //   },
-    // ],
+    tasks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Task',
+      },
+    ],
   },
   { timestamps: true }
 );

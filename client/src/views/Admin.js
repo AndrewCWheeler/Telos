@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { makeStyles } from '@material-ui/core/styles';
+import Container from '@material-ui/core/Container';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -9,7 +10,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { Button } from '@material-ui/core';
-import { navigate } from '@reach/router';
+import { Link, navigate } from '@reach/router';
 
 const useStyles = makeStyles(theme => ({
   table: {
@@ -65,49 +66,52 @@ const Admin = () => {
   };
 
   return (
-    <TableContainer component={Paper} className={classes.paper}>
-      <Table className={classes.table} aria-label='simple table'>
-        <TableHead>
-          <TableRow>
-            <TableCell>User ID</TableCell>
-            <TableCell align='right'>First Name</TableCell>
-            <TableCell align='right'>Last Name</TableCell>
-            <TableCell align='right'>Email</TableCell>
-            <TableCell align='right'>Password</TableCell>
-            <TableCell align='right'>Delete</TableCell>
-            <TableCell align='right'>Logout</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {allUsers.map((user, i) => (
-            <TableRow key={i}>
-              <TableCell component='th' scope='row'>
-                {user._id}
-              </TableCell>
-              <TableCell align='right'>{user.firstName}</TableCell>
-              <TableCell align='right'>{user.lastName}</TableCell>
-              <TableCell align='right'>{user.email}</TableCell>
-              <TableCell align='right'>{user.password}</TableCell>
-              <TableCell align='right'>
-                <Button
-                  className={classes.red}
-                  onClick={(e, id) => {
-                    deleteUser(e, user._id);
-                  }}
-                >
-                  Delete
-                </Button>
-              </TableCell>
-              <TableCell align='right'>
-                <Button className={classes.red} onClick={logoutUser}>
-                  Logout
-                </Button>
-              </TableCell>
+    <Container>
+      <Link to='/signup'>Sign Up</Link>
+      <TableContainer component={Paper} className={classes.paper}>
+        <Table className={classes.table} aria-label='simple table'>
+          <TableHead>
+            <TableRow>
+              <TableCell>User ID</TableCell>
+              <TableCell align='right'>First Name</TableCell>
+              <TableCell align='right'>Last Name</TableCell>
+              <TableCell align='right'>Email</TableCell>
+              <TableCell align='right'>Password</TableCell>
+              <TableCell align='right'>Delete</TableCell>
+              <TableCell align='right'>Logout</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {allUsers.map((user, i) => (
+              <TableRow key={i}>
+                <TableCell component='th' scope='row'>
+                  {user._id}
+                </TableCell>
+                <TableCell align='right'>{user.firstName}</TableCell>
+                <TableCell align='right'>{user.lastName}</TableCell>
+                <TableCell align='right'>{user.email}</TableCell>
+                <TableCell align='right'>{user.password}</TableCell>
+                <TableCell align='right'>
+                  <Button
+                    className={classes.red}
+                    onClick={(e, id) => {
+                      deleteUser(e, user._id);
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+                <TableCell align='right'>
+                  <Button className={classes.red} onClick={logoutUser}>
+                    Logout
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Container>
   );
 };
 

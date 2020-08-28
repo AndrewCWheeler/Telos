@@ -97,6 +97,7 @@ export default function SignUp() {
       <div className='center'>
         <h1 className={classes.title}>{'\u03C4\u03AD\u03BB\u03BF\u03C2'}</h1>
       </div>
+      <Link to='/admin'>Admin</Link>
       <div className={classes.paper}>
         <i className='fa fa-user-o fa-2x' aria-hidden='true'></i>
         {/* <Avatar className={classes.avatar}>

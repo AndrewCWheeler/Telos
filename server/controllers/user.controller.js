@@ -1,6 +1,7 @@
 const { User } = require('../models/user.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const session = require('express-session');
 const myFirstSecret = process.env.FIRST_SECRET_KEY;
 
 // const redirectLogin = (req, res, next) => {
@@ -22,18 +23,15 @@ module.exports = {
       .then(user => res.json({ message: 'success', results: user }))
       .catch(err => res.json({ message: 'error', results: err }));
   },
-  // oneUser: (req, res) => {
-  //   User.find({ where: { _id: req.params.id } })
-  //     .then(user => res.json({ message: 'success', results: user }))
-  //     .catch(err => res.json({ message: 'error', results: err }));
-  // },
+  oneUser: (req, res) => {
+    User.findOne({ _id: req.session.userId })
+      .then(user => res.json({ message: 'success', results: user }))
+      .catch(err => res.json({ message: 'error', results: err }));
+  },
   getAllUserTasks: async (req, res) => {
-    const user = await User.findOne({ _id: req.session.userId });
-    User.find({ _id: req.session.userId })
+    await User.findOne({ _id: req.session.userId })
       .populate('tasks')
-      .then(userTasks =>
-        res.json({ message: 'success', results: userTasks, sessionUser: user })
-      )
+      .then(userTasks => res.json({ message: 'success', results: userTasks }))
       .catch(err => res.json({ message: 'error', results: err }));
   },
   deleteUser: (req, res) => {
@@ -55,7 +53,13 @@ module.exports = {
           .cookie('usertoken', userToken, {
             httpOnly: true,
           })
-          .json({ message: 'success', results: user });
+          .json({
+            message: 'success',
+            results: {
+              user: user,
+              session: req.session.userId,
+            },
+          });
       })
       .catch(err => res.json({ message: err.toString(), results: err }));
   },

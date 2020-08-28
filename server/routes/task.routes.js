@@ -10,9 +10,14 @@ const redirectLogin = (req, res, next) => {
 
 module.exports = app => {
   app.get('/api', TaskController.index);
-  app.get('/api/tasks', authenticate, redirectLogin, TaskController.allTasks);
+  app.get(
+    '/api/tasks/user',
+    authenticate,
+    redirectLogin,
+    TaskController.allUserTasks
+  );
   app.get('/api/tasks/:id', authenticate, TaskController.oneTask);
-  app.post('/api/tasks', authenticate, TaskController.newTask);
+  app.post('/api/tasks/:id', authenticate, TaskController.newTask);
   app.patch('/api/tasks/:id', authenticate, TaskController.editTask);
   app.delete('/api/tasks/:id', authenticate, TaskController.deleteTask);
 };

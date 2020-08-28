@@ -20,7 +20,7 @@ module.exports = app => {
   app.post('/api/login', redirectHome, UserController.login);
   app.get('/api/users', authenticate, UserController.getAll);
   app.get('/api/users/one', authenticate, UserController.oneUser);
-  app.get('/api/users/tasks', authenticate, UserController.getAllUserTasks);
+  app.get('/api/user/tasks', authenticate, UserController.getAllUserTasks);
   app.delete('/api/users/:id', authenticate, UserController.deleteUser);
   app.get(
     '/api/users/logout',

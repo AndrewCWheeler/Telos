@@ -7,12 +7,10 @@ module.exports = {
   },
 
   // Read methods --> app.get
-  allTasks: async (req, res) => {
-    const user = await User.findOne({ _id: req.session.userId });
-    Task.find({})
-      .then(tasks =>
-        res.json({ message: 'success', results: tasks, sessionUser: user })
-      )
+  allUserTasks: (req, res) => {
+    Task.find({ owner: req.session.userId })
+      .populate('tasks')
+      .then(tasks => res.json({ message: 'success', results: tasks }))
       .catch(err => res.json({ message: 'error', results: err }));
   },
   oneTask: (req, res) => {
@@ -24,13 +22,20 @@ module.exports = {
   //Create methods --> app.post
   newTask: (req, res) => {
     Task.create(req.body)
-      .then(task => res.json({ message: 'success', results: task }))
+      .then(task => {
+        return User.findByIdAndUpdate(
+          { _id: req.params.id },
+          { $push: { tasks: task._id } },
+          { new: true }
+        );
+      })
+      .then(user => res.json({ message: 'success', results: user }))
       .catch(err => res.json({ message: 'error', results: err }));
   },
 
   //Update methods --> app.put or app.patch
   editTask: (req, res) => {
-    Task.findBIAndUpdate({ _id: req.params.id }, req.body, {
+    Task.findByIdAndUpdate({ _id: req.params.id }, req.body, {
       runValidators: true,
       new: true,
     })

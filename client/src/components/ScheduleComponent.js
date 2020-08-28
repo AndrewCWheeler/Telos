@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { navigate } from '@reach/router';
 import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -120,15 +121,44 @@ const ScheduleComponent = props => {
   const [dense, setDense] = useState(false);
   const [secondary, setSecondary] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [sessionUserId, setSessionUserId] = useState('');
+
   const classes = useStyles();
 
   useEffect(() => {
-    axios
-      .get('http://localhost:8000/api/tasks')
+    let one = 'http://localhost:8000/api/users/one';
+    const requestOne = axios.get(one, { withCredentials: true });
+    requestOne
       .then(response => {
+        console.log(response.data.results);
+        setSessionUserId(response.data.results._id);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+    let two = 'http://localhost:8000/api/tasks/user';
+    const requestTwo = axios.get(two, { withCredentials: true });
+    requestTwo
+      .then(response => {
+        console.log(response.data.results);
         setAllTasks(response.data.results);
       })
-      .catch(err => console.log(err));
+      .catch(error => {
+        console.log(error);
+      });
+    axios
+      .all([requestOne, requestTwo])
+      .then(
+        axios.spread((...responses) => {
+          const responseOne = responses[0];
+          const responseTwo = responses[1];
+          console.log(responseOne, responseTwo);
+        })
+      )
+      .catch(errors => {
+        console.log(errors);
+        navigate('/signup');
+      });
   }, [load]);
 
   const reorder = (allTasks, startIndex, endIndex) => {
@@ -174,7 +204,6 @@ const ScheduleComponent = props => {
       })
       .catch(err => console.log(err));
   };
-  console.log(task);
 
   const onSelectHandler = e => {
     console.log(e.target.value);

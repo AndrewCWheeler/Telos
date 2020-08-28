@@ -7,6 +7,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import BottomNavComponent from '../components/BottomNavComponent';
 // import { createMuiTheme } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles';
+import { Mongoose } from 'mongoose';
 
 // import ChunkComponent from '../components/ChunkComponent';
 
@@ -39,36 +40,60 @@ const DumpAndChunk = () => {
   //     },
   //   },
   // }));
-  const [task, setTask] = useState({
-    name: '',
-    category: '',
-    chunked: false,
-    // userId: '',
-    scheduled: false,
-    scheduledAt: '',
-    completed: false,
-  });
+
   const [load, setLoad] = useState(0);
   const [allTasks, setAllTasks] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState([]);
   const [sessionUserId, setSessionUserId] = useState('');
 
   useEffect(() => {
-    axios
-      .get('http://localhost:8000/api/users/tasks', {
-        withCredentials: true,
+    let one = 'http://localhost:8000/api/users/one';
+    const requestOne = axios.get(one, { withCredentials: true });
+    requestOne
+      .then(response => {
+        console.log(response.data.results);
+        setSessionUserId(response.data.results._id);
       })
+      .catch(error => {
+        console.log(error);
+      });
+    let two = 'http://localhost:8000/api/tasks/user';
+    const requestTwo = axios.get(two, { withCredentials: true });
+    requestTwo
       .then(response => {
         console.log(response.data.results);
         setAllTasks(response.data.results);
-        console.log(response.data.sessionUser._id);
-        setSessionUserId(response.data.sessionUser._id);
       })
-      .catch(err => {
-        console.log(err);
+      .catch(error => {
+        console.log(error);
+      });
+    axios
+      .all([requestOne, requestTwo])
+      .then(
+        axios.spread((...responses) => {
+          const responseOne = responses[0];
+          const responseTwo = responses[1];
+          console.log(responseOne, responseTwo);
+        })
+      )
+      .catch(errors => {
+        console.log(errors);
         navigate('/signup');
       });
   }, [load]);
+
+  console.log('This is the sessionUserId: ');
+  console.log(sessionUserId);
+
+  const [task, setTask] = useState({
+    name: '',
+    category: '',
+    chunked: false,
+    owner: '',
+    scheduled: false,
+    scheduledAt: '',
+    completed: false,
+  });
 
   const removeFromDom = taskId => {
     setAllTasks(allTasks.filter(task => task._id !== taskId));
@@ -77,8 +102,10 @@ const DumpAndChunk = () => {
   const onChangeHandler = e => {
     setTask({
       ...task,
+      owner: sessionUserId,
       [e.target.name]: e.target.value,
     });
+    console.log(e.target.value);
   };
 
   const onChunkHandler = (e, i) => {
@@ -97,9 +124,15 @@ const DumpAndChunk = () => {
 
   const onSubmitHandler = e => {
     e.preventDefault();
+    console.log('This is the task just before going to post...');
+    console.log(task);
     axios
-      .post('http://localhost:8000/api/tasks', task, { withCredentials: true })
+      .post(`http://localhost:8000/api/tasks/${sessionUserId}`, task, {
+        withCredentials: true,
+      })
       .then(res => {
+        console.log(res.data.message);
+        console.log(res.data.results);
         setTask({
           name: '',
           category: '',
@@ -107,7 +140,7 @@ const DumpAndChunk = () => {
           scheduled: false,
           scheduledAt: '',
           completed: false,
-          owner: sessionUserId,
+          owner: '',
         });
         let count = load;
         if (count >= 0) {
