@@ -30,7 +30,7 @@ function Copyright() {
 
 const useStyles = makeStyles(theme => ({
   paper: {
-    marginTop: theme.spacing(8),
+    marginTop: theme.spacing(4),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -42,7 +42,7 @@ const useStyles = makeStyles(theme => ({
   },
   form: {
     width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(3),
+    marginTop: theme.spacing(4),
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
@@ -51,7 +51,7 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(3, 0),
   },
   title: {
-    margin: theme.spacing(4, 0, 2),
+    margin: theme.spacing(8, 4),
     color: theme.palette.primary.main,
   },
 }));
@@ -94,10 +94,12 @@ export default function SignUp() {
   return (
     <Container component='main' maxWidth='xs'>
       <CssBaseline />
-      <div className='center'>
-        <h1 className={classes.title}>{'\u03C4\u03AD\u03BB\u03BF\u03C2'}</h1>
-      </div>
       <Link to='/admin'>Admin</Link>
+
+      <Typography variant='h2' gutterBottom className={classes.title}>
+        {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
+      </Typography>
+
       <div className={classes.paper}>
         <i className='fa fa-user-o fa-2x' aria-hidden='true'></i>
         {/* <Avatar className={classes.avatar}>

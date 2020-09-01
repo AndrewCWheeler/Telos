@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
 import Main from './views/Main';
+import 'fontsource-roboto';
 
 function App() {
   return (

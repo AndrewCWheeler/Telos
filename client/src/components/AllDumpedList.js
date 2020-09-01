@@ -90,13 +90,13 @@ const AllDumpedList = props => {
   const {
     allTasks,
     setAllTasks,
-    // onChangeHandler,
-    // onChunkHandler,
+    onChangeHandler,
+    onChunkHandler,
     onChunkChangeHandler,
     removeFromDom,
     onPatchHandler,
     selectedIndex,
-    // setSelectedIndex,
+    setSelectedIndex,
   } = props;
   const classes = useStyles();
   const [dense, setDense] = useState(false);

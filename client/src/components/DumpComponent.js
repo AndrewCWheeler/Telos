@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
+import { navigate } from '@reach/router';
 // import axios from 'axios';
 // import { navigate } from '@reach/router';
 import {
@@ -39,9 +41,59 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const DumpComponent = props => {
-  const { onChangeHandler, onSubmitHandler, data, setData } = props;
-
   const classes = useStyles();
+  const { load, setLoad, sessionUserId } = props;
+  const [task, setTask] = useState({
+    name: '',
+    category: '',
+    chunked: false,
+    owner: '',
+    scheduled: false,
+    scheduledAt: '',
+    completed: false,
+  });
+
+  const onChangeHandler = e => {
+    setTask({
+      ...task,
+      owner: sessionUserId,
+      [e.target.name]: e.target.value,
+    });
+    console.log(e.target.value);
+  };
+
+  const onSubmitHandler = e => {
+    e.preventDefault();
+    console.log('This is the task just before going to post...');
+    console.log(task);
+    axios
+      .post(`http://localhost:8000/api/tasks/${sessionUserId}`, task, {
+        withCredentials: true,
+      })
+      .then(res => {
+        console.log(res.data.message);
+        console.log(res.data.results);
+        setTask({
+          name: '',
+          category: '',
+          chunked: false,
+          scheduled: false,
+          scheduledAt: '',
+          completed: false,
+          owner: '',
+        });
+        let count = load;
+        if (count >= 0) {
+          count++;
+          setLoad(count);
+        }
+        console.log(load);
+        navigate('/');
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
 
   return (
     <Container className={classes.layout}>
@@ -60,7 +112,7 @@ const DumpComponent = props => {
               onChangeHandler(e);
             }}
             name='name'
-            value={data.name}
+            value={task.name}
           />
         </Grid>
         <Grid container direction='row' justify='center' alignItems='center'>

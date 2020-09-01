@@ -7,6 +7,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import BottomNavComponent from '../components/BottomNavComponent';
 // import { createMuiTheme } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
 
 // import ChunkComponent from '../components/ChunkComponent';
 
@@ -98,14 +99,14 @@ const DumpAndChunk = () => {
     setAllTasks(allTasks.filter(task => task._id !== taskId));
   };
 
-  const onChangeHandler = e => {
-    setTask({
-      ...task,
-      owner: sessionUserId,
-      [e.target.name]: e.target.value,
-    });
-    console.log(e.target.value);
-  };
+  // const onChangeHandler = e => {
+  //   setTask({
+  //     ...task,
+  //     owner: sessionUserId,
+  //     [e.target.name]: e.target.value,
+  //   });
+  //   console.log(e.target.value);
+  // };
 
   const onChunkChangeHandler = (e, i) => {
     let categoryValue = e.target.value;
@@ -121,38 +122,38 @@ const DumpAndChunk = () => {
       .catch(err => console.log(err));
   };
 
-  const onSubmitHandler = e => {
-    e.preventDefault();
-    console.log('This is the task just before going to post...');
-    console.log(task);
-    axios
-      .post(`http://localhost:8000/api/tasks/${sessionUserId}`, task, {
-        withCredentials: true,
-      })
-      .then(res => {
-        console.log(res.data.message);
-        console.log(res.data.results);
-        setTask({
-          name: '',
-          category: '',
-          chunked: false,
-          scheduled: false,
-          scheduledAt: '',
-          completed: false,
-          owner: '',
-        });
-        let count = load;
-        if (count >= 0) {
-          count++;
-          setLoad(count);
-        }
-        console.log(load);
-        navigate('/');
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  };
+  // const onSubmitHandler = e => {
+  //   e.preventDefault();
+  //   console.log('This is the task just before going to post...');
+  //   console.log(task);
+  //   axios
+  //     .post(`http://localhost:8000/api/tasks/${sessionUserId}`, task, {
+  //       withCredentials: true,
+  //     })
+  //     .then(res => {
+  //       console.log(res.data.message);
+  //       console.log(res.data.results);
+  //       setTask({
+  //         name: '',
+  //         category: '',
+  //         chunked: false,
+  //         scheduled: false,
+  //         scheduledAt: '',
+  //         completed: false,
+  //         owner: '',
+  //       });
+  //       let count = load;
+  //       if (count >= 0) {
+  //         count++;
+  //         setLoad(count);
+  //       }
+  //       console.log(load);
+  //       navigate('/');
+  //     })
+  //     .catch(err => {
+  //       console.log(err);
+  //     });
+  // };
 
   const onPatchHandler = (e, i) => {
     e.preventDefault();
@@ -187,13 +188,21 @@ const DumpAndChunk = () => {
     <div>
       <CssBaseline />
       <div className='center'>
-        <h1 className={classes.title}>{'\u03C4\u03AD\u03BB\u03BF\u03C2'}</h1>
+        <Typography
+          variant='h1'
+          // component='h2'
+          gutterBottom
+          className={classes.title}
+        >
+          {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
+        </Typography>
       </div>
       <DumpComponent
-        onChangeHandler={onChangeHandler}
-        onSubmitHandler={onSubmitHandler}
-        data={task}
-        setData={setTask}
+        // onChangeHandler={onChangeHandler}
+        // onSubmitHandler={onSubmitHandler}
+        load={load}
+        setLoad={setLoad}
+        sessionUserId={sessionUserId}
       />
       {/* <ChunkComponent
         allTasks={allTasks}
@@ -206,7 +215,7 @@ const DumpAndChunk = () => {
         onChunkHandler={onChunkHandler}
       /> */}
       <AllDumpedList
-        onChangeHandler={onChangeHandler}
+        // onChangeHandler={onChangeHandler}
         // onSubmitHandler={onSubmitHandler}
         data={task}
         setData={setTask}

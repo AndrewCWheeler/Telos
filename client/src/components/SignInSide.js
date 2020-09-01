@@ -111,7 +111,9 @@ const SignInSide = () => {
       <Grid item xs={false} sm={4} md={7} className={classes.image} />
       <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
         <div className={classes.paper}>
-          <h1 className={classes.title}>{'\u03C4\u03AD\u03BB\u03BF\u03C2'}</h1>
+          <Typography variant='h2' gutterBottom className={classes.title}>
+            {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
+          </Typography>
           <i className='fa fa-2x fa-sign-in' aria-hidden='true'></i>
           {/* <Avatar className={classes.avatar}>
             <LockOutlinedIcon />
