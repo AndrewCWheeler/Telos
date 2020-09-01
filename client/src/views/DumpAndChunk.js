@@ -7,7 +7,6 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import BottomNavComponent from '../components/BottomNavComponent';
 // import { createMuiTheme } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles';
-import { Mongoose } from 'mongoose';
 
 // import ChunkComponent from '../components/ChunkComponent';
 
@@ -108,7 +107,7 @@ const DumpAndChunk = () => {
     console.log(e.target.value);
   };
 
-  const onChunkHandler = (e, i) => {
+  const onChunkChangeHandler = (e, i) => {
     let categoryValue = e.target.value;
     axios
       .get('http://localhost:8000/api/tasks/' + i, { withCredentials: true })
@@ -165,6 +164,15 @@ const DumpAndChunk = () => {
 
       .then(res => {
         console.log(res.data.results);
+        setTask({
+          name: '',
+          category: '',
+          chunked: false,
+          scheduled: false,
+          scheduledAt: '',
+          completed: false,
+          owner: '',
+        });
         let count = load;
         if (count >= 0) {
           count++;
@@ -207,7 +215,8 @@ const DumpAndChunk = () => {
         removeFromDom={removeFromDom}
         selectedIndex={selectedIndex}
         setSelectedIndex={setSelectedIndex}
-        onChunkHandler={onChunkHandler}
+        // onChunkHandler={onChunkHandler}
+        onChunkChangeHandler={onChunkChangeHandler}
         onPatchHandler={onPatchHandler}
       />
       <BottomNavComponent />

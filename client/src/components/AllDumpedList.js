@@ -91,7 +91,8 @@ const AllDumpedList = props => {
     allTasks,
     setAllTasks,
     // onChangeHandler,
-    onChunkHandler,
+    // onChunkHandler,
+    onChunkChangeHandler,
     removeFromDom,
     onPatchHandler,
     selectedIndex,
@@ -158,7 +159,7 @@ const AllDumpedList = props => {
                           className={classes.text}
                           value={selectedIndex[i]}
                           onChange={e => {
-                            onChunkHandler(e, task._id);
+                            onChunkChangeHandler(e, task._id);
                           }}
                           label='Chunk...'
                           name='category'

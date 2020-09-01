@@ -1,7 +1,6 @@
 const { User } = require('../models/user.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const session = require('express-session');
 const myFirstSecret = process.env.FIRST_SECRET_KEY;
 
 // const redirectLogin = (req, res, next) => {
@@ -57,7 +56,6 @@ module.exports = {
             message: 'success',
             results: {
               user: user,
-              session: req.session.userId,
             },
           });
       })
@@ -77,13 +75,23 @@ module.exports = {
       // password wasn't a match!
       return res.sendStatus(400);
     }
-    const userToken = jwt.sign({ id: user._id }, myFirstSecret);
+    const userToken = jwt.sign(
+      {
+        id: user._id,
+      },
+      myFirstSecret
+    );
     req.session.userId = user.id;
     res
       .cookie('usertoken', userToken, {
         httpOnly: true,
       })
-      .json({ message: 'success' });
+      .json({
+        message: 'success',
+        results: {
+          user,
+        },
+      });
   },
   logout: (req, res) => {
     res.clearCookie('usertoken');
