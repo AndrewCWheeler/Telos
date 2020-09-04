@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { navigate } from '@reach/router';
 import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -42,6 +43,9 @@ import {
   KeyboardDatePicker,
 } from '@material-ui/pickers';
 import BottomNavComponent from './BottomNavComponent';
+import Moment from 'react-moment';
+import 'moment-timezone';
+import moment from 'moment';
 
 // const theme = createMuiTheme({
 //   palette: {
@@ -119,16 +123,67 @@ const DoComponent = () => {
   const [secondary, setSecondary] = useState(true);
   // const [selectedDate, setSelectedDate] = useState(new Date());
   const [dateParameter, setDateParameter] = useState(new Date());
+  const [sessionUserId, setSessionUserId] = useState('');
+
   const classes = useStyles();
 
   useEffect(() => {
-    axios
-      .get('http://localhost:8000/api/tasks', { withCredentials: true })
+    let one = 'http://localhost:8000/api/users/one';
+    const requestOne = axios.get(one, { withCredentials: true });
+    requestOne
+      .then(response => {
+        setSessionUserId(response.data.results._id);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+    let two = 'http://localhost:8000/api/tasks/user';
+    const requestTwo = axios.get(two, { withCredentials: true });
+    requestTwo
       .then(response => {
         setAllTasks(response.data.results);
       })
-      .catch(err => console.log(err));
+      .catch(error => {
+        console.log(error);
+      });
+    axios
+      .all([requestOne, requestTwo])
+      .then(
+        axios.spread((...responses) => {
+          const responseOne = responses[0];
+          console.log(responseOne);
+          const responseTwo = responses[1];
+          console.log(responseTwo);
+        })
+      )
+      .catch(errors => {
+        console.log(errors);
+        navigate('/signup');
+      });
   }, [load]);
+
+  const DATE_OPTIONS = {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  };
+
+  const filteredTasks = allTasks.filter(tasks => {
+    // const denominator = moment().format('YYYY-MM-DD');
+    console.log(dateParameter);
+    console.log(tasks.scheduledAt);
+    let found = '';
+    if (
+      moment(moment(tasks.scheduledAt)).isSame(dateParameter, 'day') === true
+    ) {
+      found = tasks.name;
+      console.log(found);
+    }
+
+    return found;
+  });
+  console.log(filteredTasks);
 
   const removeFromDom = taskId => {
     setAllTasks(allTasks.filter(task => task._id !== taskId));
@@ -210,14 +265,35 @@ const DoComponent = () => {
   //   }
   // };
 
+  const toUpperCaseFilter = d => {
+    return d.toUpperCase();
+  };
+
   const handleDateParameter = date => {
     console.log(date);
+    console.log(typeof date);
+    console.log(date.toLocaleString('en-US', DATE_OPTIONS));
+    console.log(moment.utc(date));
     setDateParameter(date);
+    // let count = load;
+    // if (count >= 0) {
+    //   count++;
+    //   setLoad(count);
+    // }
+    // console.log(load);
   };
 
   return (
     <Container>
       <CssBaseline />
+      <Typography
+        variant='h2'
+        // component='h2'
+        gutterBottom
+        className={classes.title}
+      >
+        {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
+      </Typography>
       <h1 className={classes.title}>Do Component</h1>
       <Typography variant='h6' className={classes.title}>
         Select Date to Sort and then DO it!
@@ -296,7 +372,7 @@ const DoComponent = () => {
           </FormControl> */}
           <div>
             <List dense={dense}>
-              {allTasks.map((task, i) =>
+              {filteredTasks.map((task, i) =>
                 task.chunked && task.scheduled === true ? (
                   <Paper key={i} elevation={5} className={classes.paper}>
                     <ListItem
@@ -361,10 +437,26 @@ const DoComponent = () => {
                         primary={task.name}
                         secondary={secondary ? task.category : null}
                       />
+
+                      {/* <ListItemText
+                        className={classes.text}
+                        primary={new Date(task.scheduledAt).toLocaleString(
+                          'en-US',
+                          DATE_OPTIONS
+                        )}
+                      /> */}
                       <ListItemText
                         className={classes.text}
-                        primary={task.scheduledAt}
+                        primary={
+                          <Moment
+                            format='MM-DD-YYYY'
+                            filter={toUpperCaseFilter}
+                          >
+                            {task.scheduledAt}
+                          </Moment>
+                        }
                       />
+
                       {/* <MuiPickersUtilsProvider utils={DateFnsUtils}>
                         <CssBaseline />
                         <Grid container justify='space-around'>

@@ -14,10 +14,13 @@
     "axios": "^0.19.2",
     "date-fns": "^2.15.0",
     "fontsource-roboto": "^3.0.3",
+    "moment": "^2.27.0",
+    "moment-timezone": "^0.5.31",
     "react": "^16.13.1",
     "react-beautiful-dnd": "^13.0.0",
     "react-dom": "^16.13.1",
     "react-dropzone": "^11.0.3",
+    "react-moment": "^0.9.7",
     "react-scripts": "^3.4.3"
   },
   "scripts": {

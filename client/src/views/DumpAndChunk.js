@@ -189,7 +189,7 @@ const DumpAndChunk = () => {
       <CssBaseline />
       <div className='center'>
         <Typography
-          variant='h1'
+          variant='h2'
           // component='h2'
           gutterBottom
           className={classes.title}

@@ -110,6 +110,7 @@ const ScheduleComponent = props => {
     name: '',
     category: '',
     chunked: '',
+    owner: '',
     scheduled: '',
     scheduledAt: '',
     completed: '',
@@ -130,7 +131,6 @@ const ScheduleComponent = props => {
     const requestOne = axios.get(one, { withCredentials: true });
     requestOne
       .then(response => {
-        console.log(response.data.results);
         setSessionUserId(response.data.results._id);
       })
       .catch(error => {
@@ -140,7 +140,6 @@ const ScheduleComponent = props => {
     const requestTwo = axios.get(two, { withCredentials: true });
     requestTwo
       .then(response => {
-        console.log(response.data.results);
         setAllTasks(response.data.results);
       })
       .catch(error => {
@@ -152,7 +151,6 @@ const ScheduleComponent = props => {
         axios.spread((...responses) => {
           const responseOne = responses[0];
           const responseTwo = responses[1];
-          console.log(responseOne, responseTwo);
         })
       )
       .catch(errors => {
@@ -176,7 +174,9 @@ const ScheduleComponent = props => {
     e.preventDefault();
     if (task.chunked === true) {
       axios
-        .patch('http://localhost:8000/api/tasks/' + i, task)
+        .patch('http://localhost:8000/api/tasks/' + i, task, {
+          withCredentials: true,
+        })
         .then(res => {
           console.log(res.data.results);
           let count = load;
@@ -184,7 +184,6 @@ const ScheduleComponent = props => {
             count++;
             setLoad(count);
           }
-          console.log(load);
         })
         .catch(err => console.log(err));
     }
@@ -194,7 +193,7 @@ const ScheduleComponent = props => {
     console.log(e.target.value);
     let categoryValue = e.target.value;
     axios
-      .get('http://localhost:8000/api/tasks/' + i)
+      .get('http://localhost:8000/api/tasks/' + i, { withCredentials: true })
       .then(res => {
         if (res.data.message === 'success') {
           let currTask = res.data.results;
@@ -210,31 +209,37 @@ const ScheduleComponent = props => {
     setSelectedCategory(e.target.value);
   };
 
-  const handleDateChange = (date, id, i) => {
-    setSelectedDate(date);
-    let currScheduled = date;
-    axios
-      .get('http://localhost:8000/api/tasks/' + id)
-      .then(res => {
-        if (res.data.message === 'success') {
-          let currTask = res.data.results;
-          currTask.scheduledAt = currScheduled;
-          setTask(currTask);
-        }
-      })
-      .catch(err => console.log(err));
+  const onChangeDate = (date, id, i) => {
     console.log(id);
-    console.log(i);
-    console.log(date);
+    setSelectedDate(date);
+    let tempTaskId = id;
+    let currTasks = [...allTasks];
+    const tempTask = currTasks.find(t => t._id === tempTaskId);
+    let currScheduled = date;
+    console.log(tempTask);
+    tempTask.scheduledAt = currScheduled;
+    setTask(tempTask);
+    console.log(tempTask);
   };
   console.log(task);
 
-  const onDateHandler = (e, id) => {
-    e.preventDefault();
+  const onDateHandler = (date, id) => {
+    console.log(id);
+    // let tempTaskId = id;
+    // let currTasks = [...allTasks];
+    // const tempTask = currTasks.find(t => t._id === tempTaskId);
+    // let currScheduled = date;
+    // console.log(tempTask);
+    // tempTask.scheduledAt = currScheduled;
+    // tempTask.scheduled = true;
+    // setTask(tempTask);
+    // console.log(task);
     if (task.scheduledAt !== null) {
       task.scheduled = true;
       axios
-        .patch('http://localhost:8000/api/tasks/' + id, task)
+        .patch('http://localhost:8000/api/tasks/' + id, task, {
+          withCredentials: true,
+        })
         .then(res => {
           console.log(res.data.results);
 
@@ -274,7 +279,15 @@ const ScheduleComponent = props => {
   return (
     <Container>
       <CssBaseline />
-      <h1>Schedule Component</h1>
+      <Typography
+        variant='h2'
+        // component='h2'
+        gutterBottom
+        className={classes.title}
+      >
+        {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
+      </Typography>
+      <h1 className={classes.title}>Schedule Component</h1>
       {/* <DatePicker selected={date} onChange={onDateChange} /> */}
       <Grid container direction='row' justify='center'>
         <FormGroup row>
@@ -315,6 +328,7 @@ const ScheduleComponent = props => {
               }}
               label='Chunk...'
               name='category'
+              value={task.category}
               // inputProps={{
               //   name: 'category',
               //   id: 'category',
@@ -387,7 +401,7 @@ const ScheduleComponent = props => {
                                   <Select
                                     native
                                     className={classes.text}
-                                    value={selectedIndex[i]}
+                                    value={selectedIndex}
                                     onChange={e => {
                                       onChunkHandler(e, task._id);
                                     }}
@@ -431,12 +445,15 @@ const ScheduleComponent = props => {
                                       className={classes.text}
                                       margin='normal'
                                       id='Selected a date...'
-                                      label='Date picker dialog'
+                                      label='Select a date...'
                                       format='MM/dd/yyyy'
                                       value={selectedDate}
                                       onChange={e => {
-                                        handleDateChange(e, task._id, i);
+                                        onChangeDate(e, task._id, i);
                                       }}
+                                      // onSubmitCapture={e => {
+                                      //   onDateHandler(e, task._id, i);
+                                      // }}
                                       KeyboardButtonProps={{
                                         'aria-label': 'change date',
                                       }}

@@ -30,7 +30,7 @@ function Copyright() {
 
 const useStyles = makeStyles(theme => ({
   paper: {
-    marginTop: theme.spacing(4),
+    marginTop: theme.spacing(1),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -96,11 +96,10 @@ export default function SignUp() {
       <CssBaseline />
       <Link to='/admin'>Admin</Link>
 
-      <Typography variant='h2' gutterBottom className={classes.title}>
-        {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
-      </Typography>
-
       <div className={classes.paper}>
+        <Typography variant='h2' gutterBottom className={classes.title}>
+          {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
+        </Typography>
         <i className='fa fa-user-o fa-2x' aria-hidden='true'></i>
         {/* <Avatar className={classes.avatar}>
           <LockOutlinedIcon />

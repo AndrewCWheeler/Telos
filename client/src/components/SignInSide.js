@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-// import Avatar from '@material-ui/core/Avatar';
+import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
@@ -10,7 +10,7 @@ import { Link, navigate } from '@reach/router';
 import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-// import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 // import e from 'express';
@@ -64,8 +64,11 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(3),
   },
   title: {
-    margin: theme.spacing(4, 0, 2),
+    margin: theme.spacing(4, 0, 8),
     color: theme.palette.primary.main,
+  },
+  subtitle: {
+    color: theme.palette.secondary.main,
   },
 }));
 
@@ -114,14 +117,15 @@ const SignInSide = () => {
           <Typography variant='h2' gutterBottom className={classes.title}>
             {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
           </Typography>
-          <i className='fa fa-2x fa-sign-in' aria-hidden='true'></i>
-          {/* <Avatar className={classes.avatar}>
-            <LockOutlinedIcon />
-          </Avatar> */}
 
-          <Typography component='h1' variant='h5'>
+          {/* <Avatar className={classes.avatar}> */}
+          <i className='fa fa-2x fa-sign-in' aria-hidden='true'></i>
+          {/* <LockOutlinedIcon />
+          </Avatar> */}
+          {/* <Typography className={classes.title} component='h1' variant='h5'>
             Sign in
-          </Typography>
+          </Typography> */}
+
           <form
             className={classes.form}
             onSubmit={e => {
