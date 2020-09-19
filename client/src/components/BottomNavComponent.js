@@ -23,7 +23,7 @@ const useStyles = makeStyles({
 
 const BottomNavComponent = () => {
   const classes = useStyles();
-  const [value, setValue] = React.useState('dump');
+  const [value, setValue] = React.useState('');
 
   const handleChange = (event, newValue) => {
     setValue(newValue);

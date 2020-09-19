@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { navigate } from '@reach/router';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
+import IconButton from '@material-ui/core/IconButton';
 // import axios from 'axios';
 // import { navigate } from '@reach/router';
 import {
@@ -27,6 +29,7 @@ const useStyles = makeStyles(theme => ({
   },
   fab: {
     margin: theme.spacing(2),
+    color: theme.palette.primary.main,
   },
   layout: {
     flexGrow: 1,
@@ -117,13 +120,21 @@ const DumpComponent = props => {
         </Grid>
         <Grid container direction='row' justify='center' alignItems='center'>
           {/* <Tooltip title='Add' aria-label='add'> */}
-          <Fab color='primary' className={classes.fab}>
+          <IconButton
+            className={classes.fab}
+            onClick={e => {
+              onSubmitHandler(e);
+            }}
+          >
+            <AddCircleIcon fontSize='large' />
+          </IconButton>
+          {/* <Fab color='primary' className={classes.fab}>
             <AddIcon
               onClick={e => {
                 onSubmitHandler(e);
               }}
             />
-          </Fab>
+          </Fab> */}
           {/* </Tooltip> */}
         </Grid>
       </form>

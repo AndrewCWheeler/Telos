@@ -99,25 +99,96 @@ const DumpAndChunk = () => {
     setAllTasks(allTasks.filter(task => task._id !== taskId));
   };
 
-  // const onChangeHandler = e => {
-  //   setTask({
-  //     ...task,
-  //     owner: sessionUserId,
-  //     [e.target.name]: e.target.value,
-  //   });
-  //   console.log(e.target.value);
-  // };
-
-  const onChunkChangeHandler = (e, i) => {
-    let categoryValue = e.target.value;
+  const onClickHandler = (e, id) => {
     axios
-      .get('http://localhost:8000/api/tasks/' + i, { withCredentials: true })
+      .get(`http://localhost:8000/api/tasks/${id}`, { withCredentials: true })
       .then(res => {
         if (res.data.message === 'success') {
-          let currTask = res.data.results;
-          currTask.category = categoryValue;
-          setTask(currTask);
+          setTask(res.data.results);
+          setSelectedIndex(res.data.results);
         }
+      })
+      .catch(err => console.log(err));
+  };
+  console.log(task);
+
+  // const onChunkChangeHandler = (e, id) => {
+  //   let categoryValue = e.target.value;
+  //   let one = `http://localhost:8000/api/tasks/${id}`;
+  //   const requestOne = axios.get(one, { withCredentials: true });
+  //   requestOne
+  //     .then(res => {
+  //       if (res.data.message === 'success') {
+  //         let currTask = res.data.results;
+  //         currTask.category = categoryValue;
+  //         currTask.chunked = true;
+  //         setTask(currTask);
+  //         console.log(currTask);
+  //         console.log(task);
+  //       }
+  //     })
+  //     .catch(err => console.log(err));
+  //   let two = `http://localhost:8000/api/tasks/${id}`;
+  //   task.chunked = true;
+  //   const requestTwo = axios.patch(two, task, { withCredentials: true });
+  //   requestTwo
+  //     .then(res => {
+  //       console.log(res.data.results);
+  //       setTask({
+  //         name: '',
+  //         category: '',
+  //         chunked: false,
+  //         scheduled: false,
+  //         scheduledAt: '',
+  //         completed: false,
+  //         owner: '',
+  //       });
+  //       let count = load;
+  //       if (count >= 0) {
+  //         count++;
+  //         setLoad(count);
+  //       }
+  //       console.log(load);
+  //     })
+  //     .catch(err => console.log(err));
+  //   axios
+  //     .all([requestOne, requestTwo])
+  //     .then(
+  //       axios.spread((...responses) => {
+  //         const responseOne = responses[0];
+  //         const responseTwo = responses[1];
+  //         console.log(responseOne, responseTwo);
+  //       })
+  //     )
+  //     .catch(errors => {
+  //       console.log(errors);
+  //     });
+  // };
+
+  const onPatchHandler = (e, i) => {
+    task.category = e.target.value;
+    task.chunked = true;
+    axios
+      .patch('http://localhost:8000/api/tasks/' + i, task, {
+        withCredentials: true,
+      })
+      .then(res => {
+        console.log(res.data.results);
+        setTask({
+          name: '',
+          category: '',
+          chunked: false,
+          scheduled: false,
+          scheduledAt: '',
+          completed: false,
+          owner: '',
+        });
+        let count = load;
+        if (count >= 0) {
+          count++;
+          setLoad(count);
+        }
+        console.log(load);
       })
       .catch(err => console.log(err));
   };
@@ -155,35 +226,6 @@ const DumpAndChunk = () => {
   //     });
   // };
 
-  const onPatchHandler = (e, i) => {
-    e.preventDefault();
-    task.chunked = true;
-    axios
-      .patch('http://localhost:8000/api/tasks/' + i, task, {
-        withCredentials: true,
-      })
-
-      .then(res => {
-        console.log(res.data.results);
-        setTask({
-          name: '',
-          category: '',
-          chunked: false,
-          scheduled: false,
-          scheduledAt: '',
-          completed: false,
-          owner: '',
-        });
-        let count = load;
-        if (count >= 0) {
-          count++;
-          setLoad(count);
-        }
-        console.log(load);
-      })
-      .catch(err => console.log(err));
-  };
-
   return (
     <div>
       <CssBaseline />
@@ -198,7 +240,7 @@ const DumpAndChunk = () => {
         </Typography>
       </div>
       <DumpComponent
-        // onChangeHandler={onChangeHandler}
+        // onClickHandler={onClickHandler}
         // onSubmitHandler={onSubmitHandler}
         load={load}
         setLoad={setLoad}
@@ -210,12 +252,12 @@ const DumpAndChunk = () => {
         data={task}
         setData={setTask}
         removeFromDom={removeFromDom}
-        onChangeHandler={onChangeHandler}
+        onClickHandler={onClickHandler}
         onPatchHandler={onPatchHandler}
         onChunkHandler={onChunkHandler}
       /> */}
       <AllDumpedList
-        // onChangeHandler={onChangeHandler}
+        onClickHandler={onClickHandler}
         // onSubmitHandler={onSubmitHandler}
         data={task}
         setData={setTask}
@@ -225,7 +267,7 @@ const DumpAndChunk = () => {
         selectedIndex={selectedIndex}
         setSelectedIndex={setSelectedIndex}
         // onChunkHandler={onChunkHandler}
-        onChunkChangeHandler={onChunkChangeHandler}
+        // onChunkChangeHandler={onChunkChangeHandler}
         onPatchHandler={onPatchHandler}
       />
       <BottomNavComponent />

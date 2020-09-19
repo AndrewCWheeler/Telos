@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
+import Modal from '@material-ui/core/Modal';
+import Backdrop from '@material-ui/core/Backdrop';
+import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is required for IE 11 support
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 // import ListItemAvatar from '@material-ui/core/ListItemAvatar';
@@ -14,6 +18,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Grid from '@material-ui/core/Grid';
 import Container from '@material-ui/core/Container';
 import Paper from '@material-ui/core/Paper';
+import FolderOpenIcon from '@material-ui/icons/FolderOpen';
 import Typography from '@material-ui/core/Typography';
 import DeleteComponent from './DeleteComponent';
 // import FolderIcon from '@material-ui/icons/Folder';
@@ -25,6 +30,8 @@ import Select from '@material-ui/core/Select';
 // import { createMuiTheme } from '@material-ui/core/styles';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import { shadows } from '@material-ui/system';
+
 // import BottomNavComponent from './BottomNavComponent';
 
 // const theme = createMuiTheme({
@@ -45,8 +52,14 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 // });
 const useStyles = makeStyles(theme => ({
   root: {
-    flexGrow: 1,
+    width: '100%',
     maxWidth: 752,
+    flexGrow: 1,
+  },
+  modal: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   demo: {
     backgroundColor: theme.palette.background.paper,
@@ -60,25 +73,41 @@ const useStyles = makeStyles(theme => ({
   },
   select: {
     color: theme.palette.primary.main,
-    backgroundColor: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette.primary.main,
   },
+
   paper: {
-    maxWidth: 752,
-    margin: `${theme.spacing(2)}px auto`,
+    maxWidth: 640,
+    margin: `${theme.spacing(1)}px auto`,
     // margin: theme.spacing(2, 0),
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText,
   },
+  paper2: {
+    backgroundColor: theme.palette.primary.main,
+    border: `2px solid ${theme.palette.primary.contrastText}`,
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
+  },
   list: {
-    margin: `${theme.spacing(2)}px auto`,
+    margin: `${theme.spacing(1)}px auto`,
+    height: '100%',
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    boxShadow: theme.shadows[10],
+    borderRadius: 10,
   },
   item: {
-    margin: theme.spacing(0, 2),
+    margin: theme.spacing(1, 2),
     color: theme.palette.primary.contrastText,
+    oveflow: 'hidden',
+    textOverflow: 'ellipsis',
+    // color: theme.palette.primary.main,
   },
   formControl: {
     margin: theme.spacing(1),
     minWidth: 120,
+    backgroundColor: theme.palette.background.main,
     // justify: 'center',
   },
   selectEmpty: {
@@ -86,13 +115,44 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+const Fade = React.forwardRef(function Fade(props, ref) {
+  const { in: open, children, onEnter, onExited, ...other } = props;
+  const style = useSpring({
+    from: { opacity: 0 },
+    to: { opacity: open ? 1 : 0 },
+    onStart: () => {
+      if (open && onEnter) {
+        onEnter();
+      }
+    },
+    onRest: () => {
+      if (!open && onExited) {
+        onExited();
+      }
+    },
+  });
+
+  Fade.propTypes = {
+    children: PropTypes.element,
+    in: PropTypes.bool.isRequired,
+    onEnter: PropTypes.func,
+    onExited: PropTypes.func,
+  };
+
+  return (
+    <animated.div ref={ref} style={style} {...other}>
+      {children}
+    </animated.div>
+  );
+});
+
 const AllDumpedList = props => {
   const {
     allTasks,
     setAllTasks,
-    onChangeHandler,
+    onClickHandler,
     onChunkHandler,
-    onChunkChangeHandler,
+    // onChunkChangeHandler,
     removeFromDom,
     onPatchHandler,
     selectedIndex,
@@ -101,6 +161,15 @@ const AllDumpedList = props => {
   const classes = useStyles();
   const [dense, setDense] = useState(false);
   const [secondary, setSecondary] = useState(false);
+  const [open, setOpen] = React.useState(false);
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   return (
     <Container className={classes.root}>
@@ -138,77 +207,107 @@ const AllDumpedList = props => {
                 task.chunked ? (
                   ''
                 ) : (
-                  <Paper key={i} elevation={5} className={classes.paper}>
-                    <ListItem
-                      className={classes.list}
-                      // button
-                      // selected={selectedIndex === 0}
-                      // onClick={event => handleListItemClick(event, 0)}
+                  // <Paper key={i} elevation={5} className={classes.paper}>
+                  <ListItem
+                    className={classes.list}
+                    key={i}
+                    disableRipple
+
+                    // button
+                    // selected={selectedIndex === 0}
+                    // onClick={event => handleListItemClick(event, 0)}
+                  >
+                    {/* <i className='fa fa-folder-open-o' aria-hidden='true'></i> */}
+                    <IconButton type='button' onClick={handleOpen}>
+                      <FolderOpenIcon className={classes.text} />
+                    </IconButton>
+                    <Modal
+                      aria-labelledby='spring-modal-title'
+                      aria-describedby='spring-modal-description'
+                      className={classes.modal}
+                      open={open}
+                      onClose={handleClose}
+                      closeAfterTransition
+                      BackdropComponent={Backdrop}
+                      BackdropProps={{
+                        timeout: 500,
+                      }}
                     >
-                      {/* <i className='fa fa-folder-open-o' aria-hidden='true'></i> */}
+                      <Fade in={open}>
+                        <Grid className={classes.paper2}>
+                          <FormControl
+                            variant='standard'
+                            className={classes.formControl}
+                          >
+                            <InputLabel
+                              className={classes.text}
+                              htmlFor='category'
+                            >
+                              Chunk...
+                            </InputLabel>
+                            <Select
+                              native
+                              className={classes.text}
+                              value={selectedIndex[i]}
+                              onClick={e => {
+                                onClickHandler(e, task._id);
+                              }}
+                              onChange={e => {
+                                onPatchHandler(e, task._id);
+                              }}
+                              label='Chunk...'
+                              name='category'
+                            >
+                              <option aria-label='None' value='' />
+                              <option value='Home'>Home</option>
+                              <option value='Health'>Health</option>
+                              <option value='Family'>Family</option>
+                              <option value='Friends'>Friends</option>
+                              <option value='Finance'>Finance</option>
+                              <option value='Creative'>Creative</option>
+                              <option value='Spiritual'>Spiritual</option>
+                              <option value='Social'>Social</option>
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                        {/* <div className={classes.paper}>
+                            <h2 id='spring-modal-title'>Spring modal</h2>
+                            <p id='spring-modal-description'>
+                              react-spring animates me.
+                            </p>
+                          </div> */}
+                      </Fade>
+                    </Modal>
 
-                      <FormControl
-                        variant='standard'
-                        className={classes.formControl}
-                      >
-                        <InputLabel className={classes.text} htmlFor='category'>
-                          Chunk...
-                        </InputLabel>
-                        <Select
-                          native
-                          className={classes.text}
-                          value={selectedIndex[i]}
-                          onChange={e => {
-                            onChunkChangeHandler(e, task._id);
-                          }}
-                          label='Chunk...'
-                          name='category'
-                          // inputProps={{
-                          //   name: 'category',
-                          //   id: 'category',
-                          // }}
-                        >
-                          <option aria-label='None' value='' />
-                          <option value='Home'>Home</option>
-                          <option value='Health'>Health</option>
-                          <option value='Family'>Family</option>
-                          <option value='Friends'>Friends</option>
-                          <option value='Finance'>Finance</option>
-                          <option value='Creative'>Creative</option>
-                          <option value='Spiritual'>Spiritual</option>
-                          <option value='Social'>Social</option>
-                        </Select>
-                      </FormControl>
-
-                      {/* <ListItemAvatar>
+                    {/* <ListItemAvatar>
                         <Avatar>
                           <IconButton aria-label='delete'>
                             <FolderIcon taskId={task._id} />
                           </IconButton>
                         </Avatar>
                       </ListItemAvatar> */}
-                      <ListItemText
-                        className={classes.item}
-                        primary={task.name}
-                        secondary={secondary ? task.category : null}
+                    <ListItemText
+                      className={classes.item}
+                      primary={task.name}
+                      secondary={secondary ? task.category : null}
+                    />
+                    <IconButton
+                      edge='start'
+                      aria-label='add chunked'
+                      onClick={e => {
+                        onPatchHandler(e, task._id);
+                      }}
+                    >
+                      <AddBoxIcon className={classes.text} />
+                    </IconButton>
+                    <IconButton edge='end' aria-label='delete'>
+                      <DeleteComponent
+                        taskId={task._id}
+                        successCallback={() => removeFromDom(task._id)}
                       />
-                      <IconButton
-                        edge='start'
-                        aria-label='add chunked'
-                        onClick={e => {
-                          onPatchHandler(e, task._id);
-                        }}
-                      >
-                        <AddBoxIcon className={classes.text} />
-                      </IconButton>
-                      <IconButton edge='end' aria-label='delete'>
-                        <DeleteComponent
-                          taskId={task._id}
-                          successCallback={() => removeFromDom(task._id)}
-                        />
-                      </IconButton>
-                    </ListItem>
-                  </Paper>
+                    </IconButton>
+                  </ListItem>
+                  // </Paper>
                 )
               )}
             </List>

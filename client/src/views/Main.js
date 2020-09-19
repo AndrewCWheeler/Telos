@@ -12,6 +12,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import ScheduleComponent from '../components/ScheduleComponent';
 import DoComponent from '../components/DoComponent';
 import Admin from './Admin';
+import ScheduleComponent2 from '../components/ScheduleComponent2';
 
 // import AllDumpedList from '../components/AllDumpedList';
 
@@ -37,6 +38,7 @@ export default () => {
         <SignUp path='/signup' />
         <CreateCategories path='/categories' />
         <ScheduleComponent path='/schedule' />
+        <ScheduleComponent2 path='/schedule2' />
         <DoComponent path='/do' />
         <Admin path='/admin' />
       </Router>
