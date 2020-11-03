@@ -3,7 +3,8 @@ import axios from 'axios';
 import { navigate } from '@reach/router';
 import Container from '@material-ui/core/Container';
 import CategoryComponent from '../components/CategoryComponent';
-import BottomNavComponent from '../components/BottomNavComponent';
+
+// Need to be completed in future to enable user to create their own categories throughout the application.
 
 const CreateCategories = () => {
   const [category, setCategory] = useState({
@@ -39,7 +40,6 @@ const CreateCategories = () => {
           nameSeven: '',
           nameEight: '',
         });
-
         navigate('/categories');
       })
       .catch(err => {
@@ -54,7 +54,6 @@ const CreateCategories = () => {
         data={category}
         setData={setCategory}
       />
-      <BottomNavComponent />
     </Container>
   );
 };

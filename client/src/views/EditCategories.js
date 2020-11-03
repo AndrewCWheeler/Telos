@@ -1,7 +1,9 @@
 import React from 'react';
 
 const EditCategories = () => {
-  return <div></div>;
+  return <div>
+    {/* For future...  */}
+  </div>;
 };
 
 export default EditCategories;

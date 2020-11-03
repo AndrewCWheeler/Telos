@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
-import Modal from '@material-ui/core/Modal';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import TextField from '@material-ui/core/TextField';
 import Backdrop from '@material-ui/core/Backdrop';
 import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is required for IE 11 support
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-// import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-// import ListItemIcon from '@material-ui/core/ListItemIcon';
-// import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
-// import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -21,35 +21,16 @@ import Paper from '@material-ui/core/Paper';
 import FolderOpenIcon from '@material-ui/icons/FolderOpen';
 import Typography from '@material-ui/core/Typography';
 import DeleteComponent from './DeleteComponent';
-// import FolderIcon from '@material-ui/icons/Folder';
 import InputLabel from '@material-ui/core/InputLabel';
-// import MenuItem from '@material-ui/core/MenuItem';
-// import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-// import { createMuiTheme } from '@material-ui/core/styles';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { shadows } from '@material-ui/system';
+import MenuItem from '@material-ui/core/MenuItem';
+import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 
-// import BottomNavComponent from './BottomNavComponent';
 
-// const theme = createMuiTheme({
-//   palette: {
-//     primary: {
-//       light: '#757ce8',
-//       main: '#3f50b5',
-//       dark: '#002884',
-//       contrastText: '#fff',
-//     },
-//     secondary: {
-//       light: '#ff7961',
-//       main: '#f44336',
-//       dark: '#ba000d',
-//       contrastText: '#000',
-//     },
-//   },
-// });
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
@@ -61,6 +42,9 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  dialogStyle: {
+    backgroundColor: theme.palette.background.paper,
+  },
   demo: {
     backgroundColor: theme.palette.background.paper,
   },
@@ -68,23 +52,32 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(4, 0, 2),
     color: theme.palette.primary.main,
   },
+  subtitle: {
+    margin: theme.spacing(4, 1, 2),
+    color: theme.palette.primary.main,
+  },
   text: {
     color: theme.palette.primary.contrastText,
+  },
+  textModal: {
+    color: theme.palette.primary.main,
+  },
+  icon: {
+    color: theme.palette.primary.main,
+    margin: theme.spacing(2, 1, 0),
   },
   select: {
     color: theme.palette.primary.main,
     backgroundColor: theme.palette.primary.main,
   },
-
   paper: {
     maxWidth: 640,
     margin: `${theme.spacing(1)}px auto`,
-    // margin: theme.spacing(2, 0),
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText,
   },
   paper2: {
-    backgroundColor: theme.palette.primary.main,
+    backgroundColor: theme.palette.background.main,
     border: `2px solid ${theme.palette.primary.contrastText}`,
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
@@ -99,16 +92,14 @@ const useStyles = makeStyles(theme => ({
   },
   item: {
     margin: theme.spacing(1, 2),
+    width: 250,
     color: theme.palette.primary.contrastText,
     oveflow: 'hidden',
     textOverflow: 'ellipsis',
-    // color: theme.palette.primary.main,
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120,
-    backgroundColor: theme.palette.background.main,
-    // justify: 'center',
+    minWidth: 150,
   },
   selectEmpty: {
     marginTop: theme.spacing(2),
@@ -131,14 +122,12 @@ const Fade = React.forwardRef(function Fade(props, ref) {
       }
     },
   });
-
   Fade.propTypes = {
     children: PropTypes.element,
     in: PropTypes.bool.isRequired,
     onEnter: PropTypes.func,
     onExited: PropTypes.func,
   };
-
   return (
     <animated.div ref={ref} style={style} {...other}>
       {children}
@@ -152,11 +141,11 @@ const AllDumpedList = props => {
     setAllTasks,
     onClickHandler,
     onChunkHandler,
-    // onChunkChangeHandler,
     removeFromDom,
     onPatchHandler,
     selectedIndex,
     setSelectedIndex,
+    onChangeHandler,
   } = props;
   const classes = useStyles();
   const [dense, setDense] = useState(false);
@@ -166,11 +155,9 @@ const AllDumpedList = props => {
   const handleOpen = () => {
     setOpen(true);
   };
-
   const handleClose = () => {
     setOpen(false);
   };
-
   return (
     <Container className={classes.root}>
       <CssBaseline />
@@ -198,30 +185,24 @@ const AllDumpedList = props => {
       </Grid>
       <Grid container spacing={1}>
         <Grid item xs={12}>
-          <Typography variant='h6' className={classes.title}>
+          {/* <Typography variant='h6' className={classes.title}>
             Select Chunk Category, then Add to Confirm...
-          </Typography>
+          </Typography> */}
           <div>
             <List dense={dense}>
               {allTasks.map((task, i) =>
                 task.chunked ? (
                   ''
                 ) : (
-                  // <Paper key={i} elevation={5} className={classes.paper}>
                   <ListItem
                     className={classes.list}
                     key={i}
                     disableRipple
-
-                    // button
-                    // selected={selectedIndex === 0}
-                    // onClick={event => handleListItemClick(event, 0)}
                   >
-                    {/* <i className='fa fa-folder-open-o' aria-hidden='true'></i> */}
-                    <IconButton type='button' onClick={handleOpen}>
+                    <IconButton type='button' onClick={e => handleOpen(e)}>
                       <FolderOpenIcon className={classes.text} />
                     </IconButton>
-                    <Modal
+                    <Dialog
                       aria-labelledby='spring-modal-title'
                       aria-describedby='spring-modal-description'
                       className={classes.modal}
@@ -233,59 +214,53 @@ const AllDumpedList = props => {
                         timeout: 500,
                       }}
                     >
-                      <Fade in={open}>
-                        <Grid className={classes.paper2}>
-                          <FormControl
-                            variant='standard'
-                            className={classes.formControl}
+                      <DialogContent className={classes.dialogStyle}>
+                        <h2 className={classes.subtitle}>{task.name}</h2>
+                        <FormControl
+                          variant='standard'
+                          className={classes.formControl}
+                        >
+                          <InputLabel
+                            className={classes.textModal}
+                            htmlFor='category'
                           >
-                            <InputLabel
-                              className={classes.text}
-                              htmlFor='category'
-                            >
-                              Chunk...
-                            </InputLabel>
-                            <Select
-                              native
-                              className={classes.text}
-                              value={selectedIndex[i]}
-                              onClick={e => {
-                                onClickHandler(e, task._id);
-                              }}
-                              onChange={e => {
-                                onPatchHandler(e, task._id);
-                              }}
-                              label='Chunk...'
-                              name='category'
-                            >
-                              <option aria-label='None' value='' />
-                              <option value='Home'>Home</option>
-                              <option value='Health'>Health</option>
-                              <option value='Family'>Family</option>
-                              <option value='Friends'>Friends</option>
-                              <option value='Finance'>Finance</option>
-                              <option value='Creative'>Creative</option>
-                              <option value='Spiritual'>Spiritual</option>
-                              <option value='Social'>Social</option>
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                        {/* <div className={classes.paper}>
-                            <h2 id='spring-modal-title'>Spring modal</h2>
-                            <p id='spring-modal-description'>
-                              react-spring animates me.
-                            </p>
-                          </div> */}
-                      </Fade>
-                    </Modal>
-
-                    {/* <ListItemAvatar>
-                        <Avatar>
-                          <IconButton aria-label='delete'>
-                            <FolderIcon taskId={task._id} />
-                          </IconButton>
-                        </Avatar>
-                      </ListItemAvatar> */}
+                            Chunk...
+                          </InputLabel>
+                          <Select
+                            native
+                            className={classes.textModal}
+                            value={selectedIndex[i]}
+                            onClick={e => {
+                              onClickHandler(e, task._id);
+                            }}
+                            onChange={e => {
+                              onPatchHandler(e, task._id);
+                            }}
+                            label='Chunk...'
+                            name='category'
+                          >
+                            <option aria-label='None' value=''/>
+                            <option value='Home'>Home</option>
+                            <option value='Health'>Health</option>
+                            <option value='Family'>Family</option>
+                            <option value='Friends'>Friends</option>
+                            <option value='Finance'>Finance</option>
+                            <option value='Creative'>Creative</option>
+                            <option value='Spiritual'>Spiritual</option>
+                            <option value='Social'>Social</option>
+                          </Select>
+                        </FormControl>
+                      </DialogContent>
+                      <DialogActions>
+                        <IconButton
+                          className={classes.icon}
+                          aria-label='update task'
+                          onClick={handleClose}
+                          >
+                          <LibraryAddIcon />
+                        </IconButton>
+                      </DialogActions>
+                    </Dialog>
                     <ListItemText
                       className={classes.item}
                       primary={task.name}
@@ -307,7 +282,6 @@ const AllDumpedList = props => {
                       />
                     </IconButton>
                   </ListItem>
-                  // </Paper>
                 )
               )}
             </List>

@@ -67,7 +67,7 @@ const Admin = () => {
 
   return (
     <Container>
-      <Link to='/signup'>Sign Up</Link>
+      <Link to='/'>Sign Up</Link>
       <TableContainer component={Paper} className={classes.paper}>
         <Table className={classes.table} aria-label='simple table'>
           <TableHead>

@@ -3,7 +3,6 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const cors = require('cors');
 const app = express();
-// const port = 8000;
 const cookieParser = require('cookie-parser');
 const TWO_HOURS = 1000 * 60 * 60 * 2;
 

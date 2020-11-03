@@ -3,16 +3,20 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import { navigate } from '@reach/router';
 import { makeStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
 import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is required for IE 11 support
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-// import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-// import ListItemIcon from '@material-ui/core/ListItemIcon';
-// import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
-// import Avatar from '@material-ui/core/Avatar';
+
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import TextField from '@material-ui/core/TextField';
+
 import IconButton from '@material-ui/core/IconButton';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -24,7 +28,7 @@ import Typography from '@material-ui/core/Typography';
 import DeleteComponent from './DeleteComponent';
 // import FolderIcon from '@material-ui/icons/Folder';
 import InputLabel from '@material-ui/core/InputLabel';
-// import MenuItem from '@material-ui/core/MenuItem';
+import MenuItem from '@material-ui/core/MenuItem';
 // import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
@@ -40,6 +44,9 @@ import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 import { shadows } from '@material-ui/system';
 import FolderOpenIcon from '@material-ui/icons/FolderOpen';
 import EventIcon from '@material-ui/icons/Event';
+import EditIcon from '@material-ui/icons/Edit';
+import UpdateIcon from '@material-ui/icons/Update';
+import Button from '@material-ui/core/Button';
 
 import 'date-fns';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -51,26 +58,11 @@ import {
   KeyboardDatePicker,
   DatePicker,
 } from '@material-ui/pickers';
-import BottomNavComponent from './BottomNavComponent';
-import { RootRef } from '@material-ui/core';
+import { RootRef, FormLabel } from '@material-ui/core';
 import Moment from 'react-moment';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup, { useRadioGroup } from '@material-ui/core/RadioGroup';
 
-// const theme = createMuiTheme({
-//   palette: {
-//     primary: {
-//       light: '#757ce8',
-//       main: '#3f50b5',
-//       dark: '#002884',
-//       contrastText: '#fff',
-//     },
-//     secondary: {
-//       light: '#ff7961',
-//       main: '#f44336',
-//       dark: '#ba000d',
-//       contrastText: '#000',
-//     },
-//   },
-// });
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
@@ -82,6 +74,9 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  dialogStyle: {
+    backgroundColor: theme.palette.background.paper,
+  },
   demo: {
     backgroundColor: theme.palette.background.paper,
   },
@@ -89,11 +84,15 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(4, 0, 2),
     color: theme.palette.primary.main,
   },
+  textMain: {
+    color: theme.palette.primary.main,
+  },
   text: {
     color: theme.palette.primary.contrastText,
   },
   subtitle: {
-    color: theme.palette.secondary.light,
+    margin: theme.spacing(-1, 0, 0),
+    color: theme.palette.primary.main,
   },
   select: {
     color: theme.palette.primary.main,
@@ -125,6 +124,9 @@ const useStyles = makeStyles(theme => ({
     width: 250,
     color: theme.palette.primary.contrastText,
   },
+  icon: {
+    color: theme.palette.primary.main,
+  },
   inline: {
     display: 'inline',
     overflow: 'hidden',
@@ -132,9 +134,7 @@ const useStyles = makeStyles(theme => ({
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120,
-    backgroundColor: theme.palette.background.main,
-    // justify: 'center',
+    minWidth: 150,
   },
   selectEmpty: {
     marginTop: theme.spacing(2),
@@ -189,35 +189,29 @@ const ScheduleComponent = props => {
   const [secondary, setSecondary] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [sessionUserId, setSessionUserId] = useState('');
-  const [openChunk, setOpenChunk] = useState(false);
-  const handleOpenChunk = () => {
-    setOpenChunk(true);
+  const [openCal, setOpenCal] = useState(false);
+  const [openEditTask, setOpenEditTask] = useState(false);
+  const handleOpenCal = () => {
+    setOpenCal(true);
   };
-  const handleCloseChunk = () => {
-    setOpenChunk(false);
+  const handleCloseCal = () => {
+    setOpenCal(false);
+  };
+  const handleEditTask = () => {
+    setOpenEditTask(true);
+  };
+  const handleCloseEditTask = () => {
+    setOpenEditTask(false);
   };
   const [openEdit, setOpenEdit] = useState(false);
 
   const handleOpenEdit = () => {
     setOpenEdit(true);
   };
-
-  const onClickHandler = (e, id) => {
-    axios
-      .get(`http://localhost:8000/api/tasks/${id}`, { withCredentials: true })
-      .then(res => {
-        if (res.data.message === 'success') {
-          setTask(res.data.results);
-          setSelectedIndex(res.data.results);
-        }
-      })
-      .catch(err => console.log(err));
-  };
-  console.log(task);
-
   const handleCloseEdit = () => {
     setOpenEdit(false);
   };
+
   const classes = useStyles();
 
   useEffect(() => {
@@ -255,6 +249,19 @@ const ScheduleComponent = props => {
       });
   }, [load]);
 
+  const onClickHandler = (e, id) => {
+    axios
+      .get(`http://localhost:8000/api/tasks/${id}`, { withCredentials: true })
+      .then(res => {
+        if (res.data.message === 'success') {
+          setTask(res.data.results);
+          setSelectedIndex(res.data.results);
+        }
+      })
+      .catch(err => console.log(err));
+  };
+  console.log(task);
+
   const reorder = (allTasks, startIndex, endIndex) => {
     const result = Array.from(allTasks);
     const [removed] = result.splice(startIndex, 1);
@@ -262,15 +269,52 @@ const ScheduleComponent = props => {
     return result;
   };
 
+  const onChangeHandler = e => {
+    setTask({
+      ...task,
+      owner: sessionUserId,
+      [e.target.name]: e.target.value,
+    });
+    console.log(e.target.value);
+  };
+
   const removeFromDom = taskId => {
     setAllTasks(allTasks.filter(task => task._id !== taskId));
   };
 
-  const onPatchChunkHandler = (e, i) => {
+  const onPatchEditNameHandler = (e, id) => {
+    // task.category = e.target.value;
+    // task.chunked = true;
+    axios
+      .patch('http://localhost:8000/api/tasks/' + id, task, {
+        withCredentials: true,
+      })
+      .then(res => {
+        console.log(res.data.results);
+        setTask({
+          name: '',
+          category: '',
+          chunked: false,
+          scheduled: false,
+          scheduledAt: '',
+          completed: false,
+          owner: '',
+        });
+        let count = load;
+        if (count >= 0) {
+          count++;
+          setLoad(count);
+        }
+        console.log(load);
+      })
+      .catch(err => console.log(err));
+  };
+
+  const onPatchEditChunkHandler = (e, id) => {
     task.category = e.target.value;
     task.chunked = true;
     axios
-      .patch('http://localhost:8000/api/tasks/' + i, task, {
+      .patch('http://localhost:8000/api/tasks/' + id, task, {
         withCredentials: true,
       })
       .then(res => {
@@ -308,14 +352,13 @@ const ScheduleComponent = props => {
   const onPatchDateHandler = (date, id) => {
     // setSelectedDate(date);
     // task.scheduledAt = date;
+    handleCloseEdit();
     task.scheduled = true;
     axios
       .patch(`http://localhost:8000/api/tasks/${id}`, task, {
         withCredentials: true,
       })
       .then(res => {
-        console.log(res.data.results);
-
         setTask({
           name: '',
           category: '',
@@ -366,46 +409,24 @@ const ScheduleComponent = props => {
       <Typography
         variant='h2'
         // component='h2'
-        gutterBottom
         className={classes.title}
       >
         {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
       </Typography>
-      <h1 className={classes.title}>Schedule Component</h1>
+      <h1 className={classes.title}>Schedule</h1>
       {/* <DatePicker selected={date} onChange={onDateChange} /> */}
-      <Grid container direction='row' justify='center'>
-        <FormGroup row>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={dense}
-                onChange={event => setDense(event.target.checked)}
-              />
-            }
-            label='Enable dense'
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={secondary}
-                onChange={event => setSecondary(event.target.checked)}
-              />
-            }
-            label='Enable secondary text'
-          />
-        </FormGroup>
-      </Grid>
-
+      
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <Typography variant='h6' className={classes.title}>
             Select Category to Sort and Calendar Icon to Schedule...
           </Typography>
-          <h3 className={classes.title}>Category:</h3>
-          <FormControl variant='outlined' className={classes.formControl}>
-            <InputLabel htmlFor='category'>Category</InputLabel>
+          <h3 className={classes.title}>Select Category:</h3>
+          <FormControl variant='standard' className={classes.formControl}>
+            <InputLabel id="select-category">Category</InputLabel>
             <Select
-              native
+              labelId="select-category"
+              className={classes.textMain}
               // value
               onChange={e => {
                 onSelectHandler(e);
@@ -413,23 +434,40 @@ const ScheduleComponent = props => {
               label='Chunk...'
               name='category'
               value={selectedCategory}
-              // inputProps={{
-              //   name: 'category',
-              //   id: 'category',
-              // }}
             >
-              <option aria-label='None' value='' />
-              <option value='Home'>Home</option>
-              <option value='Health'>Health</option>
-              <option value='Family'>Family</option>
-              <option value='Friends'>Friends</option>
-              <option value='Finance'>Finance</option>
-              <option value='Creative'>Creative</option>
-              <option value='Spiritual'>Spiritual</option>
-              <option value='Social'>Social</option>
+              <MenuItem aria-label='None' value=''><em>None</em></MenuItem>
+              <MenuItem value='Home'>Home</MenuItem>
+              <MenuItem value='Health'>Health</MenuItem>
+              <MenuItem value='Family'>Family</MenuItem>
+              <MenuItem value='Friends'>Friends</MenuItem>
+              <MenuItem value='Finance'>Finance</MenuItem>
+              <MenuItem value='Creative'>Creative</MenuItem>
+              <MenuItem value='Spiritual'>Spiritual</MenuItem>
+              <MenuItem value='Social'>Social</MenuItem>
             </Select>
           </FormControl>
-
+          <Grid container direction='row' justify='center'>
+            <FormGroup row>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={dense}
+                    onChange={event => setDense(event.target.checked)}
+                  />
+                }
+                label='Enable dense'
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={secondary}
+                    onChange={event => setSecondary(event.target.checked)}
+                  />
+                }
+                label='Enable secondary text'
+              />
+            </FormGroup>
+          </Grid>
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId='droppable'>
               {provided => (
@@ -438,11 +476,7 @@ const ScheduleComponent = props => {
                   {...provided.droppableProps}
                 >
                   <div>
-                    <List
-                      dense={dense}
-                      // id='droppable'
-                      // innerRef={provided.innerRef}
-                    >
+                    <List dense={dense}>
                       {allTasks.map((task, i) =>
                         selectedCategory === task.category &&
                         task.chunked &&
@@ -453,15 +487,6 @@ const ScheduleComponent = props => {
                             key={task._id}
                           >
                             {provided => (
-                              // <Paper
-                              //   ContainerProps={{ ref: provided.innerRef }}
-                              //   id='Task'
-                              //   elevation={5}
-                              //   // className={classes.paper}
-                              //   {...provided.draggableProps}
-                              //   {...provided.dragHandleProps}
-                              //   innerRef={provided.innerRef}
-                              // >
                               <ListItem
                                 className={classes.list}
                                 ContainerProps={{ ref: provided.innerRef }}
@@ -470,104 +495,14 @@ const ScheduleComponent = props => {
                                 {...provided.dragHandleProps}
                                 innerRef={provided.innerRef}
                               >
-                                {/* <IconButton
-                                  edge='start'
-                                  aria-label='add chunked'
-                                  onClick={e => {
-                                    onPatchHandler(e, task._id);
-                                  }}
-                                  >
-                                  <CachedIcon />
-                                </IconButton> */}
                                 <IconButton
                                   type='button'
-                                  onClick={handleOpenChunk}
+                                  onClick={e => handleOpenEdit(e)}
                                 >
-                                  <FolderOpenIcon className={classes.text} />
+                                  <EditIcon className={classes.text} />
                                 </IconButton>
-                                <Modal
-                                  aria-labelledby='modal-chunk-select'
-                                  aria-describedby='choose-chunk-category'
-                                  className={classes.modal}
-                                  open={openChunk}
-                                  onClose={handleCloseChunk}
-                                  closeAfterTransition
-                                  BackdropComponent={Backdrop}
-                                  BackdropProps={{
-                                    timeout: 500,
-                                  }}
-                                >
-                                  <Fade in={openChunk}>
-                                    <Grid className={classes.paper2}>
-                                      <FormControl
-                                        variant='standard'
-                                        className={classes.formControl}
-                                      >
-                                        <InputLabel
-                                          className={classes.text}
-                                          htmlFor='category'
-                                        >
-                                          Chunk...
-                                        </InputLabel>
-                                        <Select
-                                          native
-                                          className={classes.text}
-                                          value={selectedIndex[i]}
-                                          onClick={e => {
-                                            onClickHandler(e, task._id);
-                                          }}
-                                          onChange={e => {
-                                            onPatchChunkHandler(e, task._id);
-                                          }}
-                                          label='Chunk...'
-                                          name='category'
-                                        >
-                                          <option aria-label='None' value='' />
-                                          <option value='Home'>Home</option>
-                                          <option value='Health'>Health</option>
-                                          <option value='Family'>Family</option>
-                                          <option value='Friends'>
-                                            Friends
-                                          </option>
-                                          <option value='Finance'>
-                                            Finance
-                                          </option>
-                                          <option value='Creative'>
-                                            Creative
-                                          </option>
-                                          <option value='Spiritual'>
-                                            Spiritual
-                                          </option>
-                                          <option value='Social'>Social</option>
-                                        </Select>
-                                      </FormControl>
-                                    </Grid>
-                                  </Fade>
-                                </Modal>
-
-                                {/* <ListItemAvatar>
-                                    <Avatar>
-                                    <IconButton aria-label='delete'>
-                                    <FolderIcon taskId={task._id} />
-                                    </IconButton>
-                                    </Avatar>
-                                  </ListItemAvatar> */}
-
-                                <ListItemText
-                                  className={classes.item}
-                                  textOverflow='ellipsis'
-                                  overflow='hidden'
-                                  primary={task.name}
-                                  secondary={secondary ? task.category : null}
-                                />
-                                {/* <IconButton
-                                  type='button'
-                                  onClick={handleOpenEdit}
-                                >
-                                  <EventIcon className={classes.text} />
-                                </IconButton>
-                                <Modal
-                                  aria-labelledby='modal-chunk-select'
+                                <Dialog
+                                  aria-labelledby='modal-edit-radio'
                                   aria-describedby='choose-chunk-category'
                                   className={classes.modal}
                                   open={openEdit}
@@ -578,68 +513,173 @@ const ScheduleComponent = props => {
                                     timeout: 500,
                                   }}
                                 >
-                                  <Fade in={openEdit}>
-                                    <Grid className={classes.paper2}> */}
-                                <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                                  <CssBaseline />
-                                  {/* <Grid container justify='space-around'> */}
-                                  <KeyboardDatePicker
-                                    className={classes.text}
-                                    key={i}
-                                    margin='normal'
-                                    InputAdornmentProps={{
-                                      position: 'start',
-                                    }}
-                                    margin='normal'
-                                    id='date-picker-dialog'
-                                    format='MM/dd/yyyy'
-                                    // label='Select a date...'
-                                    value={selectedDate}
-                                    onClick={e => {
-                                      onClickHandler(e, task._id);
-                                    }}
-                                    onChange={e => {
-                                      onChangeDate(e, task._id);
-                                    }}
-                                    KeyboardButtonProps={{
-                                      'aria-label': 'change date',
-                                    }}
-                                  />
-                                  {/* </Grid> */}
-                                </MuiPickersUtilsProvider>
-                                {/* </Grid>
-                                  </Fade>
-                                </Modal> */}
-                                {/* <DatePickComponent
-                        taskId={task._id}
-                        selectedIndexId={selectedIndexId}
-                        selectedDate={selectedDate}
-                        setSelectedDate={setSelectedDate}
-                        handleDateChange={handleDateChange}
-                      /> */}
+                                  <DialogContent
+                                    className={classes.dialogStyle}
+                                  >
+                                    <Typography className={classes.title}>
+                                      <h2>
+                                        {task.name}
+                                      </h2>
+                                    </Typography>
+                                    <TextField
+                                      id='dump'
+                                      label='Edit task here...'
+                                      multiline
+                                      rowsMax={2}
+                                      size='medium'
+                                      variant='outlined'
+                                      onChange={e => {
+                                        onChangeHandler(e);
+                                      }}
+                                      onClick={e => {
+                                        onClickHandler(e, task._id);
+                                      }}
+                                      onBlur={e => {
+                                        onPatchEditNameHandler(e, task._id);
+                                      }}
+                                      placeholder={task.name}
+                                      name='name'
+                                      value={selectedIndex[i]}
+                                    />
+                                    <FormControl
+                                      variant='standard'
+                                      className={classes.formControl}
+                                    >
+                                      <InputLabel
+                                        className={classes.textMain}
+                                        htmlFor='category'
+                                      >
+                                        Chunk...
+                                      </InputLabel>
+                                      <Select
+                                        native
+                                        className={classes.textMain}
+                                        value={selectedIndex[i]}
+                                        onClick={e => {
+                                          onClickHandler(e, task._id);
+                                        }}
+                                        onChange={e => {
+                                          onPatchEditChunkHandler(e, task._id);
+                                        }}
+                                        // onChange={e => {
+                                        //   onPatchChunkHandler(e, task._id);
+                                        // }}
+                                        label='Chunk...'
+                                        name='category'
+                                      >
+                                        <option aria-label='None' value=''></option>
+                                        <option value='Home'>Home</option>
+                                        <option value='Health'>Health</option>
+                                        <option value='Family'>Family</option>
+                                        <option value='Friends'>Friends</option>
+                                        <option value='Finance'>Finance</option>
+                                        <option value='Creative'>
+                                          Creative
+                                        </option>
+                                        <option value='Spiritual'>
+                                          Spiritual
+                                        </option>
+                                        <option value='Social'>Social</option>
+                                      </Select>
+                                      {/* <IconButton
+                                        type='button'
+                                        className={classes.text}
+                                        onClick={e =>
+                                          onPatchEditHandler(e, task._id)
+                                        }
+                                      >
+                                        <UpdateIcon />
+                                      </IconButton> */}
+                                    </FormControl>
+                                  </DialogContent>
+                                  <DialogActions>
+                                  <Button 
+                                    autoFocus 
+                                    onClick={handleCloseEdit}     
+                                    color="primary"
+                                  >
+                                    Cancel
+                                  </Button>
+                                    <IconButton
+                                      className={classes.icon}
+                                      aria-label='update task'
+                                      onClick={handleCloseEdit}
+                                    >
+                                      <LibraryAddIcon />
+                                    </IconButton>
+                                  </DialogActions>
+                                </Dialog>
 
-                                {/* <DateRangeIcon /> */}
-
-                                <IconButton
+                                {/* <ListItemAvatar>
+                                    <Avatar>
+                                    <IconButton aria-label='delete'>
+                                    <FolderIcon taskId={task._id} />
+                                    </IconButton>
+                                    </Avatar>
+                                  </ListItemAvatar> */}
+                                <ListItemText
+                                  disableTypography
                                   className={classes.text}
-                                  aria-label='add to calendar'
-                                  onClick={e => {
-                                    onPatchDateHandler(e, task._id, i);
-                                  }}
+                                  textOverflow='ellipsis'
+                                  overflow='hidden'
+                                  primary={<Typography variant="body1" style={{color: 'white'}}>{task.name}</Typography>}
+                                  secondary={<Typography variant="body2" style={{color: '#bdbdbdde'}}>{secondary ? task.category : null}</Typography>}
+                                />
+                                <IconButton
+                                  type='button'
+                                  onClick={handleOpenCal}
                                 >
-                                  <LibraryAddIcon />
+                                  <EventIcon className={classes.text} />
                                 </IconButton>
 
-                                {/* <IconButton edge='end' aria-label='delete'>
-                                  <DeleteComponent
-                                    taskId={task._id}
-                                    successCallback={() =>
-                                      removeFromDom(task._id)
-                                    }
-                                  />
-                                </IconButton> */}
+                                <Dialog open={openCal} onClose={handleCloseCal}>
+                                  <DialogContent
+                                    className={classes.dialogStyle}
+                                  >
+                                    <DialogContentText>
+                                      Please select a date...
+                                    </DialogContentText>
+                                  </DialogContent>
+                                  <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                                    <CssBaseline />
+                                    {/* <Grid container justify='space-around'> */}
+                                    <KeyboardDatePicker
+                                      className={classes.text}
+                                      key={i}
+                                      margin='normal'
+                                      InputAdornmentProps={{
+                                        position: 'start',
+                                      }}
+                                      margin='normal'
+                                      id='date-picker-dialog'
+                                      format='MM/dd/yyyy'
+                                      // label='Select a date...'
+                                      value={selectedDate}
+                                      onClick={e => {
+                                        onClickHandler(e, task._id);
+                                      }}
+                                      onChange={e => {
+                                        onChangeDate(e, task._id);
+                                      }}
+                                      KeyboardButtonProps={{
+                                        'aria-label': 'change date',
+                                      }}
+                                    />
+                                    {/* </Grid> */}
+                                  </MuiPickersUtilsProvider>
+                                  <DialogActions>
+                                    <IconButton
+                                      className={classes.icon}
+                                      aria-label='add to calendar'
+                                      onClick={e => {
+                                        onPatchDateHandler(e, task._id, i);
+                                      }}
+                                    >
+                                      <LibraryAddIcon />
+                                    </IconButton>
+                                  </DialogActions>
+                                </Dialog>
                               </ListItem>
-                              // </Paper>
                             )}
                           </Draggable>
                         ) : (
@@ -655,7 +695,6 @@ const ScheduleComponent = props => {
           </DragDropContext>
         </Grid>
       </Grid>
-      <BottomNavComponent />
     </Container>
   );
 };

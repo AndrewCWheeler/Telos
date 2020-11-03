@@ -3,8 +3,6 @@ import axios from 'axios';
 import { navigate } from '@reach/router';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import IconButton from '@material-ui/core/IconButton';
-// import axios from 'axios';
-// import { navigate } from '@reach/router';
 import {
   Container,
   Grid,
@@ -41,6 +39,10 @@ const useStyles = makeStyles(theme => ({
     margin: `${theme.spacing(2)}px auto`,
     padding: theme.spacing(3, 0),
   },
+  title: {
+    margin: theme.spacing(4, 0, 2),
+    color: theme.palette.primary.main,
+  },
 }));
 
 const DumpComponent = props => {
@@ -62,7 +64,6 @@ const DumpComponent = props => {
       owner: sessionUserId,
       [e.target.name]: e.target.value,
     });
-    console.log(e.target.value);
   };
 
   const onSubmitHandler = e => {

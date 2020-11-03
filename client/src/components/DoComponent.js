@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-import Modal from '@material-ui/core/Modal';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
 import Backdrop from '@material-ui/core/Backdrop';
 import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is required for IE 11 support
 
@@ -9,11 +14,7 @@ import { navigate } from '@reach/router';
 import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-// import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-// import ListItemIcon from '@material-ui/core/ListItemIcon';
-// import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
-// import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -25,13 +26,11 @@ import Typography from '@material-ui/core/Typography';
 import DeleteComponent from './DeleteComponent';
 // import FolderIcon from '@material-ui/icons/Folder';
 import InputLabel from '@material-ui/core/InputLabel';
-// import MenuItem from '@material-ui/core/MenuItem';
-// import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-// import { createMuiTheme } from '@material-ui/core/styles';
-// import AddBoxIcon from '@material-ui/icons/AddBox';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
+
 // import DatePicker from 'react-datepicker';
 // import 'react-datepicker/dist/react-datepicker.css';
 import CachedIcon from '@material-ui/icons/Cached';
@@ -53,7 +52,6 @@ import {
   // KeyboardTimePicker,
   KeyboardDatePicker,
 } from '@material-ui/pickers';
-import BottomNavComponent from './BottomNavComponent';
 import { RootRef } from '@material-ui/core';
 import Moment from 'react-moment';
 import 'moment-timezone';
@@ -62,51 +60,36 @@ import FolderOpenIcon from '@material-ui/icons/FolderOpen';
 import UpdateIcon from '@material-ui/icons/Update';
 import EditIcon from '@material-ui/icons/Edit';
 
-// const theme = createMuiTheme({
-//   palette: {
-//     primary: {
-//       light: '#757ce8',
-//       main: '#3f50b5',
-//       dark: '#002884',
-//       contrastText: '#fff',
-//     },
-//     secondary: {
-//       light: '#ff7961',
-//       main: '#f44336',
-//       dark: '#ba000d',
-//       contrastText: '#000',
-//     },
-//   },
-// });
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
+    maxWidth: 752,
     flexGrow: 1,
-    maxWidth: 640,
   },
   modal: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  demo: {
+  dialogStyle: {
     backgroundColor: theme.palette.background.paper,
   },
-  primaryTitle: {
-    margin: theme.spacing(4, 0, 2),
-    color: theme.palette.primary.main,
-    // textShadow: '5px 5px 18px #3f50b5',
+  demo: {
+    backgroundColor: theme.palette.background.paper,
   },
   title: {
     margin: theme.spacing(4, 0, 2),
     color: theme.palette.primary.main,
   },
-
+  textMain: {
+    color: theme.palette.primary.main,
+  },
   text: {
     color: theme.palette.primary.contrastText,
   },
   subtitle: {
-    color: theme.palette.secondary.light,
+    margin: theme.spacing(-1, 0, 0),
+    color: theme.palette.primary.main,
   },
   select: {
     color: theme.palette.primary.main,
@@ -138,11 +121,17 @@ const useStyles = makeStyles(theme => ({
     width: 250,
     color: theme.palette.primary.contrastText,
   },
+  icon: {
+    color: theme.palette.primary.main,
+  },
+  inline: {
+    display: 'inline',
+    overflow: 'hidden',
+    overflowWrap: 'ellipsis',
+  },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120,
-    backgroundColor: theme.palette.background.main,
-    // justify: 'center',
+    minWidth: 150,
   },
   selectEmpty: {
     marginTop: theme.spacing(2),
@@ -200,7 +189,23 @@ const DoComponent = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [dateParameter, setDateParameter] = useState(new Date());
   const [sessionUserId, setSessionUserId] = useState('');
+  const [openCal, setOpenCal] = useState(false);
+  const [openEditTask, setOpenEditTask] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+
+  const handleOpenCal = () => {
+    setOpenCal(true);
+  };
+  const handleCloseCal = () => {
+    setOpenCal(false);
+  };
+
+  const handleEditTask = () => {
+    setOpenEditTask(true);
+  };
+  const handleCloseEditTask = () => {
+    setOpenEditTask(false);
+  };
 
   const handleOpenChunk = () => {
     setOpenChunk(true);
@@ -208,6 +213,7 @@ const DoComponent = () => {
   const handleCloseChunk = () => {
     setOpenChunk(false);
   };
+  
   const handleOpenEdit = () => {
     setOpenEdit(true);
   };
@@ -225,7 +231,6 @@ const DoComponent = () => {
         setSessionUserId(response.data.results._id);
       })
       .catch(error => {
-        console.log(error);
       });
     let two = 'http://localhost:8000/api/tasks/user';
     const requestTwo = axios.get(two, { withCredentials: true });
@@ -234,23 +239,30 @@ const DoComponent = () => {
         setAllTasks(response.data.results);
       })
       .catch(error => {
-        console.log(error);
       });
     axios
       .all([requestOne, requestTwo])
       .then(
         axios.spread((...responses) => {
           const responseOne = responses[0];
-          console.log(responseOne);
           const responseTwo = responses[1];
-          console.log(responseTwo);
         })
       )
       .catch(errors => {
-        console.log(errors);
         navigate('/signup');
       });
   }, [load]);
+
+  const onClickHandler = (e, id) => {
+    axios
+      .get(`http://localhost:8000/api/tasks/${id}`, { withCredentials: true })
+      .then(res => {
+        if (res.data.message === 'success') {
+          setTask(res.data.results);
+        }
+      })
+      .catch(err => console.log(err));
+  };
 
   const DATE_OPTIONS = {
     weekday: 'short',
@@ -266,66 +278,37 @@ const DoComponent = () => {
     return result;
   };
 
+  const filteredTasks = allTasks.filter(tasks => {
+    let found = '';
+    if (
+      moment(moment(tasks.scheduledAt)).isSame(dateParameter, 'day') === true 
+      && tasks.completed === false
+      ) {
+      found = tasks.name;
+    }
+    return found;
+  });
+
   const removeFromDom = taskId => {
     setAllTasks(allTasks.filter(task => task._id !== taskId));
   };
 
-  const filteredTasks = allTasks.filter(tasks => {
-    // const denominator = moment().format('YYYY-MM-DD');
-    console.log(dateParameter);
-    console.log(tasks.scheduledAt);
-    let found = '';
-    if (
-      moment(moment(tasks.scheduledAt)).isSame(dateParameter, 'day') === true
-    ) {
-      found = tasks.name;
-      console.log(found);
-    }
-    return found;
-  });
-  console.log(filteredTasks);
-
-  const onPatchHandler = (e, i) => {
-    e.preventDefault();
-    if (task.chunked === true) {
-      axios
-        .patch('http://localhost:8000/api/tasks/' + i, task, {
-          withCredentials: true,
-        })
-        .then(res => {
-          console.log(res.data.results);
-          let count = load;
-          if (count >= 0) {
-            count++;
-            setLoad(count);
-          }
-          console.log(load);
-        })
-        .catch(err => console.log(err));
-    }
+  const onChangeHandler = e => {
+    setTask({
+      ...task,
+      owner: sessionUserId,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const onClickHandler = (e, id) => {
+  const onPatchEditNameHandler = (e, id) => {
+    // task.category = e.target.value;
+    // task.chunked = true;
     axios
-      .get(`http://localhost:8000/api/tasks/${id}`, { withCredentials: true })
-      .then(res => {
-        if (res.data.message === 'success') {
-          setTask(res.data.results);
-        }
-      })
-      .catch(err => console.log(err));
-  };
-  console.log(task);
-
-  const onPatchChunkHandler = (e, i) => {
-    task.category = e.target.value;
-    task.chunked = true;
-    axios
-      .patch('http://localhost:8000/api/tasks/' + i, task, {
+      .patch('http://localhost:8000/api/tasks/' + id, task, {
         withCredentials: true,
       })
       .then(res => {
-        console.log(res.data.results);
         setTask({
           name: '',
           category: '',
@@ -340,18 +323,58 @@ const DoComponent = () => {
           count++;
           setLoad(count);
         }
-        console.log(load);
+      })
+      .catch(err => console.log(err));
+  };
+  const onPatchEditChunkHandler = (e, i) => {
+    task.category = e.target.value;
+    task.chunked = true;
+    axios
+      .patch('http://localhost:8000/api/tasks/' + i, task, {
+        withCredentials: true,
+      })
+      .then(res => {
+        setTask({
+          name: '',
+          category: '',
+          chunked: false,
+          scheduled: false,
+          scheduledAt: '',
+          completed: false,
+          owner: '',
+        });
+        let count = load;
+        if (count >= 0) {
+          count++;
+          setLoad(count);
+        }
       })
       .catch(err => console.log(err));
   };
 
+  const onPatchHandler = (e, i) => {
+    e.preventDefault();
+    if (task.chunked === true) {
+      axios
+        .patch('http://localhost:8000/api/tasks/' + i, task, {
+          withCredentials: true,
+        })
+        .then(res => {
+          let count = load;
+          if (count >= 0) {
+            count++;
+            setLoad(count);
+          }
+        })
+        .catch(err => console.log(err));
+    }
+  };
+
   const onSelectHandler = e => {
-    console.log(e.target.value);
     setSelectedCategory(e.target.value);
   };
 
   const onChangeDate = (date, id) => {
-    console.log(task);
     setSelectedDate(date);
     task.scheduledAt = date;
   };
@@ -365,8 +388,6 @@ const DoComponent = () => {
         withCredentials: true,
       })
       .then(res => {
-        console.log(res.data.results);
-
         setTask({
           name: '',
           category: '',
@@ -381,52 +402,77 @@ const DoComponent = () => {
           count++;
           setLoad(count);
         }
-        console.log(load);
       })
       .catch(err => console.log(err));
   };
 
-  const onCompleteHandler = id => {
-    console.log(task);
-    console.log('Set task as task.completed before updating.');
-    console.log(id);
-    console.log('Task Completed!');
+  const onDragEnd = result => {
+    const { destination, source, draggableId } = result;
+    if (!result.destination) {
+      return;
+    }
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    const items = reorder(
+      allTasks,
+      result.source.index,
+      result.destination.index
+    );
+    setAllTasks(items);
   };
 
-  // const handleDateChange = (date, id, i) => {
-  //   setSelectedDate(date);
-  //   let currScheduled = date;
-  //   axios
-  //     .get('http://localhost:8000/api/tasks/' + id)
-  //     .then(res => {
-  //       if (res.data.message === 'success') {
-  //         let currTask = res.data.results;
-  //         currTask.scheduledAt = currScheduled;
-  //         setTask(currTask);
-  //       }
-  //     })
-  //     .catch(err => console.log(err));
-  // };
-
-  // const onDateHandler = (e, id) => {
-  //   e.preventDefault();
-  //   if (task.scheduledAt !== null) {
-  //     task.scheduled = true;
-  //     axios
-  //       .patch('http://localhost:8000/api/tasks/' + id, task)
-  //       .then(res => {
-  //         console.log(res.data.results);
-
-  //         let count = load;
-  //         if (count >= 0) {
-  //           count++;
-  //           setLoad(count);
-  //         }
-  //         console.log(load);
-  //       })
-  //       .catch(err => console.log(err));
-  //   }
-  // };
+  const onCompleteHandler = (e,id) => {
+    let thisTask = '';
+    let one = `http://localhost:8000/api/tasks/${id}`;
+    const requestOne = axios.get(one, { withCredentials: true });
+    requestOne
+    .then(res => {
+      if (res.data.message === 'success') {
+        thisTask = res.data.results;
+      }
+    })
+    .catch(err => console.log(err));
+    let two = `http://localhost:8000/api/tasks/${id}`;
+    const requestTwo = axios.patch(two, task, { withCredentials: true });
+    requestTwo
+    .then(res => {
+      if (res.data.message === 'success') {
+      setTask({
+        name: '',
+        category: '',
+        chunked: false,
+        scheduled: false,
+        scheduledAt: '',
+        completed: false,
+        owner: '',
+      });
+      let count = load;
+      if (count >= 0) {
+        count++;
+        setLoad(count);
+      }
+    }})
+    .catch(err => console.log(err));
+    axios
+      .all([requestOne, requestTwo])
+      .then(
+        axios.spread((...responses) => {
+          const responseOne = responses[0];
+          console.log(responseOne);
+          const responseTwo = responses[1];
+          console.log(responseTwo);
+        })
+      )
+      .catch(errors => {
+        navigate('/signup');
+      });
+  };
 
   const toUpperCaseFilter = d => {
     return d.toUpperCase();
@@ -438,12 +484,6 @@ const DoComponent = () => {
     console.log(date.toLocaleString('en-US', DATE_OPTIONS));
     console.log(moment.utc(date));
     setDateParameter(date);
-    // let count = load;
-    // if (count >= 0) {
-    //   count++;
-    //   setLoad(count);
-    // }
-    // console.log(load);
   };
 
   return (
@@ -452,12 +492,11 @@ const DoComponent = () => {
       <Typography
         variant='h2'
         // component='h2'
-        gutterBottom
-        className={classes.primaryTitle}
+        className={classes.title}
       >
         {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
       </Typography>
-      <h1 className={classes.title}>Do Component</h1>
+      <h1 className={classes.title}>Do</h1>
       <Typography variant='h6' className={classes.title}>
         Select Date to Sort and then DO it!
       </Typography>
@@ -480,7 +519,6 @@ const DoComponent = () => {
           />
         </Grid>
       </MuiPickersUtilsProvider>
-      {/* <DatePicker selected={date} onChange={onDateChange} /> */}
       <Grid container direction='row' justify='center'>
         <FormGroup row>
           <FormControlLabel
@@ -504,57 +542,31 @@ const DoComponent = () => {
         </FormGroup>
       </Grid>
 
-      <Grid container spacing={1}>
-        <Grid item xs={12}>
-          {/* <h3 className={classes.title}>Category:</h3>
-          <FormControl variant='outlined' className={classes.formControl}>
-            <InputLabel htmlFor='category'>Category</InputLabel>
-            <Select
-              native
-              // value
-              onChange={e => {
-                onSelectHandler(e);
-              }}
-              label='Chunk...'
-              name='category'
-              // inputProps={{
-              //   name: 'category',
-              //   id: 'category',
-              // }}
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId='droppable'>
+          {provided => (
+            <RootRef
+              rootRef={provided.innerRef}
+              {...provided.droppableProps}
             >
-              <option aria-label='None' value='' />
-              <option value='Home'>Home</option>
-              <option value='Health'>Health</option>
-              <option value='Family'>Family</option>
-              <option value='Friends'>Friends</option>
-              <option value='Finance'>Finance</option>
-              <option value='Creative'>Creative</option>
-              <option value='Spiritual'>Spiritual</option>
-              <option value='Social'>Social</option>
-            </Select>
-          </FormControl> */}
-          <div>
-            <List dense={dense}>
-              {filteredTasks.map((task, i) =>
-                task.chunked && task.scheduled === true ? (
-                  // <Paper key={i} elevation={5} className={classes.paper}>
-                  <ListItem
-                    className={classes.list}
-                    key={i}
-                    // button
-                    // selected={selectedIndex === 0}
-                    // onClick={event => handleListItemClick(event, 0)}
+              <div>
+                <List dense={dense}>
+                {filteredTasks.map((task, i) =>
+                  task.chunked && task.scheduled === true ? (
+                  <Draggable
+                    draggableId={task._id}
+                    index={i}
+                    key={task._id}
                   >
-                    {/* <i className='fa fa-folder-open-o' aria-hidden='true'></i> */}
-                    {/* <IconButton
-                        edge='start'
-                        aria-label='add chunked'
-                        onClick={e => {
-                          onPatchHandler(e, task._id);
-                        }}
-                      >
-                        <CachedIcon />
-                      </IconButton> */}
+                    {provided => (
+                      <ListItem
+                      className={classes.list}
+                      ContainerProps={{ ref: provided.innerRef }}
+                      id='Task'
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      innerRef={provided.innerRef}
+                    >
                     <IconButton
                       type='button'
                       className={classes.text}
@@ -562,166 +574,13 @@ const DoComponent = () => {
                     >
                       <CheckBoxOutlineBlankIcon />
                     </IconButton>
-                    <Modal
-                      aria-labelledby='modal-chunk-select'
-                      aria-describedby='choose-chunk-category'
-                      className={classes.modal}
-                      open={openChunk}
-                      onClose={handleCloseChunk}
-                      closeAfterTransition
-                      BackdropComponent={Backdrop}
-                      BackdropProps={{
-                        timeout: 500,
-                      }}
-                    >
-                      <Fade in={openChunk}>
-                        <Grid className={classes.paper2}>
-                          <FormControl
-                            variant='standard'
-                            className={classes.formControl}
-                          >
-                            <InputLabel
-                              className={classes.text}
-                              htmlFor='category'
-                            >
-                              Chunk...
-                            </InputLabel>
-                            <Select
-                              native
-                              className={classes.text}
-                              value={selectedIndex[i]}
-                              onClick={e => {
-                                onClickHandler(e, task._id);
-                              }}
-                              onChange={e => {
-                                onPatchChunkHandler(e, task._id);
-                              }}
-                              label='Chunk...'
-                              name='category'
-                              // inputProps={{
-                              //   name: 'category',
-                              //   id: 'category',
-                              // }}
-                            >
-                              <option aria-label='None' value='' />
-                              <option value='Home'>Home</option>
-                              <option value='Health'>Health</option>
-                              <option value='Family'>Family</option>
-                              <option value='Friends'>Friends</option>
-                              <option value='Finance'>Finance</option>
-                              <option value='Creative'>Creative</option>
-                              <option value='Spiritual'>Spiritual</option>
-                              <option value='Social'>Social</option>
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                      </Fade>
-                    </Modal>
-
-                    {/* <ListItemAvatar>
-                        <Avatar>
-                        <IconButton aria-label='delete'>
-                        <FolderIcon taskId={task._id} />
-                        </IconButton>
-                        </Avatar>
-                      </ListItemAvatar> */}
-
-                    <ListItemText
-                      className={classes.item}
-                      primary={task.name}
-                      secondary={secondary ? task.category : null}
-                    />
-
-                    {/* <ListItemText
-                        className={classes.text}
-                        primary={new Date(task.scheduledAt).toLocaleString(
-                          'en-US',
-                          DATE_OPTIONS
-                          )}
-                        /> */}
-                    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                      <CssBaseline />
-                      {/* <Grid container justify='space-around'> */}
-                      <KeyboardDatePicker
-                        className={classes.text}
-                        key={i}
-                        margin='normal'
-                        InputAdornmentProps={{
-                          position: 'start',
-                        }}
-                        margin='normal'
-                        id='date-picker-dialog'
-                        format='MM/dd/yyyy'
-                        // label='Select a date...'
-                        value={selectedDate}
-                        onClick={e => {
-                          onClickHandler(e, task._id);
-                        }}
-                        onChange={e => {
-                          onChangeDate(e, task._id);
-                        }}
-                        KeyboardButtonProps={{
-                          'aria-label': 'change date',
-                        }}
-                      />
-                      {/* </Grid> */}
-                    </MuiPickersUtilsProvider>
-                    <IconButton
-                      className={classes.text}
-                      aria-label='add to calendar'
-                      onClick={e => {
-                        onPatchDateHandler(e, task._id, i);
-                      }}
-                    >
-                      <UpdateIcon />
-                    </IconButton>
-
-                    <ListItemText
-                      className={classes.text}
-                      primary={
-                        <Moment format='MM-DD-YYYY' filter={toUpperCaseFilter}>
-                          {task.scheduledAt}
-                        </Moment>
-                      }
-                    />
-
-                    {/* <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                        <CssBaseline />
-                        <Grid container justify='space-around'>
-                        <KeyboardDatePicker
-                        className={classes.text}
-                        margin='normal'
-                        id='Selected a date...'
-                        label='Date picker dialog'
-                        format='MM/dd/yyyy'
-                        value={selectedDate}
-                        onChange={e => {
-                          handleDateChange(e, task._id, i);
-                        }}
-                        KeyboardButtonProps={{
-                          'aria-label': 'change date',
-                        }}
-                        />
-                        </Grid>
-                      </MuiPickersUtilsProvider> */}
-
-                    {/* <DatePickComponent
-                        taskId={task._id}
-                        selectedIndexId={selectedIndexId}
-                        selectedDate={selectedDate}
-                        setSelectedDate={setSelectedDate}
-                        handleDateChange={handleDateChange}
-                      /> */}
-
-                    {/* <DateRangeIcon /> */}
                     <IconButton
                       type='button'
                       onClick={e => handleOpenEdit(e)}
-                      className={classes.text}
                     >
-                      <EditIcon />
+                      <EditIcon className={classes.text} />
                     </IconButton>
-                    <Modal
+                    <Dialog
                       aria-labelledby='modal-edit-select'
                       aria-describedby='choose-edit-category'
                       className={classes.modal}
@@ -733,30 +592,169 @@ const DoComponent = () => {
                         timeout: 500,
                       }}
                     >
-                      <Fade in={openEdit}>
-                        <Grid className={classes.paper2}>
-                          <IconButton type='button' onClick={handleOpenChunk}>
-                            <FolderOpenIcon className={classes.text} />
-                          </IconButton>
-                          <IconButton edge='end' aria-label='delete'>
-                            <DeleteComponent
-                              taskId={task._id}
-                              successCallback={() => removeFromDom(task._id)}
-                            />
-                          </IconButton>
-                        </Grid>
-                      </Fade>
-                    </Modal>
+                      <DialogContent
+                        className={classes.dialogStyle}
+                      >
+                        <Typography className={classes.title}>
+                          <h2>
+                            {task.name}
+                          </h2>
+                        </Typography>
+                        <TextField
+                          id='dump'
+                          label='Edit task here...'
+                          multiline
+                          rowsMax={2}
+                          size='medium'
+                          variant='outlined'
+                          onChange={e => {
+                            onChangeHandler(e);
+                          }}
+                          onClick={e => {
+                            onClickHandler(e, task._id);
+                          }}
+                          onBlur={e => {
+                            onPatchEditNameHandler(e, task._id);
+                          }}
+                          placeholder={task.name}
+                          name='name'
+                          value={selectedIndex[i]}
+                        />
+                        <FormControl
+                          variant='standard'
+                          className={classes.formControl}
+                        >
+                          <InputLabel
+                            className={classes.textMain}
+                            htmlFor='category'
+                          >
+                              Chunk...
+                          </InputLabel>
+                          <Select
+                            native
+                            className={classes.textMain}
+                            value={selectedIndex[i]}
+                            onClick={e => {
+                              onClickHandler(e, task._id);
+                            }}
+                            onChange={e => {
+                              onPatchEditChunkHandler(e, task._id);
+                            }}
+                            label='Chunk...'
+                            name='category'
+                          >
+                            <option aria-label='None' value='' />
+                            <option value='Home'>Home</option>
+                            <option value='Health'>Health</option>
+                            <option value='Family'>Family</option>
+                            <option value='Friends'>Friends</option>
+                            <option value='Finance'>Finance</option>
+                            <option value='Creative'>Creative</option>
+                            <option value='Spiritual'>Spiritual</option>
+                            <option value='Social'>Social</option>
+                          </Select>
+                        </FormControl>
+                      </DialogContent>
+                      <DialogActions>
+                        <Button 
+                          autoFocus 
+                          onClick={handleCloseEdit}     
+                          color="primary"
+                        >
+                          Cancel
+                        </Button>
+                        <IconButton
+                          className={classes.icon}
+                          aria-label='update task'
+                          onClick={handleCloseEdit}
+                        >
+                          <LibraryAddIcon />
+                        </IconButton>
+                      </DialogActions>
+                    </Dialog>
+                    <ListItemText
+                      disableTypography
+                      className={classes.text}
+                      textOverflow='ellipsis'
+                      overflow='hidden'
+                      primary={<Typography variant="body1" style={{color: 'white'}}>{task.name}</Typography>}
+                      secondary={<Typography variant="body2" style={{color: '#bdbdbdde'}}>{secondary ? task.category : null}</Typography>}
+                    />
+                    <Dialog open={openCal} onClose={handleCloseCal}>
+                      <DialogContent
+                        className={classes.dialogStyle}
+                      >
+                        <DialogContentText>
+                          Please select a date...
+                        </DialogContentText>
+                      </DialogContent>
+                      <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                        <CssBaseline />
+                        {/* <Grid container justify='space-around'> */}
+                        <KeyboardDatePicker
+                          className={classes.text}
+                          key={i}
+                          margin='normal'
+                          InputAdornmentProps={{
+                            position: 'start',
+                          }}
+                          margin='normal'
+                          id='date-picker-dialog'
+                          format='MM/dd/yyyy'
+                          // label='Select a date...'
+                          value={selectedDate}
+                          onClick={e => {
+                            onClickHandler(e, task._id);
+                          }}
+                          onChange={e => {
+                            onChangeDate(e, task._id);
+                          }}
+                          KeyboardButtonProps={{
+                            'aria-label': 'change date',
+                          }}
+                        />
+                        {/* </Grid> */}
+                      </MuiPickersUtilsProvider>
+                      <IconButton edge='end' aria-label='delete'>
+                        <DeleteComponent
+                          taskId={task._id}
+                          successCallback={() => removeFromDom(task._id)}
+                        />
+                      </IconButton>
+                      <DialogActions>
+                        <IconButton
+                          className={classes.icon}
+                          aria-label='add to calendar'
+                          onClick={e => {
+                            onPatchDateHandler(e, task._id, i);
+                          }}
+                        >
+                          <LibraryAddIcon />
+                        </IconButton>
+                      </DialogActions>
+                    </Dialog>
+                    <ListItemText
+                      className={classes.text}
+                      primary={
+                        <Moment format='MM-DD-YYYY' filter={toUpperCaseFilter}>
+                          {task.scheduledAt}
+                        </Moment>
+                      }
+                    />
                   </ListItem>
+                    )}
+                </Draggable>
                 ) : (
                   <div></div>
                 )
               )}
             </List>
           </div>
-        </Grid>
-      </Grid>
-      <BottomNavComponent />
+          {provided.placeholder}
+          </RootRef>
+          )}
+        </Droppable>
+      </DragDropContext>
     </Container>
   );
 };
