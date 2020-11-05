@@ -11,6 +11,7 @@ import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is requir
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import IconButton from '@material-ui/core/IconButton';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -29,6 +30,8 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { shadows } from '@material-ui/system';
 import MenuItem from '@material-ui/core/MenuItem';
 import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
+import Button from '@material-ui/core/Button';
+import Tooltip from '@material-ui/core/Tooltip';
 
 
 const useStyles = makeStyles(theme => ({
@@ -99,7 +102,8 @@ const useStyles = makeStyles(theme => ({
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 150,
+    minWidth: 250,
+
   },
   selectEmpty: {
     marginTop: theme.spacing(2),
@@ -146,6 +150,7 @@ const AllDumpedList = props => {
     selectedIndex,
     setSelectedIndex,
     onChangeHandler,
+    onPatchEditNameHandler,
   } = props;
   const classes = useStyles();
   const [dense, setDense] = useState(false);
@@ -199,9 +204,15 @@ const AllDumpedList = props => {
                     key={i}
                     disableRipple
                   >
-                    <IconButton type='button' onClick={e => handleOpen(e)}>
-                      <FolderOpenIcon className={classes.text} />
-                    </IconButton>
+                    <Tooltip title="Chunk task" placement="left">
+                      <ListItemIcon type='button' onClick={e => handleOpen(e)}>
+                        <FolderOpenIcon 
+                        edge="start"
+                        className={classes.text} 
+                        disableRipple
+                        />
+                      </ListItemIcon>
+                    </Tooltip>
                     <Dialog
                       aria-labelledby='spring-modal-title'
                       aria-describedby='spring-modal-description'
@@ -215,7 +226,31 @@ const AllDumpedList = props => {
                       }}
                     >
                       <DialogContent className={classes.dialogStyle}>
-                        <h2 className={classes.subtitle}>{task.name}</h2>
+                        <Typography className={classes.title}>
+                          <h2>
+                            {task.name}
+                          </h2>
+                        </Typography>
+                        <TextField
+                        id='dump'
+                        label='Edit task here...'
+                        multiline
+                        rowsMax={2}
+                        size='medium'
+                        variant='outlined'
+                        onChange={e => {
+                          onChangeHandler(e);
+                        }}
+                        onClick={e => {
+                          onClickHandler(e, task._id);
+                        }}
+                        onBlur={e => {
+                          onPatchEditNameHandler(e, task._id);
+                        }}
+                        placeholder={task.name}
+                        name='name'
+                        value={selectedIndex[i]}
+                        />
                         <FormControl
                           variant='standard'
                           className={classes.formControl}
@@ -252,6 +287,13 @@ const AllDumpedList = props => {
                         </FormControl>
                       </DialogContent>
                       <DialogActions>
+                        <Button
+                          autoFocus
+                          onClick={handleClose}
+                          color="primary"
+                          >
+                          Cancel
+                        </Button>
                         <IconButton
                           className={classes.icon}
                           aria-label='update task'
@@ -266,21 +308,14 @@ const AllDumpedList = props => {
                       primary={task.name}
                       secondary={secondary ? task.category : null}
                     />
-                    <IconButton
-                      edge='start'
-                      aria-label='add chunked'
-                      onClick={e => {
-                        onPatchHandler(e, task._id);
-                      }}
-                    >
-                      <AddBoxIcon className={classes.text} />
-                    </IconButton>
-                    <IconButton edge='end' aria-label='delete'>
-                      <DeleteComponent
-                        taskId={task._id}
-                        successCallback={() => removeFromDom(task._id)}
-                      />
-                    </IconButton>
+                    <Tooltip title="Delete Task" placement="right">
+                      <IconButton edge='end' aria-label='delete'>
+                        <DeleteComponent
+                          taskId={task._id}
+                          successCallback={() => removeFromDom(task._id)}
+                        />
+                      </IconButton>
+                    </Tooltip>
                   </ListItem>
                 )
               )}

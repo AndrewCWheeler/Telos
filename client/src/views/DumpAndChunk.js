@@ -124,18 +124,48 @@ const DumpAndChunk = (props) => {
       })
       .catch(err => console.log(err));
   };
+
+  const onPatchEditNameHandler = (e, id) => {
+    // task.category = e.target.value;
+    // task.chunked = true;
+    axios
+      .patch('http://localhost:8000/api/tasks/' + id, task, {
+        withCredentials: true,
+      })
+      .then(res => {
+        console.log(res.data.results);
+        setTask({
+          name: '',
+          category: '',
+          chunked: false,
+          scheduled: false,
+          scheduledAt: '',
+          completed: false,
+          owner: '',
+        });
+        let count = load;
+        if (count >= 0) {
+          count++;
+          setLoad(count);
+        }
+        console.log(load);
+      })
+      .catch(err => console.log(err));
+  };
+
+
   
 
   return (
     <div>
       <CssBaseline />
-      <div className='center'>
-        <Typography
+      <div className='center' style={{marginTop:'100px'}}>
+        {/* <Typography
           variant='h2'
           className={classes.title}
         >
           {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
-        </Typography>
+        </Typography> */}
         <h1 className={classes.title}>Dump & Chunk</h1>
       </div>
       <DumpComponent
@@ -154,6 +184,7 @@ const DumpAndChunk = (props) => {
         setSelectedIndex={setSelectedIndex}
         onPatchHandler={onPatchHandler}
         onChangeHandler={onChangeHandler}
+        onPatchEditNameHandler={onPatchEditNameHandler}
       />
     </div>
   );

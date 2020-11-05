@@ -1,70 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import axios from 'axios';
+import Button from '@material-ui/core/Button';
+import Backdrop from '@material-ui/core/Backdrop';
+import Checkbox from '@material-ui/core/Checkbox';
+import CircleCheckbox from './CircleCheckbox';
+
+import Container from '@material-ui/core/Container';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import DateFnsUtils from '@date-io/date-fns';
+import 'date-fns';
+import {
+  MuiPickersUtilsProvider,
+  DatePicker,
+  KeyboardDatePicker,
+} from '@material-ui/pickers';
+import DeleteComponent from './DeleteComponent';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
-import Backdrop from '@material-ui/core/Backdrop';
-import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is required for IE 11 support
-
-import { navigate } from '@reach/router';
-import { makeStyles } from '@material-ui/core/styles';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import EditIcon from '@material-ui/icons/Edit';
+import FormControl from '@material-ui/core/FormControl';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormGroup from '@material-ui/core/FormGroup';
+import Grid from '@material-ui/core/Grid';
+import IconButton from '@material-ui/core/IconButton';
+import InputLabel from '@material-ui/core/InputLabel';
+import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import IconButton from '@material-ui/core/IconButton';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Grid from '@material-ui/core/Grid';
-import Container from '@material-ui/core/Container';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
-import DeleteComponent from './DeleteComponent';
-// import FolderIcon from '@material-ui/icons/Folder';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
-
-// import DatePicker from 'react-datepicker';
-// import 'react-datepicker/dist/react-datepicker.css';
-import CachedIcon from '@material-ui/icons/Cached';
-// import DateRangeIcon from '@material-ui/icons/DateRange';
-// import DatePickComponent from './DatePickComponent';
-// import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
-import 'date-fns';
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import EventIcon from '@material-ui/icons/Event';
-import { shadows } from '@material-ui/system';
-
-import DateFnsUtils from '@date-io/date-fns';
-import {
-  MuiPickersUtilsProvider,
-  DateTimePicker,
-  DatePicker,
-  Calendar,
-  // KeyboardTimePicker,
-  KeyboardDatePicker,
-} from '@material-ui/pickers';
-import { RootRef } from '@material-ui/core';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import { navigate } from '@reach/router';
+import { makeStyles } from '@material-ui/core/styles';
 import Moment from 'react-moment';
 import 'moment-timezone';
 import moment from 'moment';
-import FolderOpenIcon from '@material-ui/icons/FolderOpen';
-import UpdateIcon from '@material-ui/icons/Update';
-import EditIcon from '@material-ui/icons/Edit';
+import PropTypes from 'prop-types';
+import { RootRef, Tooltip } from '@material-ui/core';
+import Select from '@material-ui/core/Select';
+import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
+import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is required for IE 11 support
 
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
     maxWidth: 752,
     flexGrow: 1,
+  },
+  rootList: {
+    width: '100%',
+    maxWidth: 752,
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
   },
   modal: {
     display: 'flex',
@@ -112,6 +103,9 @@ const useStyles = makeStyles(theme => ({
     margin: `${theme.spacing(1)}px auto`,
     maxHeight: '100%',
     backgroundColor: theme.palette.primary.main,
+    // '&:hover': {
+    //   opacity: 0.9,
+    // },
     color: theme.palette.primary.contrastText,
     boxShadow: theme.shadows[10],
     borderRadius: 10,
@@ -191,7 +185,19 @@ const DoComponent = () => {
   const [sessionUserId, setSessionUserId] = useState('');
   const [openCal, setOpenCal] = useState(false);
   const [openEditTask, setOpenEditTask] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
+  // const [filtered, setFiltered] = useState(false);
+  const [checked, setChecked] = useState([0]);
+
+  const handleToggle = (i) => () => {
+    const currentIndex = checked.indexOf(i);
+    const newChecked = [...checked];
+    if(currentIndex === -1){
+      newChecked.push(i);
+    } else {
+      newChecked.splice(currentIndex, 1);
+    }
+    setChecked(newChecked);
+  }
 
   const handleOpenCal = () => {
     setOpenCal(true);
@@ -271,13 +277,6 @@ const DoComponent = () => {
     day: 'numeric',
   };
 
-  const reorder = (allTasks, startIndex, endIndex) => {
-    const result = Array.from(allTasks);
-    const [removed] = result.splice(startIndex, 1);
-    result.splice(endIndex, 0, removed);
-    return result;
-  };
-
   const filteredTasks = allTasks.filter(tasks => {
     let found = '';
     if (
@@ -288,6 +287,14 @@ const DoComponent = () => {
     }
     return found;
   });
+  // setFiltered(filteredTasks);
+
+  const reorder = (filteredTasks, startIndex, endIndex) => {
+    const result = Array.from(filteredTasks);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    return result;
+  };
 
   const removeFromDom = taskId => {
     setAllTasks(allTasks.filter(task => task._id !== taskId));
@@ -420,58 +427,52 @@ const DoComponent = () => {
     }
 
     const items = reorder(
-      allTasks,
+      filteredTasks,
       result.source.index,
       result.destination.index
     );
     setAllTasks(items);
   };
 
-  const onCompleteHandler = (e,id) => {
-    let thisTask = '';
-    let one = `http://localhost:8000/api/tasks/${id}`;
-    const requestOne = axios.get(one, { withCredentials: true });
-    requestOne
-    .then(res => {
-      if (res.data.message === 'success') {
-        thisTask = res.data.results;
-      }
-    })
-    .catch(err => console.log(err));
-    let two = `http://localhost:8000/api/tasks/${id}`;
-    const requestTwo = axios.patch(two, task, { withCredentials: true });
-    requestTwo
-    .then(res => {
-      if (res.data.message === 'success') {
-      setTask({
-        name: '',
-        category: '',
-        chunked: false,
-        scheduled: false,
-        scheduledAt: '',
-        completed: false,
-        owner: '',
-      });
-      let count = load;
-      if (count >= 0) {
-        count++;
-        setLoad(count);
-      }
-    }})
-    .catch(err => console.log(err));
-    axios
-      .all([requestOne, requestTwo])
-      .then(
-        axios.spread((...responses) => {
-          const responseOne = responses[0];
-          console.log(responseOne);
-          const responseTwo = responses[1];
-          console.log(responseTwo);
-        })
-      )
-      .catch(errors => {
-        navigate('/signup');
-      });
+  const onCompleteHandler = (e,i,id) => {
+    handleToggle(i);
+    axios.get(`http://localhost:8000/api/tasks/${id}`, {withCredentials: true})
+    .then(res => { 
+      let completedTask = {};
+      console.log(res.data.message);
+      console.log(res.data.results);
+      console.log(res.data.results.completed);
+      completedTask = res.data.results;
+      completedTask.completed = true;
+      return axios.patch(`http://localhost:8000/api/tasks/${id}`, completedTask, {withCredentials: true})
+      .then(res => {
+        if (res.data.message === 'success'){
+          console.log(res.data.message);
+          removeFromDom(id);
+        }
+      }).catch(err=> console.log(err));
+    }).catch(err => console.log(err));
+
+    // axios.patch(`http://localhost:8000/api/tasks/${id}`, task, { withCredentials: true })
+    // .then(res => {
+    //   if (res.data.message === 'success') {
+    //   removeFromDom();
+    //   setTask({
+    //     name: '',
+    //     category: '',
+    //     chunked: false,
+    //     scheduled: false,
+    //     scheduledAt: '',
+    //     completed: false,
+    //     owner: '',
+    //   });
+    //   let count = load;
+    //   if (count >= 0) {
+    //     count++;
+    //     setLoad(count);
+    //   }
+    // }})
+    // .catch(err => console.log(err));
   };
 
   const toUpperCaseFilter = d => {
@@ -489,14 +490,16 @@ const DoComponent = () => {
   return (
     <Container className={classes.root}>
       <CssBaseline />
-      <Typography
+      {/* <Typography
         variant='h2'
         // component='h2'
         className={classes.title}
       >
         {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
-      </Typography>
-      <h1 className={classes.title}>Do</h1>
+      </Typography> */}
+      <div style={{marginTop:'100px'}}>
+        <h1 className={classes.title}>Do</h1>
+      </div>
       <Typography variant='h6' className={classes.title}>
         Select Date to Sort and then DO it!
       </Typography>
@@ -550,7 +553,8 @@ const DoComponent = () => {
               {...provided.droppableProps}
             >
               <div>
-                <List dense={dense}>
+                <List dense={dense}
+                >
                 {filteredTasks.map((task, i) =>
                   task.chunked && task.scheduled === true ? (
                   <Draggable
@@ -566,20 +570,34 @@ const DoComponent = () => {
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
                       innerRef={provided.innerRef}
+                      key={i}
+                      role={undefined}
+                      onClick={handleToggle(i)}
                     >
-                    <IconButton
-                      type='button'
+                    <ListItemIcon
                       className={classes.text}
-                      onClick={e => onCompleteHandler(e, task._id)}
+                      onClick={e => onCompleteHandler(e,i,task._id)}
                     >
-                      <CheckBoxOutlineBlankIcon />
-                    </IconButton>
-                    <IconButton
-                      type='button'
-                      onClick={e => handleOpenEdit(e)}
-                    >
-                      <EditIcon className={classes.text} />
-                    </IconButton>
+                      <Tooltip title="Check if completed" placement="left">
+                        <CircleCheckbox
+                        edge='start'
+                        // checked={checked.indexOf(i) !== -1}
+                        tabIndex={-1}
+                        disableRipple
+                        // inputProps={{ 'aria-labeledby': labelId }}
+                        />
+                      </Tooltip>
+                    </ListItemIcon>
+                    <ListItemSecondaryAction>
+                      <Tooltip title="Edit Task" placement="right">
+                        <IconButton edge="end" aria-label="edit-task">
+                          <EditIcon 
+                          className={classes.text}
+                          type='button'
+                          onClick={e => handleOpenEdit(e)} />
+                        </IconButton>
+                      </Tooltip>
+                    </ListItemSecondaryAction>
                     <Dialog
                       aria-labelledby='modal-edit-select'
                       aria-describedby='choose-edit-category'
@@ -692,7 +710,7 @@ const DoComponent = () => {
                         <CssBaseline />
                         {/* <Grid container justify='space-around'> */}
                         <KeyboardDatePicker
-                          className={classes.text}
+                          color="primary"
                           key={i}
                           margin='normal'
                           InputAdornmentProps={{
@@ -715,13 +733,20 @@ const DoComponent = () => {
                         />
                         {/* </Grid> */}
                       </MuiPickersUtilsProvider>
-                      <IconButton edge='end' aria-label='delete'>
+                      {/* <IconButton edge='end' aria-label='delete'>
                         <DeleteComponent
                           taskId={task._id}
                           successCallback={() => removeFromDom(task._id)}
                         />
-                      </IconButton>
+                      </IconButton> */}
                       <DialogActions>
+                      <Button 
+                          autoFocus 
+                          onClick={handleCloseCal}     
+                          color="primary"
+                          >
+                          Cancel
+                        </Button>
                         <IconButton
                           className={classes.icon}
                           aria-label='add to calendar'
@@ -734,11 +759,17 @@ const DoComponent = () => {
                       </DialogActions>
                     </Dialog>
                     <ListItemText
-                      className={classes.text}
                       primary={
-                        <Moment format='MM-DD-YYYY' filter={toUpperCaseFilter}>
-                          {task.scheduledAt}
-                        </Moment>
+                      <Tooltip title="Change Date" placement="right">
+                        <Button
+                          onClick={handleOpenCal}
+                          className={classes.text}
+                          >
+                          <Moment format='ll'>
+                            {task.scheduledAt}
+                          </Moment>
+                        </Button>
+                      </Tooltip>
                       }
                     />
                   </ListItem>

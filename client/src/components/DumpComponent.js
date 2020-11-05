@@ -15,7 +15,6 @@ import {
   // AccordionSummary,
   // AccordionDetails,
 } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 const useStyles = makeStyles(theme => ({
@@ -66,6 +65,13 @@ const DumpComponent = props => {
     });
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      console.log('Enter Key Pressed!')
+      onSubmitHandler(e);
+    }
+  }
+
   const onSubmitHandler = e => {
     e.preventDefault();
     console.log('This is the task just before going to post...');
@@ -102,7 +108,6 @@ const DumpComponent = props => {
   return (
     <Container className={classes.layout}>
       <CssBaseline />
-      {/* <Paper className={classes.paper} elevation={3}> */}
       <form className={classes.root} noValidate autoComplete='off'>
         <Grid container direction='row' justify='center' alignItems='center'>
           <TextField
@@ -115,31 +120,26 @@ const DumpComponent = props => {
             onChange={e => {
               onChangeHandler(e);
             }}
+            onKeyPress={handleKeyDown}
             name='name'
             value={task.name}
           />
         </Grid>
         <Grid container direction='row' justify='center' alignItems='center'>
-          {/* <Tooltip title='Add' aria-label='add'> */}
-          <IconButton
-            className={classes.fab}
-            onClick={e => {
-              onSubmitHandler(e);
-            }}
-          >
-            <AddCircleIcon fontSize='large' />
-          </IconButton>
-          {/* <Fab color='primary' className={classes.fab}>
-            <AddIcon
-              onClick={e => {
-                onSubmitHandler(e);
-              }}
-            />
-          </Fab> */}
-          {/* </Tooltip> */}
+          <Grid item>
+            <Tooltip title="Dump to list" placement="right">
+              <IconButton
+                className={classes.fab}
+                onClick={e => {
+                  onSubmitHandler(e);
+                }}
+                >
+                <AddCircleIcon fontSize='large' />
+              </IconButton>
+            </Tooltip>
+          </Grid>
         </Grid>
       </form>
-      {/* </Paper> */}
     </Container>
   );
 };

@@ -9,6 +9,7 @@ import DoComponent from '../components/DoComponent';
 import Admin from './Admin';
 import BottomNavComponent from '../components/BottomNavComponent';
 import ChunkComponent from '../components/ChunkComponent';
+import ResponsiveDrawer from '../components/ResponsiveDrawer';
 
 export default () => {
   return (
@@ -21,8 +22,10 @@ export default () => {
         <DoComponent path='/do' />
         <Admin path='/admin' />
         <ChunkComponent path='/chunk' />
+        <ResponsiveDrawer path='/drawer' />
       </Router>
       <BottomNavComponent />
+      <ResponsiveDrawer />
     </Container>
   );
 };

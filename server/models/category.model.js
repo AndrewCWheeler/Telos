@@ -49,6 +49,7 @@ const CategorySchema = new mongoose.Schema({
     minlength: [2, 'Category name must be at least 2 characters long'],
     maxlength: [20, 'That category name is too long!'],
   },
+  
 });
 
 module.exports.Category = mongoose.model('Category', CategorySchema);

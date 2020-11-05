@@ -8,14 +8,19 @@ import AddIcon from '@material-ui/icons/Add';
 import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import SettingsIcon from '@material-ui/icons/Settings';
+
 // import Paper from '@material-ui/core/Paper';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   root: {
-    width: 752,
+    width: '100%',
+    maxWidth: 752,
     justifyContent: 'center',
-  },
-});
+    margin: theme.spacing(4, 0),
+    fontSize: 10,
+    position: 'fixed',
+  }
+}));
 
 const BottomNavComponent = (props) => {
   const classes = useStyles();
@@ -40,9 +45,10 @@ const BottomNavComponent = (props) => {
         value={value}
         onChange={navigatePage}
         className={classes.root}
+        position='fixed'
         >
         <BottomNavigationAction
-          label='Dump/Chunk'
+          label='Dump'
           value='dump'
           icon={<AddIcon />}
         />

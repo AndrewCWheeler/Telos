@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Undo from '@material-ui/icons/Undo';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { navigate } from '@reach/router';
@@ -58,7 +59,7 @@ import {
   KeyboardDatePicker,
   DatePicker,
 } from '@material-ui/pickers';
-import { RootRef, FormLabel } from '@material-ui/core';
+import { RootRef, FormLabel, Tooltip, ListItemSecondaryAction, ListItemIcon } from '@material-ui/core';
 import Moment from 'react-moment';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup, { useRadioGroup } from '@material-ui/core/RadioGroup';
@@ -101,7 +102,7 @@ const useStyles = makeStyles(theme => ({
   paper: {
     maxWidth: 640,
     margin: `${theme.spacing(1)}px auto`,
-    // margin: theme.spacing(2, 0),
+    margin: theme.spacing(2, 0),
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText,
   },
@@ -115,7 +116,7 @@ const useStyles = makeStyles(theme => ({
     margin: `${theme.spacing(1)}px auto`,
     maxHeight: '100%',
     backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
+    color: theme.palette.primary.main,
     boxShadow: theme.shadows[10],
     borderRadius: 10,
   },
@@ -139,6 +140,9 @@ const useStyles = makeStyles(theme => ({
   selectEmpty: {
     marginTop: theme.spacing(2),
   },
+  undo: {
+    color: theme.palette.secondary.main,
+  }
 }));
 
 const Fade = React.forwardRef(function Fade(props, ref) {
@@ -338,6 +342,35 @@ const ScheduleComponent = props => {
       .catch(err => console.log(err));
   };
 
+  const onPatchUnChunkHandler = (e, id) => {
+    task.category = '';
+    task.chunked = false;
+    axios
+      .patch('http://localhost:8000/api/tasks/' + id, task, {
+        withCredentials: true,
+      })
+      .then(res => {
+        console.log(res.data.message);
+        console.log(res.data.results);
+        setTask({
+          name: '',
+          category: '',
+          chunked: false,
+          scheduled: false,
+          scheduledAt: '',
+          completed: false,
+          owner: '',
+        });
+        let count = load;
+        if (count >= 0) {
+          count++;
+          setLoad(count);
+        }
+        console.log(load);
+      })
+      .catch(err => console.log(err));
+  };
+
   const onSelectHandler = e => {
     console.log(e.target.value);
     setSelectedCategory(e.target.value);
@@ -406,14 +439,16 @@ const ScheduleComponent = props => {
   return (
     <Container className={classes.root}>
       <CssBaseline />
-      <Typography
+      {/* <Typography
         variant='h2'
         // component='h2'
         className={classes.title}
       >
         {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
-      </Typography>
-      <h1 className={classes.title}>Schedule</h1>
+      </Typography> */}
+      <div style={{marginTop:'100px'}}>
+        <h1 className={classes.title}>Schedule</h1>
+      </div>
       {/* <DatePicker selected={date} onChange={onDateChange} /> */}
       
       <Grid container spacing={1}>
@@ -446,7 +481,7 @@ const ScheduleComponent = props => {
               <MenuItem value='Social'>Social</MenuItem>
             </Select>
           </FormControl>
-          <Grid container direction='row' justify='center'>
+          <Grid container direction='row' justify='center' style={{marginTop:25}}>
             <FormGroup row>
               <FormControlLabel
                 control={
@@ -495,12 +530,15 @@ const ScheduleComponent = props => {
                                 {...provided.dragHandleProps}
                                 innerRef={provided.innerRef}
                               >
-                                <IconButton
-                                  type='button'
-                                  onClick={e => handleOpenEdit(e)}
-                                >
-                                  <EditIcon className={classes.text} />
-                                </IconButton>
+                                <Tooltip title="Edit Task" placement="left">
+                                  <ListItemIcon
+                                    type='button'
+                                    edge='start'
+                                    onClick={e => handleOpenEdit(e)}
+                                  >
+                                    <EditIcon className={classes.text} />
+                                  </ListItemIcon>
+                                </Tooltip>
                                 <Dialog
                                   aria-labelledby='modal-edit-radio'
                                   aria-describedby='choose-chunk-category'
@@ -516,6 +554,15 @@ const ScheduleComponent = props => {
                                   <DialogContent
                                     className={classes.dialogStyle}
                                   >
+                                    <Tooltip title="Unchunk" placement="top">
+                                      <IconButton 
+                                      className={classes.undo}
+                                      role='button'
+                                      onClick={e => {onPatchUnChunkHandler(e, task._id)}}
+                                      >
+                                        <Undo />
+                                      </IconButton>
+                                    </Tooltip>
                                     <Typography className={classes.title}>
                                       <h2>
                                         {task.name}
@@ -591,6 +638,7 @@ const ScheduleComponent = props => {
                                         <UpdateIcon />
                                       </IconButton> */}
                                     </FormControl>
+                                    
                                   </DialogContent>
                                   <DialogActions>
                                   <Button 
@@ -625,12 +673,17 @@ const ScheduleComponent = props => {
                                   primary={<Typography variant="body1" style={{color: 'white'}}>{task.name}</Typography>}
                                   secondary={<Typography variant="body2" style={{color: '#bdbdbdde'}}>{secondary ? task.category : null}</Typography>}
                                 />
-                                <IconButton
-                                  type='button'
-                                  onClick={handleOpenCal}
-                                >
-                                  <EventIcon className={classes.text} />
-                                </IconButton>
+                                <ListItemSecondaryAction>
+                                  <Tooltip title="Open Calendar" placement="right">
+                                    <IconButton
+                                      edge='end'
+                                      type='button'
+                                      onClick={handleOpenCal}
+                                    >
+                                      <EventIcon className={classes.text} />
+                                    </IconButton>
+                                  </Tooltip>
+                                </ListItemSecondaryAction>
 
                                 <Dialog open={openCal} onClose={handleCloseCal}>
                                   <DialogContent
