@@ -156,17 +156,18 @@ const ScheduleComponent = props => {
   const [sessionUserId, setSessionUserId] = useState('');
   const [openCal, setOpenCal] = useState(false);
   const [openEditTask, setOpenEditTask] = useState(false);
-  const handleOpenCal = () => {
-    setOpenCal(true);
-  };
-  const handleCloseCal = () => {
-    setOpenCal(false);
-  };
   const handleEditTask = () => {
     setOpenEditTask(true);
   };
   const handleCloseEditTask = () => {
     setOpenEditTask(false);
+  };
+  const handleOpenCal = (e, id) => {
+    onClickHandler(e, id);
+    setOpenCal(true);
+  };
+  const handleCloseCal = () => {
+    setOpenCal(false);
   };
   const [openEdit, setOpenEdit] = useState(false);
 
@@ -328,28 +329,16 @@ const ScheduleComponent = props => {
   const onPatchDateHandler = (date, id) => {
     // setSelectedDate(date);
     // task.scheduledAt = date;
-    handleCloseEdit();
     task.scheduled = true;
     axios
       .patch(`http://localhost:8000/api/tasks/${id}`, task, {
         withCredentials: true,
       })
       .then(res => {
-        setTask({
-          name: '',
-          category: '',
-          chunked: false,
-          scheduled: false,
-          scheduledAt: '',
-          completed: false,
-          owner: '',
-        });
-        let count = load;
-        if (count >= 0) {
-          count++;
-          setLoad(count);
+        if(res.data.message = 'success'){
+          handleCloseCal();
+          removeFromDom(id);
         }
-        console.log(load);
       })
       .catch(err => console.log(err));
   };
@@ -496,7 +485,7 @@ const ScheduleComponent = props => {
                                     <IconButton
                                       edge='end'
                                       type='button'
-                                      onClick={handleOpenCal}
+                                      onClick={e => {handleOpenCal(e, task._id)}}
                                     >
                                       <EventIcon className={classes.text} />
                                     </IconButton>
@@ -623,6 +612,8 @@ const ScheduleComponent = props => {
           </IconButton>
         </DialogActions>
       </Dialog>
+
+      {/* Second Dialog */}
       <Dialog open={openCal} onClose={handleCloseCal}>
         <DialogContent
           className={classes.dialogStyle}
