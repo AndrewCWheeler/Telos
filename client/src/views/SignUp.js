@@ -25,7 +25,6 @@ function Copyright() {
 
 const useStyles = makeStyles(theme => ({
   paper: {
-    marginTop: theme.spacing(1),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -89,7 +88,6 @@ export default function SignUp() {
   return (
     <Container component='main' maxWidth='xs'>
       <CssBaseline />
-      {/* <Link to='/admin'>Admin</Link> */}
       <div className={classes.paper}>
         <Typography variant='h2' gutterBottom className={classes.title}>
           {'\u03C4\u03AD\u03BB\u03BF\u03C2'}

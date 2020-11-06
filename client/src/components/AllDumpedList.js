@@ -38,7 +38,7 @@ const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
     maxWidth: 752,
-    flexGrow: 1,
+    // flexGrow: 1,
   },
   modal: {
     display: 'flex',
@@ -69,41 +69,31 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.primary.main,
     margin: theme.spacing(2, 1, 0),
   },
-  select: {
-    color: theme.palette.primary.main,
-    backgroundColor: theme.palette.primary.main,
-  },
-  paper: {
-    maxWidth: 640,
-    margin: `${theme.spacing(1)}px auto`,
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-  },
-  paper2: {
-    backgroundColor: theme.palette.background.main,
-    border: `2px solid ${theme.palette.primary.contrastText}`,
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
-  },
   list: {
-    margin: `${theme.spacing(1)}px auto`,
-    height: '100%',
+    marginBottom: '60px',
+  },
+  listItem: {
+    margin: theme.spacing(1,0,0),
+    maxHeight: '100%',
+    width: '100%',
     backgroundColor: theme.palette.primary.main,
+    '&:hover': {
+      backgroundColor: theme.palette.primary.dark,
+    },
     color: theme.palette.primary.contrastText,
     boxShadow: theme.shadows[10],
-    borderRadius: 10,
+    borderRadius: 3,
   },
   item: {
     margin: theme.spacing(1, 2),
     width: 250,
     color: theme.palette.primary.contrastText,
-    oveflow: 'hidden',
+    overflow: 'hidden',
     textOverflow: 'ellipsis',
   },
   formControl: {
     margin: theme.spacing(1),
     minWidth: 250,
-
   },
   selectEmpty: {
     marginTop: theme.spacing(2),
@@ -194,24 +184,24 @@ const AllDumpedList = props => {
             Select Chunk Category, then Add to Confirm...
           </Typography> */}
           <div>
-            <List dense={dense}>
+            <List dense={dense} className={classes.list}>
               {allTasks.map((task, i) =>
                 task.chunked ? (
                   ''
                 ) : (
                   <ListItem
-                    className={classes.list}
+                    className={classes.listItem}
                     key={i}
                     disableRipple
                   >
                     <Tooltip title="Chunk task" placement="left">
-                      <ListItemIcon type='button' onClick={e => handleOpen(e)}>
+                      <IconButton type='button' onClick={e => handleOpen(e)}>
                         <FolderOpenIcon 
                         edge="start"
                         className={classes.text} 
                         disableRipple
                         />
-                      </ListItemIcon>
+                      </IconButton>
                     </Tooltip>
                     <Dialog
                       aria-labelledby='spring-modal-title'
@@ -304,7 +294,7 @@ const AllDumpedList = props => {
                       </DialogActions>
                     </Dialog>
                     <ListItemText
-                      className={classes.item}
+                      className={classes.text}
                       primary={task.name}
                       secondary={secondary ? task.category : null}
                     />

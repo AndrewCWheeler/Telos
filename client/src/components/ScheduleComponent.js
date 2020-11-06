@@ -68,7 +68,7 @@ const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
     maxWidth: 752,
-    flexGrow: 1,
+    // flexGrow: 1,
   },
   modal: {
     display: 'flex',
@@ -76,9 +76,6 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'center',
   },
   dialogStyle: {
-    backgroundColor: theme.palette.background.paper,
-  },
-  demo: {
     backgroundColor: theme.palette.background.paper,
   },
   title: {
@@ -99,31 +96,25 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.primary.main,
     backgroundColor: theme.palette.primary.main,
   },
-  paper: {
-    maxWidth: 640,
-    margin: `${theme.spacing(1)}px auto`,
-    margin: theme.spacing(2, 0),
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-  },
-  paper2: {
-    backgroundColor: theme.palette.primary.main,
-    border: `2px solid ${theme.palette.primary.contrastText}`,
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
-  },
   list: {
-    margin: `${theme.spacing(1)}px auto`,
+    marginBottom: '60px',
+  },
+  listItem: {
+    margin: theme.spacing(1,0,0),
     maxHeight: '100%',
+    width: '100%',
     backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.main,
+    '&:hover': {
+      backgroundColor: theme.palette.primary.dark,
+    },
+    color: theme.palette.primary.contrastText,
     boxShadow: theme.shadows[10],
-    borderRadius: 10,
+    borderRadius: 3,
   },
   item: {
     margin: theme.spacing(1, 1),
     width: 250,
-    color: theme.palette.primary.contrastText,
+    color: theme.palette.primary.main,
   },
   icon: {
     color: theme.palette.primary.main,
@@ -145,36 +136,6 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const Fade = React.forwardRef(function Fade(props, ref) {
-  const { in: open, children, onEnter, onExited, ...other } = props;
-  const style = useSpring({
-    from: { opacity: 0 },
-    to: { opacity: open ? 1 : 0 },
-    onStart: () => {
-      if (open && onEnter) {
-        onEnter();
-      }
-    },
-    onRest: () => {
-      if (!open && onExited) {
-        onExited();
-      }
-    },
-  });
-
-  Fade.propTypes = {
-    children: PropTypes.element,
-    in: PropTypes.bool.isRequired,
-    onEnter: PropTypes.func,
-    onExited: PropTypes.func,
-  };
-  return (
-    <animated.div ref={ref} style={style} {...other}>
-      {children}
-    </animated.div>
-  );
-});
-
 const ScheduleComponent = props => {
   const [load, setLoad] = useState(0);
   const [task, setTask] = useState({
@@ -189,7 +150,7 @@ const ScheduleComponent = props => {
   const [allTasks, setAllTasks] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [dense, setDense] = useState(false);
+  const [dense, setDense] = useState(true);
   const [secondary, setSecondary] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [sessionUserId, setSessionUserId] = useState('');
@@ -209,9 +170,12 @@ const ScheduleComponent = props => {
   };
   const [openEdit, setOpenEdit] = useState(false);
 
-  const handleOpenEdit = () => {
+  const handleOpenEdit = (e, id) => {
+    onClickHandler(e, id);
     setOpenEdit(true);
   };
+  console.log(task);
+
   const handleCloseEdit = () => {
     setOpenEdit(false);
   };
@@ -264,7 +228,6 @@ const ScheduleComponent = props => {
       })
       .catch(err => console.log(err));
   };
-  console.log(task);
 
   const reorder = (allTasks, startIndex, endIndex) => {
     const result = Array.from(allTasks);
@@ -295,15 +258,6 @@ const ScheduleComponent = props => {
       })
       .then(res => {
         console.log(res.data.results);
-        setTask({
-          name: '',
-          category: '',
-          chunked: false,
-          scheduled: false,
-          scheduledAt: '',
-          completed: false,
-          owner: '',
-        });
         let count = load;
         if (count >= 0) {
           count++;
@@ -323,21 +277,16 @@ const ScheduleComponent = props => {
       })
       .then(res => {
         console.log(res.data.results);
-        setTask({
-          name: '',
-          category: '',
-          chunked: false,
-          scheduled: false,
-          scheduledAt: '',
-          completed: false,
-          owner: '',
-        });
-        let count = load;
-        if (count >= 0) {
-          count++;
-          setLoad(count);
+        if (res.data.message === 'success'){
+          removeFromDom(id);
+          handleCloseEdit();
         }
-        console.log(load);
+        // let count = load;
+        // if (count >= 0) {
+        //   count++;
+        //   setLoad(count);
+        // }
+        // console.log(load);
       })
       .catch(err => console.log(err));
   };
@@ -350,23 +299,17 @@ const ScheduleComponent = props => {
         withCredentials: true,
       })
       .then(res => {
-        console.log(res.data.message);
-        console.log(res.data.results);
-        setTask({
-          name: '',
-          category: '',
-          chunked: false,
-          scheduled: false,
-          scheduledAt: '',
-          completed: false,
-          owner: '',
-        });
-        let count = load;
-        if (count >= 0) {
-          count++;
-          setLoad(count);
+        if (res.data.message === 'success') {
+          console.log(res.data.results);
+          removeFromDom(id);
+          handleCloseEdit();
         }
-        console.log(load);
+        // let count = load;
+        // if (count >= 0) {
+        //   count++;
+        //   setLoad(count);
+        // }
+        // console.log(load);
       })
       .catch(err => console.log(err));
   };
@@ -446,16 +389,13 @@ const ScheduleComponent = props => {
       >
         {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
       </Typography> */}
-      <div style={{marginTop:'100px'}}>
+      <div style={{paddingTop:'60px'}}>
         <h1 className={classes.title}>Schedule</h1>
       </div>
       {/* <DatePicker selected={date} onChange={onDateChange} /> */}
       
-      <Grid container spacing={1}>
-        <Grid item xs={12}>
-          <Typography variant='h6' className={classes.title}>
-            Select Category to Sort and Calendar Icon to Schedule...
-          </Typography>
+      {/* <Grid container spacing={1}>
+        <Grid item xs={12}> */}
           <h3 className={classes.title}>Select Category:</h3>
           <FormControl variant='standard' className={classes.formControl}>
             <InputLabel id="select-category">Category</InputLabel>
@@ -511,7 +451,8 @@ const ScheduleComponent = props => {
                   {...provided.droppableProps}
                 >
                   <div>
-                    <List dense={dense}>
+                    <List dense={dense}
+                    className={classes.list}>
                       {allTasks.map((task, i) =>
                         selectedCategory === task.category &&
                         task.chunked &&
@@ -523,7 +464,8 @@ const ScheduleComponent = props => {
                           >
                             {provided => (
                               <ListItem
-                                className={classes.list}
+                                className={classes.listItem}
+                                button
                                 ContainerProps={{ ref: provided.innerRef }}
                                 id='Task'
                                 {...provided.draggableProps}
@@ -531,149 +473,25 @@ const ScheduleComponent = props => {
                                 innerRef={provided.innerRef}
                               >
                                 <Tooltip title="Edit Task" placement="left">
-                                  <ListItemIcon
+                                  <IconButton
                                     type='button'
                                     edge='start'
-                                    onClick={e => handleOpenEdit(e)}
+                                    onClick={e => {
+                                      handleOpenEdit(e, task._id);
+                                    }}
                                   >
                                     <EditIcon className={classes.text} />
-                                  </ListItemIcon>
+                                  </IconButton>
                                 </Tooltip>
-                                <Dialog
-                                  aria-labelledby='modal-edit-radio'
-                                  aria-describedby='choose-chunk-category'
-                                  className={classes.modal}
-                                  open={openEdit}
-                                  onClose={handleCloseEdit}
-                                  closeAfterTransition
-                                  BackdropComponent={Backdrop}
-                                  BackdropProps={{
-                                    timeout: 500,
-                                  }}
-                                >
-                                  <DialogContent
-                                    className={classes.dialogStyle}
-                                  >
-                                    <Tooltip title="Unchunk" placement="top">
-                                      <IconButton 
-                                      className={classes.undo}
-                                      role='button'
-                                      onClick={e => {onPatchUnChunkHandler(e, task._id)}}
-                                      >
-                                        <Undo />
-                                      </IconButton>
-                                    </Tooltip>
-                                    <Typography className={classes.title}>
-                                      <h2>
-                                        {task.name}
-                                      </h2>
-                                    </Typography>
-                                    <TextField
-                                      id='dump'
-                                      label='Edit task here...'
-                                      multiline
-                                      rowsMax={2}
-                                      size='medium'
-                                      variant='outlined'
-                                      onChange={e => {
-                                        onChangeHandler(e);
-                                      }}
-                                      onClick={e => {
-                                        onClickHandler(e, task._id);
-                                      }}
-                                      onBlur={e => {
-                                        onPatchEditNameHandler(e, task._id);
-                                      }}
-                                      placeholder={task.name}
-                                      name='name'
-                                      value={selectedIndex[i]}
-                                    />
-                                    <FormControl
-                                      variant='standard'
-                                      className={classes.formControl}
-                                    >
-                                      <InputLabel
-                                        className={classes.textMain}
-                                        htmlFor='category'
-                                      >
-                                        Chunk...
-                                      </InputLabel>
-                                      <Select
-                                        native
-                                        className={classes.textMain}
-                                        value={selectedIndex[i]}
-                                        onClick={e => {
-                                          onClickHandler(e, task._id);
-                                        }}
-                                        onChange={e => {
-                                          onPatchEditChunkHandler(e, task._id);
-                                        }}
-                                        // onChange={e => {
-                                        //   onPatchChunkHandler(e, task._id);
-                                        // }}
-                                        label='Chunk...'
-                                        name='category'
-                                      >
-                                        <option aria-label='None' value=''></option>
-                                        <option value='Home'>Home</option>
-                                        <option value='Health'>Health</option>
-                                        <option value='Family'>Family</option>
-                                        <option value='Friends'>Friends</option>
-                                        <option value='Finance'>Finance</option>
-                                        <option value='Creative'>
-                                          Creative
-                                        </option>
-                                        <option value='Spiritual'>
-                                          Spiritual
-                                        </option>
-                                        <option value='Social'>Social</option>
-                                      </Select>
-                                      {/* <IconButton
-                                        type='button'
-                                        className={classes.text}
-                                        onClick={e =>
-                                          onPatchEditHandler(e, task._id)
-                                        }
-                                      >
-                                        <UpdateIcon />
-                                      </IconButton> */}
-                                    </FormControl>
-                                    
-                                  </DialogContent>
-                                  <DialogActions>
-                                  <Button 
-                                    autoFocus 
-                                    onClick={handleCloseEdit}     
-                                    color="primary"
-                                  >
-                                    Cancel
-                                  </Button>
-                                    <IconButton
-                                      className={classes.icon}
-                                      aria-label='update task'
-                                      onClick={handleCloseEdit}
-                                    >
-                                      <LibraryAddIcon />
-                                    </IconButton>
-                                  </DialogActions>
-                                </Dialog>
-
-                                {/* <ListItemAvatar>
-                                    <Avatar>
-                                    <IconButton aria-label='delete'>
-                                    <FolderIcon taskId={task._id} />
-                                    </IconButton>
-                                    </Avatar>
-                                  </ListItemAvatar> */}
                                 <ListItemText
                                   disableTypography
                                   className={classes.text}
-                                  textOverflow='ellipsis'
+                                  textoverflow='ellipsis'
                                   overflow='hidden'
-                                  primary={<Typography variant="body1" style={{color: 'white'}}>{task.name}</Typography>}
-                                  secondary={<Typography variant="body2" style={{color: '#bdbdbdde'}}>{secondary ? task.category : null}</Typography>}
+                                  primary={<Typography variant="body1">{task.name}</Typography>}
+                                  secondary={<Typography variant="body2">{secondary ? task.category : null}</Typography>}
                                 />
-                                <ListItemSecondaryAction>
+                                <div>
                                   <Tooltip title="Open Calendar" placement="right">
                                     <IconButton
                                       edge='end'
@@ -683,55 +501,7 @@ const ScheduleComponent = props => {
                                       <EventIcon className={classes.text} />
                                     </IconButton>
                                   </Tooltip>
-                                </ListItemSecondaryAction>
-
-                                <Dialog open={openCal} onClose={handleCloseCal}>
-                                  <DialogContent
-                                    className={classes.dialogStyle}
-                                  >
-                                    <DialogContentText>
-                                      Please select a date...
-                                    </DialogContentText>
-                                  </DialogContent>
-                                  <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                                    <CssBaseline />
-                                    {/* <Grid container justify='space-around'> */}
-                                    <KeyboardDatePicker
-                                      className={classes.text}
-                                      key={i}
-                                      margin='normal'
-                                      InputAdornmentProps={{
-                                        position: 'start',
-                                      }}
-                                      margin='normal'
-                                      id='date-picker-dialog'
-                                      format='MM/dd/yyyy'
-                                      // label='Select a date...'
-                                      value={selectedDate}
-                                      onClick={e => {
-                                        onClickHandler(e, task._id);
-                                      }}
-                                      onChange={e => {
-                                        onChangeDate(e, task._id);
-                                      }}
-                                      KeyboardButtonProps={{
-                                        'aria-label': 'change date',
-                                      }}
-                                    />
-                                    {/* </Grid> */}
-                                  </MuiPickersUtilsProvider>
-                                  <DialogActions>
-                                    <IconButton
-                                      className={classes.icon}
-                                      aria-label='add to calendar'
-                                      onClick={e => {
-                                        onPatchDateHandler(e, task._id, i);
-                                      }}
-                                    >
-                                      <LibraryAddIcon />
-                                    </IconButton>
-                                  </DialogActions>
-                                </Dialog>
+                                </div>
                               </ListItem>
                             )}
                           </Draggable>
@@ -746,8 +516,160 @@ const ScheduleComponent = props => {
               )}
             </Droppable>
           </DragDropContext>
-        </Grid>
-      </Grid>
+        {/* </Grid>
+      </Grid> */}
+
+      {/* First Dialog  */}
+      <Dialog
+        aria-labelledby='modal-edit-radio'
+        aria-describedby='choose-chunk-category'
+        className={classes.modal}
+        open={openEdit}
+        onClose={handleCloseEdit}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <DialogContent
+          className={classes.dialogStyle}
+        >
+          <Tooltip title="Unchunk" placement="top">
+            <IconButton 
+            className={classes.undo}
+            role='button'
+            onClick={e => {onPatchUnChunkHandler(e, task._id)}}
+            >
+              <Undo />
+            </IconButton>
+          </Tooltip>
+          <Typography variant='h5' className={classes.title}>
+              {task.name}
+          </Typography>
+          <TextField
+            id='dump'
+            label='Edit task here...'
+            multiline
+            rowsMax={2}
+            size='medium'
+            variant='outlined'
+            onChange={e => {
+              onChangeHandler(e);
+            }}
+            // onClick={e => {
+            //   onClickHandler(e, task._id);
+            // }}
+            onBlur={e => {
+              onPatchEditNameHandler(e, task._id);
+            }}
+            placeholder={task.name}
+            name='name'
+            value={task.name}
+          />
+          <FormControl
+            variant='standard'
+            className={classes.formControl}
+          >
+            <InputLabel
+              className={classes.textMain}
+              htmlFor='category'
+            >
+              Chunk...
+            </InputLabel>
+            <Select
+              native
+              className={classes.textMain}
+              value={task.category}
+              // onClick={e => {
+              //   onClickHandler(e, task._id);
+              // }}
+              onChange={e => {
+                onPatchEditChunkHandler(e, task._id);
+              }}
+              label='Chunk...'
+              name='category'
+            >
+              <option aria-label='None' value=''></option>
+              <option value='Home'>Home</option>
+              <option value='Health'>Health</option>
+              <option value='Family'>Family</option>
+              <option value='Friends'>Friends</option>
+              <option value='Finance'>Finance</option>
+              <option value='Creative'>
+                Creative
+              </option>
+              <option value='Spiritual'>
+                Spiritual
+              </option>
+              <option value='Social'>Social</option>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+        <Button 
+          autoFocus 
+          onClick={handleCloseEdit}
+          color="primary"
+        >
+          Cancel
+        </Button>
+          <IconButton
+            className={classes.icon}
+            aria-label='update task'
+            onClick={handleCloseEdit}
+          >
+            <LibraryAddIcon />
+          </IconButton>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={openCal} onClose={handleCloseCal}>
+        <DialogContent
+          className={classes.dialogStyle}
+        >
+          <DialogContentText>
+            Please select a date...
+          </DialogContentText>
+        </DialogContent>
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <CssBaseline />
+          {/* <Grid container justify='space-around'> */}
+          <KeyboardDatePicker
+            className={classes.text}
+            key={task.scheduledAt}
+            margin='normal'
+            InputAdornmentProps={{
+              position: 'start',
+            }}
+            margin='normal'
+            id='date-picker-dialog'
+            format='MM/dd/yyyy'
+            // label='Select a date...'
+            value={selectedDate}
+            onClick={e => {
+              onClickHandler(e, task._id);
+            }}
+            onChange={e => {
+              onChangeDate(e, task._id);
+            }}
+            KeyboardButtonProps={{
+              'aria-label': 'change date',
+            }}
+          />
+          {/* </Grid> */}
+        </MuiPickersUtilsProvider>
+        <DialogActions>
+          <IconButton
+            className={classes.icon}
+            aria-label='add to calendar'
+            onClick={e => {
+              onPatchDateHandler(e, task._id);
+            }}
+          >
+            <LibraryAddIcon />
+          </IconButton>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

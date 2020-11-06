@@ -77,6 +77,15 @@ const useStyles = makeStyles(theme => ({
   },
   text: {
     color: theme.palette.primary.contrastText,
+    display: 'inline-block',
+    overflowX: 'scroll',
+    overflowY: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    padding: 0,
+    margin: '0 5px 0 0',
+    width: '120px',
+    height: '100%',
   },
   subtitle: {
     margin: theme.spacing(-1, 0, 0),
@@ -100,28 +109,27 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(2, 4, 3),
   },
   list: {
-    margin: `${theme.spacing(1)}px auto`,
+    marginBottom: '60px',
+  },
+  listItem: {
+    margin: theme.spacing(1,0,0),
     maxHeight: '100%',
+    width: '100%',
     backgroundColor: theme.palette.primary.main,
-    // '&:hover': {
-    //   opacity: 0.9,
-    // },
+    '&:hover': {
+      backgroundColor: theme.palette.primary.dark,
+    },
     color: theme.palette.primary.contrastText,
     boxShadow: theme.shadows[10],
-    borderRadius: 10,
+    borderRadius: 3,
   },
   item: {
     margin: theme.spacing(1, 1),
     width: 250,
     color: theme.palette.primary.contrastText,
   },
-  icon: {
-    color: theme.palette.primary.main,
-  },
-  inline: {
-    display: 'inline',
-    overflow: 'hidden',
-    overflowWrap: 'ellipsis',
+  itemWhite: {
+    color: theme.palette.primary.contrastText,
   },
   formControl: {
     margin: theme.spacing(1),
@@ -130,6 +138,10 @@ const useStyles = makeStyles(theme => ({
   selectEmpty: {
     marginTop: theme.spacing(2),
   },
+  icon: {
+    fontSize: '18px',
+    color: theme.palette.primary.contrastText,
+  }
 }));
 
 const Fade = React.forwardRef(function Fade(props, ref) {
@@ -176,7 +188,7 @@ const DoComponent = () => {
   const [allTasks, setAllTasks] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [dense, setDense] = useState(false);
+  const [dense, setDense] = useState(true);
   const [secondary, setSecondary] = useState(true);
   const [openChunk, setOpenChunk] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
@@ -507,7 +519,7 @@ const DoComponent = () => {
         <CssBaseline />
         <Grid container justify='space-around'>
           <DatePicker
-            className={classes.text}
+            className={classes.itemWhite}
             margin='normal'
             id='Selected a date...'
             label='Date picker dialog'
@@ -554,6 +566,7 @@ const DoComponent = () => {
             >
               <div>
                 <List dense={dense}
+                className={classes.list}
                 >
                 {filteredTasks.map((task, i) =>
                   task.chunked && task.scheduled === true ? (
@@ -564,7 +577,7 @@ const DoComponent = () => {
                   >
                     {provided => (
                       <ListItem
-                      className={classes.list}
+                      className={classes.listItem}
                       ContainerProps={{ ref: provided.innerRef }}
                       id='Task'
                       {...provided.draggableProps}
@@ -575,8 +588,8 @@ const DoComponent = () => {
                       onClick={handleToggle(i)}
                     >
                     <ListItemIcon
-                      className={classes.text}
-                      onClick={e => onCompleteHandler(e,i,task._id)}
+                      className={classes.itemWhite}
+                      // onClick={e => onCompleteHandler(e,i,task._id)}
                     >
                       <Tooltip title="Check if completed" placement="left">
                         <CircleCheckbox
@@ -592,7 +605,7 @@ const DoComponent = () => {
                       <Tooltip title="Edit Task" placement="right">
                         <IconButton edge="end" aria-label="edit-task">
                           <EditIcon 
-                          className={classes.text}
+                          className={classes.icon}
                           type='button'
                           onClick={e => handleOpenEdit(e)} />
                         </IconButton>
@@ -695,8 +708,8 @@ const DoComponent = () => {
                       className={classes.text}
                       textOverflow='ellipsis'
                       overflow='hidden'
-                      primary={<Typography variant="body1" style={{color: 'white'}}>{task.name}</Typography>}
-                      secondary={<Typography variant="body2" style={{color: '#bdbdbdde'}}>{secondary ? task.category : null}</Typography>}
+                      primary={<Typography variant="body1" style={{color: 'white', fontSize:'15px', textDecoration: 'bold'}}>{task.name}</Typography>}
+                      secondary={<Typography variant="body2" style={{color: 'white', fontSize:'12px'}}>{secondary ? task.category : null}</Typography>}
                     />
                     <Dialog open={openCal} onClose={handleCloseCal}>
                       <DialogContent
@@ -742,7 +755,7 @@ const DoComponent = () => {
                       <DialogActions>
                       <Button 
                           autoFocus 
-                          onClick={handleCloseCal}     
+                          onClick={handleCloseCal}
                           color="primary"
                           >
                           Cancel
@@ -763,11 +776,13 @@ const DoComponent = () => {
                       <Tooltip title="Change Date" placement="right">
                         <Button
                           onClick={handleOpenCal}
-                          className={classes.text}
+                          className={classes.itemWhite}
                           >
-                          <Moment format='ll'>
-                            {task.scheduledAt}
-                          </Moment>
+                          <div>
+                            <Moment format='dddd' style={{fontSize: '15px', textTransform: 'capitalize', float: 'left'}}>
+                              {task.scheduledAt}
+                            </Moment>
+                          </div>
                         </Button>
                       </Tooltip>
                       }

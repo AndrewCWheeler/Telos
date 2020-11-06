@@ -16,9 +16,9 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
     maxWidth: 752,
     justifyContent: 'center',
-    margin: theme.spacing(4, 0),
     fontSize: 10,
     position: 'fixed',
+    bottom: 0,
   }
 }));
 

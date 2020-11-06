@@ -13,7 +13,7 @@ import ResponsiveDrawer from '../components/ResponsiveDrawer';
 
 export default () => {
   return (
-    <Container className='center'>
+    <div className='center'>
       <CssBaseline />
       <Router>
         <DumpAndChunk path='/' />
@@ -24,8 +24,8 @@ export default () => {
         <ChunkComponent path='/chunk' />
         <ResponsiveDrawer path='/drawer' />
       </Router>
-      <BottomNavComponent />
+      <BottomNavComponent position="fixed"/>
       <ResponsiveDrawer />
-    </Container>
+    </div>
   );
 };
