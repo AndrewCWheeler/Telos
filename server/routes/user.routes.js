@@ -21,6 +21,7 @@ module.exports = app => {
   app.get('/api/users', authenticate, UserController.getAll);
   app.get('/api/users/one', authenticate, UserController.oneUser);
   app.get('/api/user/tasks', authenticate, UserController.getAllUserTasks);
+  app.get('/api/user/categories', authenticate, UserController.getAllUserCategories);
   app.delete('/api/users/:id', authenticate, UserController.deleteUser);
   app.get(
     '/api/users/logout',

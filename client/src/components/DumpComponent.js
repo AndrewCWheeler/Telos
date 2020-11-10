@@ -21,7 +21,8 @@ const useStyles = makeStyles(theme => ({
   root: {
     '& .MuiTextField-root': {
       margin: theme.spacing(1),
-      width: '48ch',
+      width: '30ch',
+      color: theme.palette.text.primary,
     },
   },
   fab: {
@@ -109,25 +110,27 @@ const DumpComponent = props => {
     <Container className={classes.layout}>
       <CssBaseline />
       <form className={classes.root} noValidate autoComplete='off'>
-        <Grid container direction='row' justify='center' alignItems='center'>
-          <TextField
-            id='dump'
-            label='Dump...'
-            multiline
-            rowsMax={2}
-            size='medium'
-            variant='outlined'
-            onChange={e => {
-              onChangeHandler(e);
-            }}
-            onKeyPress={handleKeyDown}
-            name='name'
-            value={task.name}
-          />
-        </Grid>
-        <Grid container direction='row' justify='center' alignItems='center'>
+        <Grid className={classes.dump} container direction='row' justify='center' alignItems='center'>
           <Grid item>
-            <Tooltip title="Dump to list" placement="right">
+            <TextField
+              id='dump'
+              label='Dump...'
+              multiline
+              rowsMax={2}
+              size='medium'
+              variant='outlined'
+              onChange={e => {
+                onChangeHandler(e);
+              }}
+              onKeyPress={handleKeyDown}
+              name='name'
+              value={task.name}
+            />
+          </Grid>
+        </Grid>
+        <Grid className={classes.dump} container direction='row' justify='center' alignItems='center'>
+          <Grid item>
+            <Tooltip title="Add" placement="right">
               <IconButton
                 className={classes.fab}
                 onClick={e => {

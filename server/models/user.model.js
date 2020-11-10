@@ -30,6 +30,12 @@ const UserSchema = new mongoose.Schema(
         ref: 'Task',
       },
     ],
+    categories: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
+      },
+    ],
   },
   { timestamps: true }
 );

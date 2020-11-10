@@ -19,6 +19,10 @@ const useStyles = makeStyles(theme => ({
     fontSize: 10,
     position: 'fixed',
     bottom: 0,
+    color: theme.palette.text.primary,
+    '&$focused':{
+      color: theme.palette.text.secondary,
+    }
   }
 }));
 
@@ -34,8 +38,8 @@ const BottomNavComponent = (props) => {
       navigate('/schedule');
     } else if (newValue === 'do') {
       navigate('/do');
-    } else if (newValue === 'categories') {
-      navigate('/categories');
+    } else if (newValue === 'category') {
+      navigate('/category');
     }
   };
 
@@ -64,7 +68,7 @@ const BottomNavComponent = (props) => {
         />
         <BottomNavigationAction
           label='Categories'
-          value='categories'
+          value='category'
           icon={<SettingsIcon />}
         />
       </BottomNavigation>

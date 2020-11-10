@@ -4,6 +4,8 @@ import Button from '@material-ui/core/Button';
 import Backdrop from '@material-ui/core/Backdrop';
 import Checkbox from '@material-ui/core/Checkbox';
 import CircleCheckbox from './CircleCheckbox';
+import RadioButtonUncheckedRoundedIcon from '@material-ui/icons/RadioButtonUncheckedRounded';
+import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
 
 import Container from '@material-ui/core/Container';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -44,12 +46,13 @@ import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is required for IE 11 support
+import SimpleSnackbar from './SimpleSnackBar';
 
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
     maxWidth: 752,
-    flexGrow: 1,
+    // flexGrow: 1,
   },
   rootList: {
     width: '100%',
@@ -65,18 +68,19 @@ const useStyles = makeStyles(theme => ({
   dialogStyle: {
     backgroundColor: theme.palette.background.paper,
   },
-  demo: {
-    backgroundColor: theme.palette.background.paper,
-  },
   title: {
     margin: theme.spacing(4, 0, 2),
     color: theme.palette.primary.main,
   },
-  textMain: {
+  subtitle: {
+    margin: theme.spacing(-1, 0, 0),
     color: theme.palette.primary.main,
   },
+  // textMain: {
+  //   color: theme.palette.primary.main,
+  // },
   text: {
-    color: theme.palette.primary.contrastText,
+    color: theme.palette.text.primary,
     display: 'inline-block',
     overflowX: 'scroll',
     overflowY: 'hidden',
@@ -86,10 +90,6 @@ const useStyles = makeStyles(theme => ({
     margin: '0 5px 0 0',
     width: '120px',
     height: '100%',
-  },
-  subtitle: {
-    margin: theme.spacing(-1, 0, 0),
-    color: theme.palette.primary.main,
   },
   select: {
     color: theme.palette.primary.main,
@@ -109,27 +109,35 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(2, 4, 3),
   },
   list: {
-    marginBottom: '60px',
+    marginBottom: '90px',
   },
   listItem: {
-    margin: theme.spacing(1,0,0),
+    // margin: theme.spacing(1,0,0),
     maxHeight: '100%',
     width: '100%',
-    backgroundColor: theme.palette.primary.main,
-    '&:hover': {
-      backgroundColor: theme.palette.primary.dark,
-    },
-    color: theme.palette.primary.contrastText,
-    boxShadow: theme.shadows[10],
-    borderRadius: 3,
+    backgroundColor: theme.palette.background.default,
+    // color: theme.palette.primary.contrastText,
+    // boxShadow: theme.shadows[10],
+    // borderRadius: 3,
+    borderBottom: '1px solid #e1dfdc',
+    paddingLeft: 0,
   },
-  item: {
-    margin: theme.spacing(1, 1),
-    width: 250,
-    color: theme.palette.primary.contrastText,
+  primaryIconStyle: {
+    fontSize:24,
+    color: theme.palette.primary.main,
   },
-  itemWhite: {
-    color: theme.palette.primary.contrastText,
+  secondaryIconStyle: {
+    fontSize:24,
+    color: theme.palette.secondary.main,
+  },
+  neutralIconStyle: {
+    fontSize:'24px',
+    color: theme.palette.text.secondary,
+  },
+  inline: {
+    display: 'inline',
+    overflow: 'hidden',
+    overflowWrap: 'ellipsis',
   },
   formControl: {
     margin: theme.spacing(1),
@@ -138,41 +146,40 @@ const useStyles = makeStyles(theme => ({
   selectEmpty: {
     marginTop: theme.spacing(2),
   },
-  icon: {
-    fontSize: '18px',
-    color: theme.palette.primary.contrastText,
+  undo: {
+    color: theme.palette.secondary.main,
   }
 }));
 
-const Fade = React.forwardRef(function Fade(props, ref) {
-  const { in: open, children, onEnter, onExited, ...other } = props;
-  const style = useSpring({
-    from: { opacity: 0 },
-    to: { opacity: open ? 1 : 0 },
-    onStart: () => {
-      if (open && onEnter) {
-        onEnter();
-      }
-    },
-    onRest: () => {
-      if (!open && onExited) {
-        onExited();
-      }
-    },
-  });
+// const Fade = React.forwardRef(function Fade(props, ref) {
+//   const { in: open, children, onEnter, onExited, ...other } = props;
+//   const style = useSpring({
+//     from: { opacity: 0 },
+//     to: { opacity: open ? 1 : 0 },
+//     onStart: () => {
+//       if (open && onEnter) {
+//         onEnter();
+//       }
+//     },
+//     onRest: () => {
+//       if (!open && onExited) {
+//         onExited();
+//       }
+//     },
+//   });
 
-  Fade.propTypes = {
-    children: PropTypes.element,
-    in: PropTypes.bool.isRequired,
-    onEnter: PropTypes.func,
-    onExited: PropTypes.func,
-  };
-  return (
-    <animated.div ref={ref} style={style} {...other}>
-      {children}
-    </animated.div>
-  );
-});
+//   Fade.propTypes = {
+//     children: PropTypes.element,
+//     in: PropTypes.bool.isRequired,
+//     onEnter: PropTypes.func,
+//     onExited: PropTypes.func,
+//   };
+//   return (
+//     <animated.div ref={ref} style={style} {...other}>
+//       {children}
+//     </animated.div>
+//   );
+// });
 
 const DoComponent = () => {
   const [load, setLoad] = useState(0);
@@ -196,9 +203,25 @@ const DoComponent = () => {
   const [dateParameter, setDateParameter] = useState(new Date());
   const [sessionUserId, setSessionUserId] = useState('');
   const [openCal, setOpenCal] = useState(false);
-  const [openEditTask, setOpenEditTask] = useState(false);
+  // const [openEditTask, setOpenEditTask] = useState(false);
   // const [filtered, setFiltered] = useState(false);
   const [checked, setChecked] = useState([0]);
+  const [openSnack, setOpenSnack] = useState(false);
+  const [snack, setSnack] = useState('');
+  
+
+  const handleOpenSnackBar = (snack) => {
+    setOpenSnack(true);
+    setSnack(snack); 
+  };
+
+  const handleCloseSnackBar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpenSnack(false);
+  };
 
   const handleToggle = (i) => () => {
     const currentIndex = checked.indexOf(i);
@@ -209,30 +232,33 @@ const DoComponent = () => {
       newChecked.splice(currentIndex, 1);
     }
     setChecked(newChecked);
+    console.log("handleToggled()!!")
   }
 
-  const handleOpenCal = () => {
+  const handleOpenCal = (e, id) => {
+    onClickHandler(e, id);
     setOpenCal(true);
   };
   const handleCloseCal = () => {
     setOpenCal(false);
   };
 
-  const handleEditTask = () => {
-    setOpenEditTask(true);
-  };
-  const handleCloseEditTask = () => {
-    setOpenEditTask(false);
-  };
+  // const handleEditTask = () => {
+  //   setOpenEditTask(true);
+  // };
+  // const handleCloseEditTask = () => {
+  //   setOpenEditTask(false);
+  // };
 
-  const handleOpenChunk = () => {
-    setOpenChunk(true);
-  };
-  const handleCloseChunk = () => {
-    setOpenChunk(false);
-  };
+  // const handleOpenChunk = () => {
+  //   setOpenChunk(true);
+  // };
+  // const handleCloseChunk = () => {
+  //   setOpenChunk(false);
+  // };
   
-  const handleOpenEdit = () => {
+  const handleOpenEdit = (e, id) => {
+    onClickHandler(e, id);
     setOpenEdit(true);
   };
   const handleCloseEdit = () => {
@@ -328,15 +354,6 @@ const DoComponent = () => {
         withCredentials: true,
       })
       .then(res => {
-        setTask({
-          name: '',
-          category: '',
-          chunked: false,
-          scheduled: false,
-          scheduledAt: '',
-          completed: false,
-          owner: '',
-        });
         let count = load;
         if (count >= 0) {
           count++;
@@ -345,82 +362,74 @@ const DoComponent = () => {
       })
       .catch(err => console.log(err));
   };
-  const onPatchEditChunkHandler = (e, i) => {
+  const onPatchEditChunkHandler = (e, id) => {
     task.category = e.target.value;
     task.chunked = true;
     axios
-      .patch('http://localhost:8000/api/tasks/' + i, task, {
+      .patch('http://localhost:8000/api/tasks/' + id, task, {
         withCredentials: true,
       })
       .then(res => {
-        setTask({
-          name: '',
-          category: '',
-          chunked: false,
-          scheduled: false,
-          scheduledAt: '',
-          completed: false,
-          owner: '',
-        });
-        let count = load;
-        if (count >= 0) {
-          count++;
-          setLoad(count);
+        if (res.data.message === 'success'){
+          // removeFromDom(id);
+          handleCloseEdit();
         }
+        // let count = load;
+        // if (count >= 0) {
+        //   count++;
+        //   setLoad(count);
+        // }
       })
       .catch(err => console.log(err));
   };
 
-  const onPatchHandler = (e, i) => {
-    e.preventDefault();
-    if (task.chunked === true) {
-      axios
-        .patch('http://localhost:8000/api/tasks/' + i, task, {
-          withCredentials: true,
-        })
-        .then(res => {
-          let count = load;
-          if (count >= 0) {
-            count++;
-            setLoad(count);
-          }
-        })
-        .catch(err => console.log(err));
-    }
-  };
+  // const onPatchHandler = (e, i) => {
+  //   e.preventDefault();
+  //   if (task.chunked === true) {
+  //     axios
+  //       .patch('http://localhost:8000/api/tasks/' + i, task, {
+  //         withCredentials: true,
+  //       })
+  //       .then(res => {
+  //         let count = load;
+  //         if (count >= 0) {
+  //           count++;
+  //           setLoad(count);
+  //         }
+  //       })
+  //       .catch(err => console.log(err));
+  //   }
+  // };
 
-  const onSelectHandler = e => {
-    setSelectedCategory(e.target.value);
-  };
+  // const onSelectHandler = e => {
+  //   setSelectedCategory(e.target.value);
+  // };
 
   const onChangeDate = (date, id) => {
     setSelectedDate(date);
     task.scheduledAt = date;
   };
 
-  const onPatchDateHandler = (date, id) => {
+  const onPatchDateHandler = (e, id, snack) => {
     // setSelectedDate(date);
-    // task.scheduledAt = date;
+    task.scheduledAt = selectedDate;
     task.scheduled = true;
     axios
       .patch(`http://localhost:8000/api/tasks/${id}`, task, {
         withCredentials: true,
       })
       .then(res => {
-        setTask({
-          name: '',
-          category: '',
-          chunked: false,
-          scheduled: false,
-          scheduledAt: '',
-          completed: false,
-          owner: '',
-        });
-        let count = load;
-        if (count >= 0) {
-          count++;
-          setLoad(count);
-        }
+        if(res.data.message = 'success') {
+          console.log(res.data.results);
+          removeFromDom(id);
+          handleCloseCal();
+          handleOpenSnackBar(snack);
+        };
+        // let count = load;
+        // if (count >= 0) {
+        //   count++;
+        //   setLoad(count);
+        // }
       })
       .catch(err => console.log(err));
   };
@@ -446,8 +455,8 @@ const DoComponent = () => {
     setAllTasks(items);
   };
 
-  const onCompleteHandler = (e,i,id) => {
-    handleToggle(i);
+  const onCompleteHandler = (e,id,snack) => {
+    // handleToggle(i);
     axios.get(`http://localhost:8000/api/tasks/${id}`, {withCredentials: true})
     .then(res => { 
       let completedTask = {};
@@ -461,6 +470,7 @@ const DoComponent = () => {
         if (res.data.message === 'success'){
           console.log(res.data.message);
           removeFromDom(id);
+          handleOpenSnackBar(snack);
         }
       }).catch(err=> console.log(err));
     }).catch(err => console.log(err));
@@ -487,9 +497,9 @@ const DoComponent = () => {
     // .catch(err => console.log(err));
   };
 
-  const toUpperCaseFilter = d => {
-    return d.toUpperCase();
-  };
+  // const toUpperCaseFilter = d => {
+  //   return d.toUpperCase();
+  // };
 
   const handleDateParameter = date => {
     console.log(date);
@@ -502,6 +512,7 @@ const DoComponent = () => {
   return (
     <Container className={classes.root}>
       <CssBaseline />
+      <div style={{marginTop:'90px'}}>
       {/* <Typography
         variant='h2'
         // component='h2'
@@ -509,17 +520,22 @@ const DoComponent = () => {
       >
         {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
       </Typography> */}
-      <div style={{marginTop:'100px'}}>
-        <h1 className={classes.title}>Do</h1>
-      </div>
-      <Typography variant='h6' className={classes.title}>
-        Select Date to Sort and then DO it!
+      <Typography 
+      className={classes.title}
+      variant='h5'>
+        Do
       </Typography>
+      <Typography
+      className={classes.subtitle} 
+      variant='subtitle1'>
+        Please select a date:
+      </Typography>
+      </div>
       <MuiPickersUtilsProvider utils={DateFnsUtils}>
         <CssBaseline />
         <Grid container justify='space-around'>
           <DatePicker
-            className={classes.itemWhite}
+            className={classes.primaryIconStyle}
             margin='normal'
             id='Selected a date...'
             label='Date picker dialog'
@@ -534,7 +550,7 @@ const DoComponent = () => {
           />
         </Grid>
       </MuiPickersUtilsProvider>
-      <Grid container direction='row' justify='center'>
+      {/* <Grid container direction='row' justify='center'>
         <FormGroup row>
           <FormControlLabel
             control={
@@ -555,7 +571,7 @@ const DoComponent = () => {
             label='Enable secondary text'
           />
         </FormGroup>
-      </Grid>
+      </Grid> */}
 
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId='droppable'>
@@ -565,11 +581,13 @@ const DoComponent = () => {
               {...provided.droppableProps}
             >
               <div>
-                <List dense={dense}
+                <List 
+                dense
+                secondary
                 className={classes.list}
                 >
                 {filteredTasks.map((task, i) =>
-                  task.chunked && task.scheduled === true ? (
+                  task.chunked && task.scheduled ? (
                   <Draggable
                     draggableId={task._id}
                     index={i}
@@ -584,193 +602,40 @@ const DoComponent = () => {
                       {...provided.dragHandleProps}
                       innerRef={provided.innerRef}
                       key={i}
-                      role={undefined}
-                      onClick={handleToggle(i)}
+                      // role={undefined}
+                      // onClick={handleToggle(i)}
                     >
                     <ListItemIcon
-                      className={classes.itemWhite}
-                      // onClick={e => onCompleteHandler(e,i,task._id)}
+                      // className={classes.primaryIconStyle}
+                      onClick={e => onCompleteHandler(e,task._id,"Task Completed!")}
                     >
-                      <Tooltip title="Check if completed" placement="left">
-                        <CircleCheckbox
-                        edge='start'
-                        // checked={checked.indexOf(i) !== -1}
-                        tabIndex={-1}
-                        disableRipple
-                        // inputProps={{ 'aria-labeledby': labelId }}
-                        />
-                      </Tooltip>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            icon={<RadioButtonUncheckedRoundedIcon 
+                              fontSize="small" 
+                              color="primary"
+                              />}
+                            checkedIcon={<CheckCircleRoundedIcon 
+                              fontSize="small"
+                              color="primary"
+                              />}
+                            name="completed"
+                          />
+                        }
+                        label=""
+                      />
                     </ListItemIcon>
-                    <ListItemSecondaryAction>
-                      <Tooltip title="Edit Task" placement="right">
-                        <IconButton edge="end" aria-label="edit-task">
-                          <EditIcon 
-                          className={classes.icon}
-                          type='button'
-                          onClick={e => handleOpenEdit(e)} />
-                        </IconButton>
-                      </Tooltip>
-                    </ListItemSecondaryAction>
-                    <Dialog
-                      aria-labelledby='modal-edit-select'
-                      aria-describedby='choose-edit-category'
-                      className={classes.modal}
-                      open={openEdit}
-                      onClose={handleCloseEdit}
-                      closeAfterTransition
-                      BackdropComponent={Backdrop}
-                      BackdropProps={{
-                        timeout: 500,
-                      }}
-                    >
-                      <DialogContent
-                        className={classes.dialogStyle}
-                      >
-                        <Typography className={classes.title}>
-                          <h2>
-                            {task.name}
-                          </h2>
-                        </Typography>
-                        <TextField
-                          id='dump'
-                          label='Edit task here...'
-                          multiline
-                          rowsMax={2}
-                          size='medium'
-                          variant='outlined'
-                          onChange={e => {
-                            onChangeHandler(e);
-                          }}
-                          onClick={e => {
-                            onClickHandler(e, task._id);
-                          }}
-                          onBlur={e => {
-                            onPatchEditNameHandler(e, task._id);
-                          }}
-                          placeholder={task.name}
-                          name='name'
-                          value={selectedIndex[i]}
-                        />
-                        <FormControl
-                          variant='standard'
-                          className={classes.formControl}
-                        >
-                          <InputLabel
-                            className={classes.textMain}
-                            htmlFor='category'
-                          >
-                              Chunk...
-                          </InputLabel>
-                          <Select
-                            native
-                            className={classes.textMain}
-                            value={selectedIndex[i]}
-                            onClick={e => {
-                              onClickHandler(e, task._id);
-                            }}
-                            onChange={e => {
-                              onPatchEditChunkHandler(e, task._id);
-                            }}
-                            label='Chunk...'
-                            name='category'
-                          >
-                            <option aria-label='None' value='' />
-                            <option value='Home'>Home</option>
-                            <option value='Health'>Health</option>
-                            <option value='Family'>Family</option>
-                            <option value='Friends'>Friends</option>
-                            <option value='Finance'>Finance</option>
-                            <option value='Creative'>Creative</option>
-                            <option value='Spiritual'>Spiritual</option>
-                            <option value='Social'>Social</option>
-                          </Select>
-                        </FormControl>
-                      </DialogContent>
-                      <DialogActions>
-                        <Button 
-                          autoFocus 
-                          onClick={handleCloseEdit}     
-                          color="primary"
-                        >
-                          Cancel
-                        </Button>
-                        <IconButton
-                          className={classes.icon}
-                          aria-label='update task'
-                          onClick={handleCloseEdit}
-                        >
-                          <LibraryAddIcon />
-                        </IconButton>
-                      </DialogActions>
-                    </Dialog>
+                    
                     <ListItemText
                       disableTypography
                       className={classes.text}
                       textOverflow='ellipsis'
                       overflow='hidden'
-                      primary={<Typography variant="body1" style={{color: 'white', fontSize:'15px', textDecoration: 'bold'}}>{task.name}</Typography>}
-                      secondary={<Typography variant="body2" style={{color: 'white', fontSize:'12px'}}>{secondary ? task.category : null}</Typography>}
+                      primary={<Typography style={{fontSize:15}}>{task.name}</Typography>}
+                      secondary={<Typography style={{fontSize:12}}>{secondary ? task.category : null}</Typography>}
                     />
-                    <Dialog open={openCal} onClose={handleCloseCal}>
-                      <DialogContent
-                        className={classes.dialogStyle}
-                      >
-                        <DialogContentText>
-                          Please select a date...
-                        </DialogContentText>
-                      </DialogContent>
-                      <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                        <CssBaseline />
-                        {/* <Grid container justify='space-around'> */}
-                        <KeyboardDatePicker
-                          color="primary"
-                          key={i}
-                          margin='normal'
-                          InputAdornmentProps={{
-                            position: 'start',
-                          }}
-                          margin='normal'
-                          id='date-picker-dialog'
-                          format='MM/dd/yyyy'
-                          // label='Select a date...'
-                          value={selectedDate}
-                          onClick={e => {
-                            onClickHandler(e, task._id);
-                          }}
-                          onChange={e => {
-                            onChangeDate(e, task._id);
-                          }}
-                          KeyboardButtonProps={{
-                            'aria-label': 'change date',
-                          }}
-                        />
-                        {/* </Grid> */}
-                      </MuiPickersUtilsProvider>
-                      {/* <IconButton edge='end' aria-label='delete'>
-                        <DeleteComponent
-                          taskId={task._id}
-                          successCallback={() => removeFromDom(task._id)}
-                        />
-                      </IconButton> */}
-                      <DialogActions>
-                      <Button 
-                          autoFocus 
-                          onClick={handleCloseCal}
-                          color="primary"
-                          >
-                          Cancel
-                        </Button>
-                        <IconButton
-                          className={classes.icon}
-                          aria-label='add to calendar'
-                          onClick={e => {
-                            onPatchDateHandler(e, task._id, i);
-                          }}
-                        >
-                          <LibraryAddIcon />
-                        </IconButton>
-                      </DialogActions>
-                    </Dialog>
+                    
                     <ListItemText
                       primary={
                       <Tooltip title="Change Date" placement="right">
@@ -787,6 +652,20 @@ const DoComponent = () => {
                       </Tooltip>
                       }
                     />
+                    <div>
+                      <Tooltip title="Edit Task" placement="right">
+                        <IconButton 
+                        edge="end" 
+                        aria-label="edit-task"
+                        type='button'
+                        onClick={e => handleOpenEdit(e, task._id)} 
+                        >
+                          <EditIcon 
+                          className={classes.neutralIconStyle}
+                          />
+                        </IconButton>
+                      </Tooltip>
+                    </div>
                   </ListItem>
                     )}
                 </Draggable>
@@ -801,6 +680,169 @@ const DoComponent = () => {
           )}
         </Droppable>
       </DragDropContext>
+
+      {/* Edit Task Dialog */}
+      <Dialog
+        aria-labelledby='modal-edit-select'
+        aria-describedby='choose-edit-category'
+        className={classes.modal}
+        open={openEdit}
+        onClose={handleCloseEdit}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <DialogContent
+          className={classes.dialogStyle}
+        >
+          <Typography variant='h5' className={classes.title}>
+              {task.name}
+          </Typography>
+          <TextField
+            id='dump'
+            label='Edit task here...'
+            multiline
+            rowsMax={2}
+            size='medium'
+            variant='outlined'
+            onChange={e => {
+              onChangeHandler(e);
+            }}
+            // onClick={e => {
+            //   onClickHandler(e, task._id);
+            // }}
+            onBlur={e => {
+              onPatchEditNameHandler(e, task._id);
+            }}
+            // placeholder={task.name}
+            name='name'
+            value={task.name}
+          />
+          <FormControl
+            variant='standard'
+            className={classes.formControl}
+          >
+            <InputLabel
+              className={classes.textMain}
+              htmlFor='category'
+            >
+                Chunk...
+            </InputLabel>
+            <Select
+              native
+              className={classes.textMain}
+              value={task.category}
+              // onClick={e => {
+              //   onClickHandler(e, task._id);
+              // }}
+              onChange={e => {
+                onPatchEditChunkHandler(e, task._id);
+              }}
+              label='Chunk...'
+              name='category'
+            >
+              <option aria-label='None' value='' />
+              <option value='Home'>Home</option>
+              <option value='Health'>Health</option>
+              <option value='Family'>Family</option>
+              <option value='Friends'>Friends</option>
+              <option value='Finance'>Finance</option>
+              <option value='Creative'>Creative</option>
+              <option value='Spiritual'>Spiritual</option>
+              <option value='Social'>Social</option>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            autoFocus 
+            onClick={handleCloseEdit}     
+            color="primary"
+          >
+            Cancel
+          </Button>
+          <IconButton
+            // className={classes.icon}
+            aria-label='update task'
+            onClick={handleCloseEdit}
+            color="primary"
+          >
+            <LibraryAddIcon />
+          </IconButton>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={openCal} onClose={handleCloseCal}>
+        <DialogContent
+          className={classes.dialogStyle}
+        >
+          <Typography variant='h5' className={classes.title}>
+              {task.name}
+          </Typography>
+          <DialogContentText
+          color="secondary"
+          >
+            Please select a date...
+          </DialogContentText>
+        </DialogContent>
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <CssBaseline />
+          {/* <Grid container justify='space-around'> */}
+          <KeyboardDatePicker
+            color="primary"
+            key={task.scheduledAt}
+            margin='normal'
+            InputAdornmentProps={{
+              position: 'start',
+            }}
+            margin='normal'
+            id='date-picker-dialog'
+            format='MM/dd/yyyy'
+            // label='Select a date...'
+            value={selectedDate}
+            onClick={e => {
+              onClickHandler(e, task._id);
+            }}
+            onChange={e => {
+              onChangeDate(e, task._id);
+            }}
+            KeyboardButtonProps={{
+              'aria-label': 'change date',
+            }}
+          />
+          {/* </Grid> */}
+        </MuiPickersUtilsProvider>
+        {/* <IconButton edge='end' aria-label='delete'>
+          <DeleteComponent
+            taskId={task._id}
+            successCallback={() => removeFromDom(task._id)}
+          />
+        </IconButton> */}
+        <DialogActions>
+        <Button 
+            autoFocus 
+            onClick={handleCloseCal}
+            color="primary"
+            >
+            Cancel
+          </Button>
+          <IconButton
+            // className={classes.icon}
+            aria-label='add to calendar'
+            onClick={e => {
+              onPatchDateHandler(e, task._id, "Date Changed!");
+            }}
+          >
+            <LibraryAddIcon />
+          </IconButton>
+        </DialogActions>
+      </Dialog>
+      <SimpleSnackbar 
+      snack={snack}
+      openSnack={openSnack}
+      handleOpenSnackBar={handleOpenSnackBar}
+      handleCloseSnackBar={handleCloseSnackBar} />
     </Container>
   );
 };

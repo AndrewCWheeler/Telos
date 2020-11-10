@@ -63,11 +63,12 @@ import { RootRef, FormLabel, Tooltip, ListItemSecondaryAction, ListItemIcon } fr
 import Moment from 'react-moment';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup, { useRadioGroup } from '@material-ui/core/RadioGroup';
+import SimpleSnackbar from './SimpleSnackBar';
 
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
-    maxWidth: 752,
+    maxWidth: 840,
     // flexGrow: 1,
   },
   modal: {
@@ -83,11 +84,11 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.primary.main,
   },
   textMain: {
-    color: theme.palette.primary.main,
+    maring: theme.spacing(2),
   },
-  text: {
-    color: theme.palette.primary.contrastText,
-  },
+  // text: {
+  //   color: theme.palette.primary.contrastText,
+  // },
   subtitle: {
     margin: theme.spacing(-1, 0, 0),
     color: theme.palette.primary.main,
@@ -97,27 +98,30 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.primary.main,
   },
   list: {
-    marginBottom: '60px',
+    marginBottom: '90px',
   },
   listItem: {
-    margin: theme.spacing(1,0,0),
+    // margin: theme.spacing(1,0,0),
     maxHeight: '100%',
     width: '100%',
-    backgroundColor: theme.palette.primary.main,
-    '&:hover': {
-      backgroundColor: theme.palette.primary.dark,
-    },
-    color: theme.palette.primary.contrastText,
-    boxShadow: theme.shadows[10],
-    borderRadius: 3,
+    backgroundColor: theme.palette.background.default,
+    // color: theme.palette.primary.contrastText,
+    // boxShadow: theme.shadows[10],
+    // borderRadius: 3,
+    borderBottom: '1px solid #e1dfdc',
+    paddingLeft: 0,
   },
-  item: {
-    margin: theme.spacing(1, 1),
-    width: 250,
+  primaryIconStyle: {
+    fontSize:24,
     color: theme.palette.primary.main,
   },
-  icon: {
-    color: theme.palette.primary.main,
+  secondaryIconStyle: {
+    fontSize:24,
+    color: theme.palette.secondary.main,
+  },
+  neutralIconStyle: {
+    fontSize:'24px',
+    color: theme.palette.text.secondary,
   },
   inline: {
     display: 'inline',
@@ -156,18 +160,39 @@ const ScheduleComponent = props => {
   const [sessionUserId, setSessionUserId] = useState('');
   const [openCal, setOpenCal] = useState(false);
   const [openEditTask, setOpenEditTask] = useState(false);
-  const handleOpenCal = () => {
-    setOpenCal(true);
+  const [openSnack, setOpenSnack] = useState(false);
+  const [snack, setSnack] = useState('');
+  
+
+  const handleOpenSnackBar = (snack) => {
+    setOpenSnack(true);
+    setSnack(snack); 
   };
+
+  const handleCloseSnackBar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpenSnack(false);
+  };
+  
+  const handleOpenCal = (e, id) => {
+    // let now = moment();
+    onClickHandler(e, id);
+    setOpenCal(true);
+    // setSelectedDate(now);
+  };
+
   const handleCloseCal = () => {
     setOpenCal(false);
   };
-  const handleEditTask = () => {
-    setOpenEditTask(true);
-  };
-  const handleCloseEditTask = () => {
-    setOpenEditTask(false);
-  };
+  // const handleEditTask = () => {
+  //   setOpenEditTask(true);
+  // };
+  // const handleCloseEditTask = () => {
+  //   setOpenEditTask(false);
+  // };
   const [openEdit, setOpenEdit] = useState(false);
 
   const handleOpenEdit = (e, id) => {
@@ -190,7 +215,6 @@ const ScheduleComponent = props => {
         setSessionUserId(response.data.results._id);
       })
       .catch(error => {
-        console.log(error);
       });
     let two = 'http://localhost:8000/api/tasks/user';
     const requestTwo = axios.get(two, { withCredentials: true });
@@ -199,20 +223,16 @@ const ScheduleComponent = props => {
         setAllTasks(response.data.results);
       })
       .catch(error => {
-        console.log(error);
       });
     axios
       .all([requestOne, requestTwo])
       .then(
         axios.spread((...responses) => {
           const responseOne = responses[0];
-          console.log(responseOne);
           const responseTwo = responses[1];
-          console.log(responseTwo);
         })
       )
       .catch(errors => {
-        console.log(errors);
         navigate('/signup');
       });
   }, [load]);
@@ -257,13 +277,11 @@ const ScheduleComponent = props => {
         withCredentials: true,
       })
       .then(res => {
-        console.log(res.data.results);
         let count = load;
         if (count >= 0) {
           count++;
           setLoad(count);
         }
-        console.log(load);
       })
       .catch(err => console.log(err));
   };
@@ -276,7 +294,6 @@ const ScheduleComponent = props => {
         withCredentials: true,
       })
       .then(res => {
-        console.log(res.data.results);
         if (res.data.message === 'success'){
           removeFromDom(id);
           handleCloseEdit();
@@ -324,32 +341,29 @@ const ScheduleComponent = props => {
     setSelectedDate(date);
     task.scheduledAt = date;
   };
+  console.log(task); 
 
-  const onPatchDateHandler = (date, id) => {
+  const onPatchDateHandler = (e, id) => {
     // setSelectedDate(date);
-    // task.scheduledAt = date;
-    handleCloseEdit();
+    task.scheduledAt = selectedDate;
     task.scheduled = true;
     axios
       .patch(`http://localhost:8000/api/tasks/${id}`, task, {
         withCredentials: true,
       })
       .then(res => {
-        setTask({
-          name: '',
-          category: '',
-          chunked: false,
-          scheduled: false,
-          scheduledAt: '',
-          completed: false,
-          owner: '',
-        });
-        let count = load;
-        if (count >= 0) {
-          count++;
-          setLoad(count);
-        }
-        console.log(load);
+        if(res.data.message = 'success') {
+          console.log(res.data.results);
+          removeFromDom(id);
+          handleCloseCal();
+          handleOpenSnackBar("Task scheduled!");
+        };
+        // let count = load;
+        // if (count >= 0) {
+        //   count++;
+        //   setLoad(count);
+        // }
+        // console.log(load);
       })
       .catch(err => console.log(err));
   };
@@ -375,13 +389,14 @@ const ScheduleComponent = props => {
     setAllTasks(items);
   };
 
-  const toUpperCaseFilter = d => {
-    return d.toUpperCase();
-  };
+  // const toUpperCaseFilter = d => {
+  //   return d.toUpperCase();
+  // };
 
   return (
     <Container className={classes.root}>
       <CssBaseline />
+      <div style={{marginTop:'90px'}}>
       {/* <Typography
         variant='h2'
         // component='h2'
@@ -389,14 +404,21 @@ const ScheduleComponent = props => {
       >
         {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
       </Typography> */}
-      <div style={{paddingTop:'60px'}}>
-        <h1 className={classes.title}>Schedule</h1>
+      <Typography
+      className={classes.title} 
+      variant='h5'>
+        Schedule
+      </Typography>
+      <Typography
+      className={classes.subtitle} 
+      variant='subtitle1'>
+        Please select a category:
+      </Typography>
       </div>
       {/* <DatePicker selected={date} onChange={onDateChange} /> */}
       
       {/* <Grid container spacing={1}>
         <Grid item xs={12}> */}
-          <h3 className={classes.title}>Select Category:</h3>
           <FormControl variant='standard' className={classes.formControl}>
             <InputLabel id="select-category">Category</InputLabel>
             <Select
@@ -421,7 +443,7 @@ const ScheduleComponent = props => {
               <MenuItem value='Social'>Social</MenuItem>
             </Select>
           </FormControl>
-          <Grid container direction='row' justify='center' style={{marginTop:25}}>
+          {/* <Grid container direction='row' justify='center' style={{marginTop:25}}>
             <FormGroup row>
               <FormControlLabel
                 control={
@@ -442,7 +464,7 @@ const ScheduleComponent = props => {
                 label='Enable secondary text'
               />
             </FormGroup>
-          </Grid>
+          </Grid> */}
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId='droppable'>
               {provided => (
@@ -451,12 +473,12 @@ const ScheduleComponent = props => {
                   {...provided.droppableProps}
                 >
                   <div>
-                    <List dense={dense}
+                    <List dense secondary
                     className={classes.list}>
                       {allTasks.map((task, i) =>
                         selectedCategory === task.category &&
                         task.chunked &&
-                        task.scheduled !== true ? (
+                        !task.scheduled ? (
                           <Draggable
                             draggableId={task._id}
                             index={i}
@@ -471,36 +493,39 @@ const ScheduleComponent = props => {
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
                                 innerRef={provided.innerRef}
+                                key={i}
                               >
-                                <Tooltip title="Edit Task" placement="left">
-                                  <IconButton
-                                    type='button'
-                                    edge='start'
-                                    onClick={e => {
-                                      handleOpenEdit(e, task._id);
-                                    }}
-                                  >
-                                    <EditIcon className={classes.text} />
-                                  </IconButton>
+                                <Tooltip title="Open Calendar" placement="left">
+                                    <IconButton
+                                      // edge='start'
+                                      type='button'
+                                      onClick={e => {handleOpenCal(e, task._id)}}
+                                    >
+                                      <EventIcon className={classes.primaryIconStyle} />
+                                    </IconButton>
                                 </Tooltip>
                                 <ListItemText
                                   disableTypography
                                   className={classes.text}
                                   textoverflow='ellipsis'
                                   overflow='hidden'
-                                  primary={<Typography variant="body1">{task.name}</Typography>}
-                                  secondary={<Typography variant="body2">{secondary ? task.category : null}</Typography>}
+                                  primary={<Typography style={{fontSize:15}}>{task.name}</Typography>}
+                                  secondary={<Typography style={{fontSize:12}}>{secondary ? task.category : null}</Typography>}
                                 />
                                 <div>
-                                  <Tooltip title="Open Calendar" placement="right">
-                                    <IconButton
-                                      edge='end'
-                                      type='button'
-                                      onClick={handleOpenCal}
-                                    >
-                                      <EventIcon className={classes.text} />
-                                    </IconButton>
-                                  </Tooltip>
+                                <Tooltip title="Edit Task" placement="right">
+                                  <IconButton
+                                    type='button'
+                                    edge='end'
+                                    onClick={e => {
+                                      handleOpenEdit(e, task._id);
+                                    }}
+                                  >
+                                    <EditIcon 
+                                    className={classes.neutralIconStyle}
+                                    />
+                                  </IconButton>
+                                </Tooltip>
                                 </div>
                               </ListItem>
                             )}
@@ -519,10 +544,10 @@ const ScheduleComponent = props => {
         {/* </Grid>
       </Grid> */}
 
-      {/* First Dialog  */}
+      {/* Edit Task Dialog  */}
       <Dialog
-        aria-labelledby='modal-edit-radio'
-        aria-describedby='choose-chunk-category'
+        aria-labelledby='modal-edit-select'
+        aria-describedby='choose-edit-category'
         className={classes.modal}
         open={openEdit}
         onClose={handleCloseEdit}
@@ -596,12 +621,8 @@ const ScheduleComponent = props => {
               <option value='Family'>Family</option>
               <option value='Friends'>Friends</option>
               <option value='Finance'>Finance</option>
-              <option value='Creative'>
-                Creative
-              </option>
-              <option value='Spiritual'>
-                Spiritual
-              </option>
+              <option value='Creative'>Creative</option>
+              <option value='Spiritual'>Spiritual</option>
               <option value='Social'>Social</option>
             </Select>
           </FormControl>
@@ -615,9 +636,10 @@ const ScheduleComponent = props => {
           Cancel
         </Button>
           <IconButton
-            className={classes.icon}
+            // className={classes.icon}
             aria-label='update task'
             onClick={handleCloseEdit}
+            color="primary"
           >
             <LibraryAddIcon />
           </IconButton>
@@ -627,15 +649,18 @@ const ScheduleComponent = props => {
         <DialogContent
           className={classes.dialogStyle}
         >
-          <DialogContentText>
+          <Typography variant='h5' className={classes.title}>
+              {task.name}
+          </Typography>
+          <DialogContentText 
+          color="secondary">
             Please select a date...
           </DialogContentText>
         </DialogContent>
-        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+        <MuiPickersUtilsProvider color="primary" utils={DateFnsUtils}>
           <CssBaseline />
           {/* <Grid container justify='space-around'> */}
           <KeyboardDatePicker
-            className={classes.text}
             key={task.scheduledAt}
             margin='normal'
             InputAdornmentProps={{
@@ -659,17 +684,30 @@ const ScheduleComponent = props => {
           {/* </Grid> */}
         </MuiPickersUtilsProvider>
         <DialogActions>
+          <Button
+            autoFocus
+            onClick={handleCloseCal}
+            color="primary"
+            >
+            Cancel
+          </Button>
           <IconButton
-            className={classes.icon}
+            // className={classes.icon}
             aria-label='add to calendar'
             onClick={e => {
               onPatchDateHandler(e, task._id);
             }}
+            color="primary"
           >
             <LibraryAddIcon />
           </IconButton>
         </DialogActions>
       </Dialog>
+      <SimpleSnackbar 
+      snack={snack}
+      openSnack={openSnack}
+      handleOpenSnackBar={handleOpenSnackBar}
+      handleCloseSnackBar={handleCloseSnackBar} />
     </Container>
   );
 };

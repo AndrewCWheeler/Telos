@@ -4,13 +4,13 @@ import { navigate } from '@reach/router';
 import DumpComponent from '../components/DumpComponent';
 import AllDumpedList from '../components/AllDumpedList';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import BottomNavComponent from '../components/BottomNavComponent';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import SimpleSnackbar from '../components/SimpleSnackBar';
 
 
 const useStyles = makeStyles(theme => ({
@@ -22,6 +22,10 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(4, 0, 2),
     color: theme.palette.primary.main,
   },
+  subtitle: {
+    color: theme.palette.primary.main,
+  },
+
 }));
 
 const DumpAndChunk = (props) => {
@@ -31,6 +35,39 @@ const DumpAndChunk = (props) => {
   const [allTasks, setAllTasks] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState([]);
   const [sessionUserId, setSessionUserId] = useState('');
+  const [open, setOpen] = useState(false);
+  const [openSnack, setOpenSnack] = useState(false);
+  const [snack, setSnack] = useState('');
+  const [task, setTask] = useState({
+    name: '',
+    category: '',
+    chunked: false,
+    owner: '',
+    scheduled: false,
+    scheduledAt: '',
+    completed: false,
+  });
+
+  const handleOpenSnackBar = (snack) => {
+    setOpenSnack(true);
+    setSnack(snack); 
+  };
+
+  const handleCloseSnackBar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpenSnack(false);
+  };
+
+  const handleOpen = (e, id) => {
+    onClickHandler(e, id);
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   useEffect(() => {
     let one = 'http://localhost:8000/api/users/one';
@@ -65,16 +102,6 @@ const DumpAndChunk = (props) => {
       });
   }, [load]);
 
-  const [task, setTask] = useState({
-    name: '',
-    category: '',
-    chunked: false,
-    owner: '',
-    scheduled: false,
-    scheduledAt: '',
-    completed: false,
-  });
-
   const removeFromDom = taskId => {
     setAllTasks(allTasks.filter(task => task._id !== taskId));
   };
@@ -99,74 +126,56 @@ const DumpAndChunk = (props) => {
     });
   };
 
-  const onPatchHandler = (e, i) => {
+  const onPatchHandler = (e, id, snack) => {
     task.category = e.target.value;
     task.chunked = true;
     axios
-      .patch('http://localhost:8000/api/tasks/' + i, task, {
+      .patch('http://localhost:8000/api/tasks/' + id, task, {
         withCredentials: true,
       })
       .then(res => {
-        setTask({
-          name: '',
-          category: '',
-          chunked: false,
-          scheduled: false,
-          scheduledAt: '',
-          completed: false,
-          owner: '',
-        });
-        let count = load;
-        if (count >= 0) {
-          count++;
-          setLoad(count);
+        if (res.data.message = 'success'){
+          handleOpenSnackBar(snack);
+          removeFromDom(id);
+          handleClose();
         }
       })
       .catch(err => console.log(err));
   };
 
   const onPatchEditNameHandler = (e, id) => {
-    // task.category = e.target.value;
-    // task.chunked = true;
     axios
       .patch('http://localhost:8000/api/tasks/' + id, task, {
         withCredentials: true,
       })
       .then(res => {
         console.log(res.data.results);
-        setTask({
-          name: '',
-          category: '',
-          chunked: false,
-          scheduled: false,
-          scheduledAt: '',
-          completed: false,
-          owner: '',
-        });
         let count = load;
         if (count >= 0) {
           count++;
           setLoad(count);
         }
-        console.log(load);
       })
       .catch(err => console.log(err));
   };
 
-
-  
-
   return (
     <div>
       <CssBaseline />
-      <div className='center' style={{marginTop:'100px'}}>
+      <div style={{marginTop:'90px'}}>
         {/* <Typography
           variant='h2'
           className={classes.title}
         >
           {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
         </Typography> */}
-        <h1 className={classes.title}>Dump & Chunk</h1>
+        <Typography
+          className={classes.title}
+          variant='h5'
+          // className={classes.subtitle}
+        >
+          Dump & Chunk
+        </Typography>
       </div>
       <DumpComponent
         load={load}
@@ -174,9 +183,13 @@ const DumpAndChunk = (props) => {
         sessionUserId={sessionUserId}
       />
       <AllDumpedList
+        open={open}
+        setOpen={setOpen}
+        handleOpen={handleOpen}
+        handleClose={handleClose}
         onClickHandler={onClickHandler}
-        data={task}
-        setData={setTask}
+        task={task}
+        setTask={setTask}
         allTasks={allTasks}
         setAllTasks={setAllTasks}
         removeFromDom={removeFromDom}
@@ -186,6 +199,11 @@ const DumpAndChunk = (props) => {
         onChangeHandler={onChangeHandler}
         onPatchEditNameHandler={onPatchEditNameHandler}
       />
+      <SimpleSnackbar 
+      snack={snack}
+      openSnack={openSnack}
+      handleOpenSnackBar={handleOpenSnackBar}
+      handleCloseSnackBar={handleCloseSnackBar} />
     </div>
   );
 };

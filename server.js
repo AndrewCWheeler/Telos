@@ -44,5 +44,6 @@ app.use(express.urlencoded({ extended: true }));
 
 require('./server/routes/task.routes')(app);
 require('./server/routes/user.routes')(app);
+require('./server/routes/category.routes')(app);
 
 app.listen(PORT, () => console.log(`Listening on PORT: ${PORT}`));

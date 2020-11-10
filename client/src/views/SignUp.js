@@ -7,23 +7,31 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { Link, navigate } from '@reach/router';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
-function Copyright() {
-  return (
-    <Typography variant='body2' color='textSecondary' align='center'>
-      {'Copyright © '}
-      <Link color='inherit' to='https://material-ui.com/'>
-        Telos.com
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
+
+// function Copyright() {
+//   return (
+//     <Typography variant='body2' color='textSecondary' align='center'>
+//       {'Copyright © '}
+//       <Link color='inherit' to='https://material-ui.com/'>
+//         Telos.com
+//       </Link>{' '}
+//       {new Date().getFullYear()}
+//       {'.'}
+//     </Typography>
+//   );
+// }
 
 const useStyles = makeStyles(theme => ({
+  root: {
+    '& .MuiTextField-root': {
+      margin: theme.spacing(1),
+      width: '100%',
+    },
+  },
   paper: {
     display: 'flex',
     flexDirection: 'column',
@@ -48,7 +56,26 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(8, 4),
     color: theme.palette.primary.main,
   },
+  link: {
+    color: theme.palette.info.light,
+    "&:active": {
+      color: theme.palette.info.main,
+    }
+  },
 }));
+
+// const myTheme = createMuiTheme({
+//   overrides: {
+//     MuiInputLabel: { // Name of the component ⚛️ / style sheet
+//       root: { 
+//         color: 'white',// Name of the rule
+//         "&$focused": { // increase the specificity for the pseudo class
+//           color: 'white',
+//         }
+//       }
+//     }
+//   }
+// });
 
 export default function SignUp() {
   const classes = useStyles();
@@ -89,13 +116,18 @@ export default function SignUp() {
     <Container component='main' maxWidth='xs'>
       <CssBaseline />
       <div className={classes.paper}>
-        <Typography variant='h2' gutterBottom className={classes.title}>
+        <Typography 
+        variant='h2' 
+        gutterBottom 
+        className={classes.title}
+        >
           {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
         </Typography>
         <i className='fa fa-user-o fa-2x' aria-hidden='true'></i>
         <Typography component='h1' variant='h5'>
           Sign up
         </Typography>
+        {/* <ThemeProvider theme={myTheme}> */}
         <form className={classes.form} noValidate>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
@@ -174,11 +206,12 @@ export default function SignUp() {
           <Grid container justify='center' style={{marginTop:54}}>
             <Grid item>
               <Typography align='center' variant='body2'>
-                <Link to='/signin'>Already have an account? Sign in</Link>
+                <Link className={classes.link} to='/signin'>Already have an account? Sign in</Link>
               </Typography>
             </Grid>
           </Grid>
         </form>
+        {/* </ThemeProvider> */}
       </div>
       {/* <Box mt={5} className={classes.bottom}>
         <Copyright />

@@ -18,11 +18,6 @@ module.exports = {
       .catch(err => res.json({ message: 'error', results: err }));
   },
   oneUser: (req, res) => {
-    User.findOne({ _id: req.params.id })
-      .then(user => res.json({ message: 'success', results: user }))
-      .catch(err => res.json({ message: 'error', results: err }));
-  },
-  oneUser: (req, res) => {
     User.findOne({ _id: req.session.userId })
       .then(user => res.json({ message: 'success', results: user }))
       .catch(err => res.json({ message: 'error', results: err }));
@@ -31,6 +26,12 @@ module.exports = {
     await User.findOne({ _id: req.session.userId })
       .populate('tasks')
       .then(userTasks => res.json({ message: 'success', results: userTasks }))
+      .catch(err => res.json({ message: 'error', results: err }));
+  },
+  getAllUserCategories: async (req, res) => {
+    await User.findOne({ _id: req.session.userId })
+      .populate('categories')
+      .then(userCategories => res.json({ message: 'success', results: userCategories }))
       .catch(err => res.json({ message: 'error', results: err }));
   },
   deleteUser: (req, res) => {

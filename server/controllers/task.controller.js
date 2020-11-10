@@ -38,6 +38,7 @@ module.exports = {
     Task.findByIdAndUpdate({ _id: req.params.id }, req.body, {
       runValidators: true,
       new: true,
+      useFindAndModify: false,
     })
       .then(task => res.json({ message: 'success', results: task }))
       .catch(err => res.json({ message: 'error', results: err }));

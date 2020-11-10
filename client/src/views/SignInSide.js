@@ -28,6 +28,7 @@ const useStyles = makeStyles(theme => ({
   root: {
     height: '100vh',
     margin: theme.spacing(3, 0),
+    backgroundColor: '#212121',
   },
   image: {
     backgroundImage: 'url(https://source.unsplash.com/random)',
@@ -65,6 +66,12 @@ const useStyles = makeStyles(theme => ({
   },
   subtitle: {
     color: theme.palette.secondary.main,
+  },
+  link: {
+    color: theme.palette.info.light,
+    "&:active": {
+      color: theme.palette.info.main,
+    }
   },
 }));
 
@@ -104,7 +111,7 @@ const SignInSide = () => {
     <Grid container component='main' className={classes.root}>
       <CssBaseline />
       <Grid item xs={false} sm={4} md={7} className={classes.image} />
-      <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+      <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square >
         <div className={classes.paper}>
           <Typography variant='h2' gutterBottom className={classes.title}>
             {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
@@ -145,10 +152,6 @@ const SignInSide = () => {
                 onChangeHandler(e);
               }}
             />
-            <FormControlLabel
-              control={<Checkbox value='remember' color='primary' />}
-              label='Remember me'
-            />
             <Button
               type='submit'
               fullWidth
@@ -158,14 +161,9 @@ const SignInSide = () => {
             >
               Sign In
             </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link to='#' variant='body2'>
-                  Forgot password?
-                </Link>
-              </Grid>
+            <Grid container justify='center' style={{marginTop:54}}>
               <Grid item>
-                <Link to='/' variant='body2'>
+                <Link className={classes.link} to='/' variant='body2'>
                   {"Don't have an account? Sign Up"}
                 </Link>
               </Grid>

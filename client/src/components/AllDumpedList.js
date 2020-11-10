@@ -37,7 +37,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
-    maxWidth: 752,
+    maxWidth: 840,
     // flexGrow: 1,
   },
   modal: {
@@ -57,80 +57,84 @@ const useStyles = makeStyles(theme => ({
   },
   subtitle: {
     margin: theme.spacing(4, 1, 2),
+    // color: theme.palette.primary.main,
+  },
+  folderStyle: {
+    fontSize:24,
     color: theme.palette.primary.main,
   },
-  text: {
-    color: theme.palette.primary.contrastText,
-  },
+  // text: {
+  //   color: theme.palette.primary.contrastText,
+  // },
   textModal: {
-    color: theme.palette.primary.main,
+    // color: theme.palette.primary.main,
   },
   icon: {
     color: theme.palette.primary.main,
-    margin: theme.spacing(2, 1, 0),
+    margin: theme.spacing(0, 1, 0),
+  },
+  deleteStyle: {
+    // color: theme.palette.secondary.main,
   },
   list: {
-    marginBottom: '60px',
+    marginBottom: '90px',
   },
   listItem: {
-    margin: theme.spacing(1,0,0),
+    // margin: theme.spacing(1,0,0),
     maxHeight: '100%',
     width: '100%',
-    backgroundColor: theme.palette.primary.main,
-    '&:hover': {
-      backgroundColor: theme.palette.primary.dark,
-    },
-    color: theme.palette.primary.contrastText,
-    boxShadow: theme.shadows[10],
-    borderRadius: 3,
-  },
-  item: {
-    margin: theme.spacing(1, 2),
-    width: 250,
-    color: theme.palette.primary.contrastText,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    backgroundColor: theme.palette.background.default,
+    // '&:hover': {
+    //   backgroundColor: theme.palette.primary.dark,
+    // },
+    // color: theme.palette.primary.contrastText,
+    // boxShadow: theme.shadows[10],
+    // borderRadius: 3,
+    borderBottom: '1px solid #e1dfdc',
+    paddingLeft: 0,
   },
   formControl: {
     margin: theme.spacing(1),
     minWidth: 250,
   },
-  selectEmpty: {
-    marginTop: theme.spacing(2),
-  },
 }));
 
-const Fade = React.forwardRef(function Fade(props, ref) {
-  const { in: open, children, onEnter, onExited, ...other } = props;
-  const style = useSpring({
-    from: { opacity: 0 },
-    to: { opacity: open ? 1 : 0 },
-    onStart: () => {
-      if (open && onEnter) {
-        onEnter();
-      }
-    },
-    onRest: () => {
-      if (!open && onExited) {
-        onExited();
-      }
-    },
-  });
-  Fade.propTypes = {
-    children: PropTypes.element,
-    in: PropTypes.bool.isRequired,
-    onEnter: PropTypes.func,
-    onExited: PropTypes.func,
-  };
-  return (
-    <animated.div ref={ref} style={style} {...other}>
-      {children}
-    </animated.div>
-  );
-});
+// const Fade = React.forwardRef(function Fade(props, ref) {
+//   const { in: open, children, onEnter, onExited, ...other } = props;
+//   const style = useSpring({
+//     from: { opacity: 0 },
+//     to: { opacity: open ? 1 : 0 },
+//     onStart: () => {
+//       if (open && onEnter) {
+//         onEnter();
+//       }
+//     },
+//     onRest: () => {
+//       if (!open && onExited) {
+//         onExited();
+//       }
+//     },
+//   });
+//   Fade.propTypes = {
+//     children: PropTypes.element,
+//     in: PropTypes.bool.isRequired,
+//     onEnter: PropTypes.func,
+//     onExited: PropTypes.func,
+//   };
+//   return (
+//     <animated.div ref={ref} style={style} {...other}>
+//       {children}
+//     </animated.div>
+//   );
+// });
 
 const AllDumpedList = props => {
   const {
+    task, 
+    setTask,
+    open,
+    handleOpen,
+    handleClose,
     allTasks,
     setAllTasks,
     onClickHandler,
@@ -141,22 +145,16 @@ const AllDumpedList = props => {
     setSelectedIndex,
     onChangeHandler,
     onPatchEditNameHandler,
+
   } = props;
   const classes = useStyles();
-  const [dense, setDense] = useState(false);
-  const [secondary, setSecondary] = useState(false);
-  const [open, setOpen] = React.useState(false);
+  const [dense, setDense] = useState(true);
+  const [secondary, setSecondary] = useState(true);
 
-  const handleOpen = () => {
-    setOpen(true);
-  };
-  const handleClose = () => {
-    setOpen(false);
-  };
   return (
     <Container className={classes.root}>
       <CssBaseline />
-      <Grid container direction='row' justify='center'>
+      {/* <Grid container direction='row' justify='center'>
         <FormGroup row>
           <FormControlLabel
             control={
@@ -177,14 +175,14 @@ const AllDumpedList = props => {
             label='Enable secondary text'
           />
         </FormGroup>
-      </Grid>
+      </Grid> */}
       <Grid container spacing={1}>
         <Grid item xs={12}>
           {/* <Typography variant='h6' className={classes.title}>
             Select Chunk Category, then Add to Confirm...
           </Typography> */}
           <div>
-            <List dense={dense} className={classes.list}>
+            <List dense secondary className={classes.list}>
               {allTasks.map((task, i) =>
                 task.chunked ? (
                   ''
@@ -193,113 +191,24 @@ const AllDumpedList = props => {
                     className={classes.listItem}
                     key={i}
                     disableRipple
+                    button
                   >
                     <Tooltip title="Chunk task" placement="left">
-                      <IconButton type='button' onClick={e => handleOpen(e)}>
-                        <FolderOpenIcon 
-                        edge="start"
-                        className={classes.text} 
+                      <IconButton type='button' onClick={e => handleOpen(e, task._id)}>
+                        <FolderOpenIcon
+                        className={classes.folderStyle}
+                        // edge="start" 
                         disableRipple
                         />
                       </IconButton>
                     </Tooltip>
-                    <Dialog
-                      aria-labelledby='spring-modal-title'
-                      aria-describedby='spring-modal-description'
-                      className={classes.modal}
-                      open={open}
-                      onClose={handleClose}
-                      closeAfterTransition
-                      BackdropComponent={Backdrop}
-                      BackdropProps={{
-                        timeout: 500,
-                      }}
-                    >
-                      <DialogContent className={classes.dialogStyle}>
-                        <Typography className={classes.title}>
-                          <h2>
-                            {task.name}
-                          </h2>
-                        </Typography>
-                        <TextField
-                        id='dump'
-                        label='Edit task here...'
-                        multiline
-                        rowsMax={2}
-                        size='medium'
-                        variant='outlined'
-                        onChange={e => {
-                          onChangeHandler(e);
-                        }}
-                        onClick={e => {
-                          onClickHandler(e, task._id);
-                        }}
-                        onBlur={e => {
-                          onPatchEditNameHandler(e, task._id);
-                        }}
-                        placeholder={task.name}
-                        name='name'
-                        value={selectedIndex[i]}
-                        />
-                        <FormControl
-                          variant='standard'
-                          className={classes.formControl}
-                        >
-                          <InputLabel
-                            className={classes.textModal}
-                            htmlFor='category'
-                          >
-                            Chunk...
-                          </InputLabel>
-                          <Select
-                            native
-                            className={classes.textModal}
-                            value={selectedIndex[i]}
-                            onClick={e => {
-                              onClickHandler(e, task._id);
-                            }}
-                            onChange={e => {
-                              onPatchHandler(e, task._id);
-                            }}
-                            label='Chunk...'
-                            name='category'
-                          >
-                            <option aria-label='None' value=''/>
-                            <option value='Home'>Home</option>
-                            <option value='Health'>Health</option>
-                            <option value='Family'>Family</option>
-                            <option value='Friends'>Friends</option>
-                            <option value='Finance'>Finance</option>
-                            <option value='Creative'>Creative</option>
-                            <option value='Spiritual'>Spiritual</option>
-                            <option value='Social'>Social</option>
-                          </Select>
-                        </FormControl>
-                      </DialogContent>
-                      <DialogActions>
-                        <Button
-                          autoFocus
-                          onClick={handleClose}
-                          color="primary"
-                          >
-                          Cancel
-                        </Button>
-                        <IconButton
-                          className={classes.icon}
-                          aria-label='update task'
-                          onClick={handleClose}
-                          >
-                          <LibraryAddIcon />
-                        </IconButton>
-                      </DialogActions>
-                    </Dialog>
                     <ListItemText
-                      className={classes.text}
-                      primary={task.name}
-                      secondary={secondary ? task.category : null}
+                      disableTypography
+                      primary={<Typography style={{fontSize:15}}>{task.name}</Typography>}
+                      secondary={<Typography style={{fontSize:12}}>{secondary ? task.category : null}</Typography>}
                     />
                     <Tooltip title="Delete Task" placement="right">
-                      <IconButton edge='end' aria-label='delete'>
+                      <IconButton className={classes.deleteStyle} edge='end' aria-label='delete'>
                         <DeleteComponent
                           taskId={task._id}
                           successCallback={() => removeFromDom(task._id)}
@@ -313,6 +222,96 @@ const AllDumpedList = props => {
           </div>
         </Grid>
       </Grid>
+      <Dialog
+        aria-labelledby='spring-modal-title'
+        aria-describedby='spring-modal-description'
+        className={classes.modal}
+        open={open}
+        onClose={handleClose}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <DialogContent className={classes.dialogStyle}>
+          <Typography className={classes.title}>
+            <h2>
+              {task.name}
+            </h2>
+          </Typography>
+          <TextField
+          id='dump'
+          label='Edit task here...'
+          multiline
+          rowsMax={2}
+          size='medium'
+          variant='outlined'
+          onChange={e => {
+            onChangeHandler(e);
+          }}
+          // onClick={e => {
+          //   onClickHandler(e, task._id);
+          // }}
+          onBlur={e => {
+            onPatchEditNameHandler(e, task._id);
+          }}
+          placeholder={task.name}
+          name='name'
+          value={task.name}
+          />
+          <FormControl
+            variant='standard'
+            className={classes.formControl}
+          >
+            <InputLabel
+              className={classes.textModal}
+              htmlFor='category'
+            >
+              Chunk...
+            </InputLabel>
+            <Select
+              native
+              className={classes.textModal}
+              value={task.category}
+              // onClick={e => {
+              //   onClickHandler(e, task._id);
+              // }}
+              onChange={e => {
+                onPatchHandler(e, task._id, 'Task Chunked!');
+              }}
+              label='Chunk...'
+              name='category'
+            >
+              <option aria-label='None' value=''/>
+              <option value='Home'>Home</option>
+              <option value='Health'>Health</option>
+              <option value='Family'>Family</option>
+              <option value='Friends'>Friends</option>
+              <option value='Finance'>Finance</option>
+              <option value='Creative'>Creative</option>
+              <option value='Spiritual'>Spiritual</option>
+              <option value='Social'>Social</option>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            autoFocus
+            onClick={handleClose}
+            color="primary"
+            >
+            Cancel
+          </Button>
+          <IconButton
+            className={classes.icon}
+            aria-label='update task'
+            onClick={handleClose}
+            >
+            <LibraryAddIcon />
+          </IconButton>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
