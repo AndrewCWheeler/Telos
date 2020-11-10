@@ -645,6 +645,8 @@ const ScheduleComponent = props => {
           </IconButton>
         </DialogActions>
       </Dialog>
+
+      {/* Second Dialog */}
       <Dialog open={openCal} onClose={handleCloseCal}>
         <DialogContent
           className={classes.dialogStyle}
