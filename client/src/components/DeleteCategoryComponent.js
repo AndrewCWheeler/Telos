@@ -19,6 +19,7 @@ const DeleteCategoryComponent = props => {
       aria-hidden='true'
       onClick={deleteCategory}
       style={{fontSize:24}}
+      // color='error'
     />
   )
 }

@@ -1,16 +1,20 @@
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
+import Backdrop from '@material-ui/core/Backdrop';
+import ColorizeIcon from '@material-ui/icons/Colorize';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
-import Backdrop from '@material-ui/core/Backdrop';
 
+import EditIcon from '@material-ui/icons/Edit';
 import FolderOpenIcon from '@material-ui/icons/FolderOpen';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import DeleteCategoryComponent from './DeleteCategoryComponent';
 
+import LabelIcon from '@material-ui/icons/Label';
+import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -27,12 +31,18 @@ import Typography from '@material-ui/core/Typography';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 
+import PaletteIcon from '@material-ui/icons/Palette';
 import Paper from '@material-ui/core/Paper';
 import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import SaveIcon from '@material-ui/icons/Save';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import SimpleSnackbar from './SimpleSnackBar';
+import InputLabel from '@material-ui/core/InputLabel';
+
+import { green } from '@material-ui/core/colors';
+import Radio from '@material-ui/core/Radio';
+import RadioColorButtons from './RadioColorButtons';
 
 
 const useStyles = makeStyles(theme => ({
@@ -49,7 +59,7 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(2),
     color: theme.palette.primary.main,
   },
-  folderStyle: {
+  iconStyle: {
     fontSize:24,
     color: theme.palette.primary.main,
   },
@@ -58,14 +68,18 @@ const useStyles = makeStyles(theme => ({
     overflow: 'hidden',
     padding: theme.spacing(0, 3),
   },
+  neutralIconStyle: {
+    fontSize:24,
+    // color: theme.palette.text.secondary,
+  },
   paper: {
-    maxWidth: 500,
-    margin: `${theme.spacing(2)}px auto`,
+    maxWidth: 840,
+    margin: `${theme.spacing(1)}px auto`,
     padding: theme.spacing(3, 0),
   },
   title: {
-    margin: theme.spacing(4, 0, 2),
-    color: theme.palette.primary.main,
+    marginTop: theme.spacing(4),
+    // color: theme.palette.primary.main,
   },
   list: {
     marginBottom: '90px',
@@ -85,8 +99,8 @@ const useStyles = makeStyles(theme => ({
     paddingLeft: 0,
   },
   formControl: {
-    margin: theme.spacing(1),
-    minWidth: 250,
+    // margin: theme.spacing(1),
+    maxWidth: 300,
   },
 }));
 
@@ -102,6 +116,23 @@ const CategoryComponent = props => {
   const [open, setOpen] = useState(false);
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
+  const [openEdit, setOpenEdit] = useState(false);
+  const [selectedColor, setSelectedColor] = useState('');
+
+  const handleChangeColor = (e) => {
+    setSelectedColor(e.target.value);
+    onChangeHandler(e);
+  };
+
+  const handleOpenEdit = (e, id) => {
+    onClickHandler(e, id);
+    setOpenEdit(true);
+  };
+  console.log(category);
+
+  const handleCloseEdit = () => {
+    setOpenEdit(false);
+  };
   
   const handleOpenSnackBar = (snack) => {
     setSnack(snack); 
@@ -124,15 +155,17 @@ const CategoryComponent = props => {
     setOpen(false);
   };
 
-
   const onChangeHandler = e => {
     setCategory({
       ...category,
       owner: sessionUserId,
       [e.target.name]: e.target.value,
     });
+    console.log("Category inside onChangeHandler: ")
     console.log(category);
   };
+  console.log("Category outside onChangeHandler: ")
+  console.log(category);
 
   const handleKeyDown = (e, snack) => {
     if (e.key === 'Enter') {
@@ -142,7 +175,7 @@ const CategoryComponent = props => {
   };
 
   const onSubmitHandler = (e, snack) => {
-    e.preventDefault();
+    // e.preventDefault();
     console.log('This is the category just before going to post...');
     console.log(category);
     axios
@@ -219,7 +252,7 @@ const CategoryComponent = props => {
   };
 
   const onPatchHandler = (e, id, snack) => {
-    category.name = e.target.value;
+    // category.name = e.target.value;
     axios
       .patch('http://localhost:8000/api/categories/' + id, category, {
         withCredentials: true,
@@ -228,8 +261,15 @@ const CategoryComponent = props => {
         if (res.data.message = 'success'){
           handleOpenSnackBar(snack);
           // removeFromDom(id);
-          handleClose();
+          handleCloseEdit();
         }
+        let count = load;
+        if (count >= 0) {
+          count++;
+          setLoad(count);
+        }
+        console.log(load);
+        navigate('/category');
       })
       .catch(err => console.log(err));
   };
@@ -251,7 +291,9 @@ const CategoryComponent = props => {
           Categories
         </Typography>
       </div>
-      <div className={classes.paper}>
+      <div 
+      className={classes.paper}
+      >
         <form className={classes.root} noValidate autoComplete='off'>
           <Grid className={classes.dump} container direction='row' justify='center' alignItems='center'>
             <Grid item>
@@ -300,24 +342,26 @@ const CategoryComponent = props => {
                       disableRipple
                       button
                     >
-                      <Tooltip title="Color category" placement="left">
-                        <IconButton type='button' 
-                        // onClick={e => handleOpen(e, category._id)}
-                        >
-                          <FolderOpenIcon
-                          className={classes.folderStyle}
-                          // edge="start" 
-                          disableRipple
-                          />
-                        </IconButton>
+                      <Tooltip title="Edit" placement="left">
+                      <IconButton
+                        type='button'
+                        edge='end'
+                        onClick={e => {
+                          handleOpenEdit(e, category._id);
+                        }}
+                      >
+                        <LabelIcon
+                        className={classes.neutralIconStyle}
+                        style={{color:category.color}}
+                        />
+                      </IconButton>
                       </Tooltip>
                       <ListItemText
                         disableTypography
-                        primary={<Typography style={{fontSize:15}}>{category.name}</Typography>}
-                        // secondary={<Typography style={{fontSize:12}}>{secondary ? task.category : null}</Typography>}
+                        primary={<Typography style={{fontSize:15, color: category.color, marginLeft: 9}}>{category.name}</Typography>}
                       />
-                      <Tooltip title="Delete Category" placement="right">
-                        <IconButton className={classes.deleteStyle} edge='end' aria-label='delete'>
+                      <Tooltip title="Delete Category?" placement="right">
+                        <IconButton edge='end' aria-label='delete'>
                           <DeleteCategoryComponent
                             categoryId={category._id}
                             successCallback={() => removeFromDom(category._id)}
@@ -331,6 +375,83 @@ const CategoryComponent = props => {
           </Grid>
         </Grid>
       </div>
+      <Dialog
+        aria-labelledby='modal-edit-select'
+        aria-describedby='choose-edit-category'
+        className={classes.modal}
+        open={openEdit}
+        onClose={handleCloseEdit}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <DialogContent
+          className={classes.dialogStyle}
+        >
+          {/* <Tooltip title="Unchunk" placement="top">
+            <IconButton 
+            className={classes.undo}
+            role='button'
+            onClick={e => {onPatchUnChunkHandler(e, category._id)}}
+            >
+              <Undo />
+            </IconButton>
+          </Tooltip> */}
+          <Typography 
+            variant='h5' 
+            className={classes.title}
+            style={{color:selectedColor}}  
+          >
+            {category.name}
+          </Typography>
+          <TextField
+            id='dump'
+            label='Edit category here...'
+            multiline
+            rowsMax={2}
+            size='medium'
+            variant='outlined'
+            onChange={e => {
+              onChangeHandler(e);
+            }}
+            // onClick={e => {
+            //   onClickHandler(e, category._id);
+            // }}
+            // onBlur={e => {
+            //   onPatchEditNameHandler(e, category._id);
+            // }}
+            placeholder={category.name}
+            name='name'
+            value={category.name}
+          />
+          <div className={classes.formControl}>
+            <RadioColorButtons
+              selectedColor={selectedColor}
+              setSelectedColor={setSelectedColor}
+              handleChangeColor={e => {handleChangeColor(e)}}
+            />
+        </div>
+        </DialogContent>
+        <DialogActions>
+        <Button 
+          autoFocus 
+          onClick={handleCloseEdit}
+          color="primary"
+        >
+          Cancel
+        </Button>
+          <IconButton
+            onClick={e => {onPatchHandler(e, category._id, "Category Updated!")}}
+            aria-label='update category'
+            // onClick={handleCloseEdit}
+            color="primary"
+          >
+            <LibraryAddIcon />
+          </IconButton>
+        </DialogActions>
+      </Dialog>
       <SimpleSnackbar 
       snack={snack}
       openSnack={openSnack}

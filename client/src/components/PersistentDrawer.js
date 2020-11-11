@@ -4,8 +4,10 @@ import clsx from 'clsx';
 import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
+
 import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
@@ -13,6 +15,7 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import LabelIcon from '@material-ui/icons/Label';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -104,9 +107,9 @@ const useStyles = makeStyles((theme) => ({
       display: 'block',
     },
   },
-  myTitle: {
-    color: theme.palette.primary.main,
-  },
+  // myTitle: {
+  //   color: theme.palette.primary.main,
+  // },
   search: {
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
@@ -130,6 +133,9 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  secondaryIcon: {
+    color: theme.palette.secondary.main,
   },
   inputRoot: {
     color: 'inherit',
@@ -180,11 +186,10 @@ const PersistentDrawer = (props) => {
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-  const {toggleDarkMode} = props;
+  const {toggleDarkMode, navigatePage, navValue} = props;
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
   
-
   const handleOpenSnackBar = (snack) => {
     setOpenSnack(true);
     setSnack(snack);
@@ -223,18 +228,18 @@ const PersistentDrawer = (props) => {
     setOpen(false);
   };
 
-  const navigateDump = (e) => {
-    navigate('/');
-  };
-  const navigateSchedule = (e) => {
-    navigate('/schedule');
-  };
-  const navigateDo = (e) => {
-    navigate('/do');
-  };
-  const navigateCategories = (e) => {
-    navigate('/category');
-  }; 
+  // const navigateDump = (e) => {
+  //   navigate('/');
+  // };
+  // const navigateSchedule = (e) => {
+  //   navigate('/schedule');
+  // };
+  // const navigateDo = (e) => {
+  //   navigate('/do');
+  // };
+  // const navigateCategories = (e) => {
+  //   navigate('/category');
+  // }; 
 
   const logoutUser = (e, snack) => {
     axios
@@ -308,17 +313,17 @@ const PersistentDrawer = (props) => {
         <ListItem 
         button
         value='dump'
-        onClick={e => {navigateDump(e)}}
+        onClick={e => {navigatePage(e, 'dump')}}
         >
           <ListItemIcon>
             <AddIcon />
           </ListItemIcon>
           <ListItemText primary='Dump' />
         </ListItem>
-        <ListItem 
+        <ListItem
         button
         value='schedule'
-        onClick={e => {navigateSchedule(e)}}
+        onClick={e => {navigatePage(e, 'schedule')}}
         >
           <ListItemIcon>
             <CalendarTodayIcon />
@@ -328,7 +333,7 @@ const PersistentDrawer = (props) => {
         <ListItem 
         button
         value='do'
-        onClick={e => {navigateDo(e)}}
+        onClick={e => {navigatePage(e, 'do')}}
         >
           <ListItemIcon>
             <CheckCircleIcon />
@@ -338,23 +343,41 @@ const PersistentDrawer = (props) => {
         <ListItem 
         button
         value='category'
-        onClick={e => {navigateCategories(e)}}
+        onClick={e => {navigatePage(e, 'category')}}
         >
           <ListItemIcon>
-            <SettingsIcon />
+            <LabelIcon />
           </ListItemIcon>
           <ListItemText primary='Categories' />
         </ListItem>
       </List>
       <Divider />
-      <ListItem>
-        <IconButton 
-          edge="start"
-          onClick={toggleDarkMode}>
+      <ListItem
+        button
+        onClick={toggleDarkMode}
+      >
+        <ListItemIcon>
           <Brightness4Icon />
-        </IconButton>
+        </ListItemIcon>
         Dark Mode
         {/* <FormControlLabel control = {<Switch onClick={toggleDarkMode}/>} /> */}
+      </ListItem>
+      <ListItem
+        button
+        onClick={e => {logoutUser(e, "Successfully logged out!")}}
+      >
+        <ListItemIcon>
+          <ExitToAppIcon
+            className={classes.secondaryIcon}
+          />
+        </ListItemIcon>
+        <Typography>
+          <Link
+          color="secondary"
+          >
+            Logout
+          </Link>
+        </Typography>
       </ListItem>
     </div>
   );
@@ -375,7 +398,7 @@ const PersistentDrawer = (props) => {
       >
         <Toolbar>
           <IconButton
-            color="primary"
+            // color="primary"
             aria-label="open drawer"
             onClick={handleDrawerOpen}
             edge="start"
@@ -386,7 +409,8 @@ const PersistentDrawer = (props) => {
           <Typography 
             variant="h6" 
             noWrap
-            className={classes.myTitle}>
+            // className={classes.myTitle}
+            >
             {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
           </Typography>
           <div className={classes.grow} />
@@ -397,7 +421,7 @@ const PersistentDrawer = (props) => {
               // aria-controls={menuId}
               aria-haspopup="true"
               onClick={handleProfileMenuOpen}
-              color="primary"
+              // color="primary"
             >
               <AccountCircle />
           </IconButton>
@@ -418,7 +442,9 @@ const PersistentDrawer = (props) => {
         }}
       >
         <div className={classes.drawerHeader}>
-          <IconButton onClick={handleDrawerClose} color="primary">
+          <IconButton onClick={handleDrawerClose} 
+          // color="primary"
+          >
             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
         </div>

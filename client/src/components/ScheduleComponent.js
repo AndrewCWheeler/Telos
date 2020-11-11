@@ -41,6 +41,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import CachedIcon from '@material-ui/icons/Cached';
 // import DateRangeIcon from '@material-ui/icons/DateRange';
 // import DatePickComponent from './DatePickComponent';
+import LabelIcon from '@material-ui/icons/Label';
 import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 import { shadows } from '@material-ui/system';
 import FolderOpenIcon from '@material-ui/icons/FolderOpen';
@@ -83,15 +84,15 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(4, 0, 2),
     color: theme.palette.primary.main,
   },
-  textMain: {
-    maring: theme.spacing(2),
-  },
+  // textMain: {
+  //   margin: theme.spacing(2),
+  // },
   // text: {
   //   color: theme.palette.primary.contrastText,
   // },
   subtitle: {
-    margin: theme.spacing(-1, 0, 0),
-    color: theme.palette.primary.main,
+    margin: theme.spacing(1, 0, 0),
+    color: theme.palette.text.secondary,
   },
   select: {
     color: theme.palette.primary.main,
@@ -115,12 +116,17 @@ const useStyles = makeStyles(theme => ({
     fontSize:24,
     color: theme.palette.primary.main,
   },
+  radioStyle: {
+    justifyContent: 'center',
+    fontSize:15,
+    // margin: theme.spacing(1),
+  },
   secondaryIconStyle: {
     fontSize:24,
     color: theme.palette.secondary.main,
   },
   neutralIconStyle: {
-    fontSize:'24px',
+    fontSize:24,
     color: theme.palette.text.secondary,
   },
   inline: {
@@ -130,7 +136,8 @@ const useStyles = makeStyles(theme => ({
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 150,
+    minWidth: 250,
+    marginBottom: 60,
   },
   selectEmpty: {
     marginTop: theme.spacing(2),
@@ -152,6 +159,7 @@ const ScheduleComponent = props => {
     completed: '',
   });
   const [allTasks, setAllTasks] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [dense, setDense] = useState(true);
@@ -224,18 +232,28 @@ const ScheduleComponent = props => {
       })
       .catch(error => {
       });
-    axios
-      .all([requestOne, requestTwo])
-      .then(
-        axios.spread((...responses) => {
-          const responseOne = responses[0];
-          const responseTwo = responses[1];
+      let three = 'http://localhost:8000/api/categories/user';
+      const requestThree = axios.get(three, {withCredentials: true });
+      requestThree
+        .then(response => {
+          setAllCategories(response.data.results);
+        }).catch(error => {
+          console.log(error);
         })
-      )
-      .catch(errors => {
-        navigate('/signup');
-      });
-  }, [load]);
+      axios
+        .all([requestOne, requestTwo, requestThree])
+        .then(
+          axios.spread((...responses) => {
+            const responseOne = responses[0];
+            const responseTwo = responses[1];
+            const responseThree = responses[2];
+            console.log(responseOne, responseTwo, responseThree);
+          })
+        )
+        .catch(errors => {
+          navigate('/signup');
+        });
+    }, [load]);
 
   const onClickHandler = (e, id) => {
     axios
@@ -419,7 +437,33 @@ const ScheduleComponent = props => {
       
       {/* <Grid container spacing={1}>
         <Grid item xs={12}> */}
-          <FormControl variant='standard' className={classes.formControl}>
+        <FormControl component="fieldset" className={classes.formControl}>
+          {/* <FormLabel component="legend">Category:</FormLabel> */}
+          <RadioGroup 
+            row aria-label="category" 
+            name="category" 
+            value={selectedCategory} 
+            onChange={e => {
+                onSelectHandler(e);
+              }}
+            className={classes.radioStyle}
+            defaultValue=''>
+
+            {allCategories.map((category, catIdx)=> 
+            <FormControlLabel
+              key={catIdx}
+              value={category.name}
+              label={<Typography style={{fontSize:15}}>
+                {category.name}
+              </Typography>}
+              labelPlacement="bottom"
+              control={<Radio style={{color:category.color, fontSize:15}}/>}
+            />
+            )}
+
+          </RadioGroup>
+        </FormControl>
+          {/* <FormControl variant='standard' className={classes.formControl}>
             <InputLabel id="select-category">Category</InputLabel>
             <Select
               labelId="select-category"
@@ -433,16 +477,15 @@ const ScheduleComponent = props => {
               value={selectedCategory}
             >
               <MenuItem aria-label='None' value=''><em>None</em></MenuItem>
-              <MenuItem value='Home'>Home</MenuItem>
-              <MenuItem value='Health'>Health</MenuItem>
-              <MenuItem value='Family'>Family</MenuItem>
-              <MenuItem value='Friends'>Friends</MenuItem>
-              <MenuItem value='Finance'>Finance</MenuItem>
-              <MenuItem value='Creative'>Creative</MenuItem>
-              <MenuItem value='Spiritual'>Spiritual</MenuItem>
-              <MenuItem value='Social'>Social</MenuItem>
+              {allCategories.map((category, catIdx) => 
+                <MenuItem key={catIdx} value={category.name}
+                style={{color:category.color}}
+              >
+                  {category.name}
+                </MenuItem>
+              )}
             </Select>
-          </FormControl>
+          </FormControl> */}
           {/* <Grid container direction='row' justify='center' style={{marginTop:25}}>
             <FormGroup row>
               <FormControlLabel
@@ -501,17 +544,20 @@ const ScheduleComponent = props => {
                                       type='button'
                                       onClick={e => {handleOpenCal(e, task._id)}}
                                     >
-                                      <EventIcon className={classes.primaryIconStyle} />
+                                      <EventIcon className={classes.neutralIconStyle} />
                                     </IconButton>
                                 </Tooltip>
+                                {allCategories.map((category, catIdx) => 
+                                  task.category === category.name ? (
                                 <ListItemText
-                                  disableTypography
-                                  className={classes.text}
-                                  textoverflow='ellipsis'
-                                  overflow='hidden'
-                                  primary={<Typography style={{fontSize:15}}>{task.name}</Typography>}
-                                  secondary={<Typography style={{fontSize:12}}>{secondary ? task.category : null}</Typography>}
+                                disableTypography
+                                textoverflow='ellipsis'
+                                overflow='hidden'
+                                primary={<Typography style={{fontSize:15}}>{task.name}</Typography>}
+                                secondary={<Typography key={catIdx} style={{fontSize:12, color:category.color}}>{secondary ? task.category : null}</Typography>}
                                 />
+                                ) : null
+                                )}
                                 <div>
                                 <Tooltip title="Edit Task" placement="right">
                                   <IconButton
@@ -569,8 +615,10 @@ const ScheduleComponent = props => {
               <Undo />
             </IconButton>
           </Tooltip>
-          <Typography variant='h5' className={classes.title}>
+          <Typography className={classes.title}>
+            <h2>
               {task.name}
+            </h2>
           </Typography>
           <TextField
             id='dump'
@@ -597,14 +645,14 @@ const ScheduleComponent = props => {
             className={classes.formControl}
           >
             <InputLabel
-              className={classes.textMain}
+              // className={classes.textMain}
               htmlFor='category'
             >
               Chunk...
             </InputLabel>
             <Select
-              native
-              className={classes.textMain}
+              // native
+              // className={classes.textMain}
               value={task.category}
               // onClick={e => {
               //   onClickHandler(e, task._id);
@@ -615,15 +663,17 @@ const ScheduleComponent = props => {
               label='Chunk...'
               name='category'
             >
-              <option aria-label='None' value=''></option>
-              <option value='Home'>Home</option>
-              <option value='Health'>Health</option>
-              <option value='Family'>Family</option>
-              <option value='Friends'>Friends</option>
-              <option value='Finance'>Finance</option>
-              <option value='Creative'>Creative</option>
-              <option value='Spiritual'>Spiritual</option>
-              <option value='Social'>Social</option>
+              <MenuItem aria-label='None' value=''><em>None</em></MenuItem>
+              {allCategories.map((category, catIdx) => 
+                <MenuItem key={catIdx} value={category.name}
+                style={{color:category.color}}
+                >
+                  <LabelIcon
+                    style={{fontSize:18,marginRight:12}}
+                  />
+                  {category.name}
+                </MenuItem>
+              )}
             </Select>
           </FormControl>
         </DialogContent>

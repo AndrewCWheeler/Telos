@@ -21,7 +21,7 @@ const SimpleSnackbar = props => {
           horizontal: 'center',
         }}
         open={openSnack}
-        autoHideDuration={6000}
+        autoHideDuration={2000}
         onClose={handleCloseSnackBar}
         message={snack}
         key={snack}

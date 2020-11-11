@@ -54,7 +54,7 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     margin: theme.spacing(8, 4),
-    color: theme.palette.primary.main,
+    // color: theme.palette.primary.main,
   },
   link: {
     color: theme.palette.info.light,

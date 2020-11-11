@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
@@ -9,6 +10,7 @@ import TextField from '@material-ui/core/TextField';
 import Backdrop from '@material-ui/core/Backdrop';
 import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is required for IE 11 support
 import List from '@material-ui/core/List';
+import LabelIcon from '@material-ui/icons/Label';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -32,6 +34,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
+import Link from '@material-ui/core/Link';
+// import CategoryList from './CategoryList';
 
 
 const useStyles = makeStyles(theme => ({
@@ -61,7 +65,7 @@ const useStyles = makeStyles(theme => ({
   },
   folderStyle: {
     fontSize:24,
-    color: theme.palette.primary.main,
+    // color: theme.palette.primary.main,
   },
   // text: {
   //   color: theme.palette.primary.contrastText,
@@ -99,35 +103,6 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-// const Fade = React.forwardRef(function Fade(props, ref) {
-//   const { in: open, children, onEnter, onExited, ...other } = props;
-//   const style = useSpring({
-//     from: { opacity: 0 },
-//     to: { opacity: open ? 1 : 0 },
-//     onStart: () => {
-//       if (open && onEnter) {
-//         onEnter();
-//       }
-//     },
-//     onRest: () => {
-//       if (!open && onExited) {
-//         onExited();
-//       }
-//     },
-//   });
-//   Fade.propTypes = {
-//     children: PropTypes.element,
-//     in: PropTypes.bool.isRequired,
-//     onEnter: PropTypes.func,
-//     onExited: PropTypes.func,
-//   };
-//   return (
-//     <animated.div ref={ref} style={style} {...other}>
-//       {children}
-//     </animated.div>
-//   );
-// });
-
 const AllDumpedList = props => {
   const {
     task, 
@@ -136,6 +111,7 @@ const AllDumpedList = props => {
     handleOpen,
     handleClose,
     allTasks,
+    allCategories,
     setAllTasks,
     onClickHandler,
     onChunkHandler,
@@ -195,7 +171,7 @@ const AllDumpedList = props => {
                   >
                     <Tooltip title="Chunk task" placement="left">
                       <IconButton type='button' onClick={e => handleOpen(e, task._id)}>
-                        <FolderOpenIcon
+                        <LabelIcon
                         className={classes.folderStyle}
                         // edge="start" 
                         disableRipple
@@ -204,7 +180,20 @@ const AllDumpedList = props => {
                     </Tooltip>
                     <ListItemText
                       disableTypography
-                      primary={<Typography style={{fontSize:15}}>{task.name}</Typography>}
+                      primary={
+                      <Link
+                        button
+                        onClick={e => handleOpen(e, task._id)}
+                        style={{textDecoration:'none'}}
+                      >
+                        <Typography
+                          style={{fontSize:15}}
+                          color="textPrimary"
+                          >
+                          {task.name}
+                        </Typography>
+                      </Link>
+                      }
                       secondary={<Typography style={{fontSize:12}}>{secondary ? task.category : null}</Typography>}
                     />
                     <Tooltip title="Delete Task" placement="right">
@@ -241,6 +230,7 @@ const AllDumpedList = props => {
             </h2>
           </Typography>
           <TextField
+          inputProps={{ autoFocus: true }}
           id='dump'
           label='Edit task here...'
           multiline
@@ -265,33 +255,33 @@ const AllDumpedList = props => {
             className={classes.formControl}
           >
             <InputLabel
-              className={classes.textModal}
-              htmlFor='category'
+              // className={classes.textModal}
+              id='category'
             >
               Chunk...
             </InputLabel>
             <Select
-              native
-              className={classes.textModal}
+              // native
+              // className={classes.textModal}
               value={task.category}
-              // onClick={e => {
-              //   onClickHandler(e, task._id);
-              // }}
               onChange={e => {
                 onPatchHandler(e, task._id, 'Task Chunked!');
               }}
+              labelId='category'
               label='Chunk...'
               name='category'
             >
-              <option aria-label='None' value=''/>
-              <option value='Home'>Home</option>
-              <option value='Health'>Health</option>
-              <option value='Family'>Family</option>
-              <option value='Friends'>Friends</option>
-              <option value='Finance'>Finance</option>
-              <option value='Creative'>Creative</option>
-              <option value='Spiritual'>Spiritual</option>
-              <option value='Social'>Social</option>
+              <MenuItem aria-label='None' value=''><em>None</em></MenuItem>
+              {allCategories.map((category, catIdx) => 
+                <MenuItem key={catIdx} value={category.name}
+                style={{color:category.color}}
+                >
+                  <LabelIcon
+                    style={{fontSize:18,marginRight:12}}
+                  />
+                  {category.name}
+                </MenuItem>
+              )}
             </Select>
           </FormControl>
         </DialogContent>

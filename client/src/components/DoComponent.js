@@ -29,6 +29,7 @@ import FormGroup from '@material-ui/core/FormGroup';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import InputLabel from '@material-ui/core/InputLabel';
+import LabelIcon from '@material-ui/icons/Label';
 import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -41,18 +42,23 @@ import Moment from 'react-moment';
 import 'moment-timezone';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import { RootRef, Tooltip } from '@material-ui/core';
+import { MenuItem, RootRef, Tooltip } from '@material-ui/core';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is required for IE 11 support
 import SimpleSnackbar from './SimpleSnackBar';
+import Undo from '@material-ui/icons/Undo';
 
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
-    maxWidth: 752,
+    maxWidth: 840,
     // flexGrow: 1,
+  },
+  fab: {
+    margin: theme.spacing(2),
+    color: theme.palette.primary.main,
   },
   rootList: {
     width: '100%',
@@ -70,7 +76,7 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     margin: theme.spacing(4, 0, 2),
-    color: theme.palette.primary.main,
+    // color: theme.palette.primary.main,
   },
   subtitle: {
     margin: theme.spacing(-1, 0, 0),
@@ -109,7 +115,8 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(2, 4, 3),
   },
   list: {
-    marginBottom: '90px',
+    marginBottom: 90,
+    marginTop: 60,
   },
   listItem: {
     // margin: theme.spacing(1,0,0),
@@ -193,6 +200,7 @@ const DoComponent = () => {
     complete: '',
   });
   const [allTasks, setAllTasks] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [dense, setDense] = useState(true);
@@ -284,18 +292,28 @@ const DoComponent = () => {
       })
       .catch(error => {
       });
-    axios
-      .all([requestOne, requestTwo])
-      .then(
-        axios.spread((...responses) => {
-          const responseOne = responses[0];
-          const responseTwo = responses[1];
+      let three = 'http://localhost:8000/api/categories/user';
+      const requestThree = axios.get(three, {withCredentials: true });
+      requestThree
+        .then(response => {
+          setAllCategories(response.data.results);
+        }).catch(error => {
+          console.log(error);
         })
-      )
-      .catch(errors => {
-        navigate('/signup');
-      });
-  }, [load]);
+      axios
+        .all([requestOne, requestTwo, requestThree])
+        .then(
+          axios.spread((...responses) => {
+            const responseOne = responses[0];
+            const responseTwo = responses[1];
+            const responseThree = responses[2];
+            console.log(responseOne, responseTwo, responseThree);
+          })
+        )
+        .catch(errors => {
+          navigate('/signup');
+        });
+    }, [load]);
 
   const onClickHandler = (e, id) => {
     axios
@@ -362,6 +380,30 @@ const DoComponent = () => {
       })
       .catch(err => console.log(err));
   };
+  const onPatchUnScheduleHandler = (e, id, snack) => {
+    task.scheduledAt = '';
+    task.scheduled = false;
+    axios
+      .patch('http://localhost:8000/api/tasks/' + id, task, {
+        withCredentials: true,
+      })
+      .then(res => {
+        if (res.data.message === 'success') {
+          console.log(res.data.results);
+          removeFromDom(id);
+          handleCloseEdit();
+          handleOpenSnackBar(snack);
+        }
+        // let count = load;
+        // if (count >= 0) {
+        //   count++;
+        //   setLoad(count);
+        // }
+        // console.log(load);
+      })
+      .catch(err => console.log(err));
+  };
+
   const onPatchEditChunkHandler = (e, id) => {
     task.category = e.target.value;
     task.chunked = true;
@@ -531,16 +573,20 @@ const DoComponent = () => {
         Please select a date:
       </Typography>
       </div>
-      <MuiPickersUtilsProvider utils={DateFnsUtils}>
+      <MuiPickersUtilsProvider utils={DateFnsUtils}
+        style={{width:160}}
+      >
         <CssBaseline />
         <Grid container justify='space-around'>
           <DatePicker
+
             className={classes.primaryIconStyle}
             margin='normal'
             id='Selected a date...'
-            label='Date picker dialog'
+            // label='Date picker dialog'
             format='MM/dd/yyyy'
             value={dateParameter}
+            // defaultValue={Moment}
             onChange={e => {
               handleDateParameter(e);
             }}
@@ -604,38 +650,47 @@ const DoComponent = () => {
                       key={i}
                       // role={undefined}
                       // onClick={handleToggle(i)}
-                    >
+                      >
+                    
                     <ListItemIcon
                       // className={classes.primaryIconStyle}
                       onClick={e => onCompleteHandler(e,task._id,"Task Completed!")}
-                    >
+                      >
+                      {/* {allCategories.map((category, catIdx) => 
+                        task.category === category.name ? ( */}
                       <FormControlLabel
+                        // key={catIdx}
                         control={
                           <Checkbox
                             icon={<RadioButtonUncheckedRoundedIcon 
                               fontSize="small" 
-                              color="primary"
+                              // style={{color:category.color}}
                               />}
                             checkedIcon={<CheckCircleRoundedIcon 
                               fontSize="small"
-                              color="primary"
+                              // style={{color:category.color}}
                               />}
                             name="completed"
                           />
                         }
                         label=""
                       />
+                      {/* ):null
+                      )} */}
                     </ListItemIcon>
-                    
+                    {allCategories.map((category, catIdx) => 
+                      task.category === category.name ? (
                     <ListItemText
                       disableTypography
                       className={classes.text}
                       textOverflow='ellipsis'
                       overflow='hidden'
                       primary={<Typography style={{fontSize:15}}>{task.name}</Typography>}
-                      secondary={<Typography style={{fontSize:12}}>{secondary ? task.category : null}</Typography>}
+                      secondary={<Typography key={catIdx} style={{fontSize:12, color:category.color}}>{secondary ? task.category : null}</Typography>}
                     />
-                    
+
+                    ) : null
+                    )}
                     <ListItemText
                       primary={
                       <Tooltip title="Change Date" placement="right">
@@ -697,6 +752,15 @@ const DoComponent = () => {
         <DialogContent
           className={classes.dialogStyle}
         >
+          <Tooltip title="Un-schedule" placement="top">
+            <IconButton 
+            className={classes.undo}
+            role='button'
+            onClick={e => {onPatchUnScheduleHandler(e, task._id, "Removed from Calendar!")}}
+            >
+              <Undo />
+            </IconButton>
+          </Tooltip>
           <Typography variant='h5' className={classes.title}>
               {task.name}
           </Typography>
@@ -731,7 +795,6 @@ const DoComponent = () => {
                 Chunk...
             </InputLabel>
             <Select
-              native
               className={classes.textMain}
               value={task.category}
               // onClick={e => {
@@ -743,15 +806,17 @@ const DoComponent = () => {
               label='Chunk...'
               name='category'
             >
-              <option aria-label='None' value='' />
-              <option value='Home'>Home</option>
-              <option value='Health'>Health</option>
-              <option value='Family'>Family</option>
-              <option value='Friends'>Friends</option>
-              <option value='Finance'>Finance</option>
-              <option value='Creative'>Creative</option>
-              <option value='Spiritual'>Spiritual</option>
-              <option value='Social'>Social</option>
+              <MenuItem aria-label='None' value=''><em>None</em></MenuItem>
+              {allCategories.map((category, catIdx) => 
+                <MenuItem key={catIdx} value={category.name}
+                style={{color:category.color}}
+              >
+                  <LabelIcon 
+                    style={{fontSize:18,marginRight:12}}
+                  />
+                  {category.name}
+                </MenuItem>
+              )}
             </Select>
           </FormControl>
         </DialogContent>

@@ -8,6 +8,8 @@ import AddIcon from '@material-ui/icons/Add';
 import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import SettingsIcon from '@material-ui/icons/Settings';
+import LabelIcon from '@material-ui/icons/Label';
+import { Typography } from '@material-ui/core';
 
 // import Paper from '@material-ui/core/Paper';
 
@@ -28,48 +30,56 @@ const useStyles = makeStyles(theme => ({
 
 const BottomNavComponent = (props) => {
   const classes = useStyles();
-  const [value, setValue] = useState('dump');
-
-  const navigatePage = (event, newValue) => {
-    setValue(newValue);
-    if (newValue === 'dump') {
-      navigate('/');
-    } else if (newValue === 'schedule') {
-      navigate('/schedule');
-    } else if (newValue === 'do') {
-      navigate('/do');
-    } else if (newValue === 'category') {
-      navigate('/category');
-    }
-  };
+  const { navValue, navigatePage } = props;
 
   return (
     <Grid container direction='row' justify='center'>
       <BottomNavigation
-        value={value}
+        value={navValue}
         onChange={navigatePage}
         className={classes.root}
         position='fixed'
+        showLabels
         >
         <BottomNavigationAction
-          label='Dump'
+          label={<Typography 
+            style={{fontSize:15}}>
+            Dump/Chunk
+          </Typography>}
           value='dump'
-          icon={<AddIcon />}
+          icon={<AddIcon 
+            style={{fontSize:24}}
+          />}
         />
         <BottomNavigationAction
-          label='Schedule'
+          label={<Typography 
+            style={{fontSize:15}}>
+            Schedule
+          </Typography>}
           value='schedule'
-          icon={<CalendarTodayIcon />}
+          icon={<CalendarTodayIcon 
+            style={{fontSize:24}}
+          />}
         />
         <BottomNavigationAction
-          label='Do'
+          label={<Typography 
+            style={{fontSize:15}}>
+            Do
+          </Typography>}
           value='do'
-          icon={<CheckCircleIcon />}
+          icon={<CheckCircleIcon
+            style={{fontSize:24}}
+          />}
         />
         <BottomNavigationAction
-          label='Categories'
+          label={<Typography 
+            style={{fontSize:15}}>
+            Categories
+          </Typography>}
           value='category'
-          icon={<SettingsIcon />}
+          icon={<LabelIcon 
+          style={{fontSize:24}}
+          />}
         />
       </BottomNavigation>
     </Grid>

@@ -16,11 +16,11 @@ import SimpleSnackbar from '../components/SimpleSnackBar';
 const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
-    maxWidth: 752,
+    maxWidth: 840,
   },
   title: {
     margin: theme.spacing(4, 0, 2),
-    color: theme.palette.primary.main,
+    // color: theme.palette.primary.main,
   },
   subtitle: {
     color: theme.palette.primary.main,
@@ -33,6 +33,7 @@ const DumpAndChunk = (props) => {
 
   const [load, setLoad] = useState(0);
   const [allTasks, setAllTasks] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState([]);
   const [sessionUserId, setSessionUserId] = useState('');
   const [open, setOpen] = useState(false);
@@ -88,13 +89,22 @@ const DumpAndChunk = (props) => {
       .catch(error => {
         console.log(error);
       });
+    let three = 'http://localhost:8000/api/categories/user';
+    const requestThree = axios.get(three, {withCredentials: true });
+    requestThree
+      .then(response => {
+        setAllCategories(response.data.results);
+      }).catch(error => {
+        console.log(error);
+      })
     axios
-      .all([requestOne, requestTwo])
+      .all([requestOne, requestTwo, requestThree])
       .then(
         axios.spread((...responses) => {
           const responseOne = responses[0];
           const responseTwo = responses[1];
-          console.log(responseOne, responseTwo);
+          const responseThree = responses[2];
+          console.log(responseOne, responseTwo, responseThree);
         })
       )
       .catch(errors => {
@@ -192,6 +202,7 @@ const DumpAndChunk = (props) => {
         setTask={setTask}
         allTasks={allTasks}
         setAllTasks={setAllTasks}
+        allCategories={allCategories}
         removeFromDom={removeFromDom}
         selectedIndex={selectedIndex}
         setSelectedIndex={setSelectedIndex}
