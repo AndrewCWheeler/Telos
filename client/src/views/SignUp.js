@@ -10,6 +10,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 
 // function Copyright() {
@@ -53,7 +54,7 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(3, 0),
   },
   title: {
-    margin: theme.spacing(8, 4),
+    margin: theme.spacing(4, 4),
     // color: theme.palette.primary.main,
   },
   link: {
@@ -112,6 +113,25 @@ export default function SignUp() {
       });
   };
 
+  ValidatorForm.addValidationRule('isPasswordMatch', (value) => {
+    if(value !== user.password) {
+      return false;
+    }
+    return true;
+  });
+  ValidatorForm.addValidationRule('twoOrMore', (value) => {
+    if(value.length > 0 && value.length < 2) {
+      return false;
+    }
+    return true;
+  });
+  ValidatorForm.addValidationRule('eightOrMore', (value) => {
+    if(value.length > 0 && value.length < 8) {
+      return false;
+    }
+    return true;
+  });
+
   return (
     <Container component='main' maxWidth='xs'>
       <CssBaseline />
@@ -128,10 +148,16 @@ export default function SignUp() {
           Sign up
         </Typography>
         {/* <ThemeProvider theme={myTheme}> */}
-        <form className={classes.form} noValidate>
+        <ValidatorForm 
+          className={classes.form} 
+          noValidate
+          onSubmit={e => {
+            onSubmitHandler(e);
+          }}
+        >
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <TextField
+              <TextValidator
                 autoComplete='fname'
                 name='firstName'
                 variant='outlined'
@@ -141,10 +167,13 @@ export default function SignUp() {
                 label='First Name'
                 autoFocus
                 onChange={onChangeHandler}
+                value={user.firstName}
+                validators={['required', 'twoOrMore']}
+                errorMessages={['First name is required.', 'Must be at least 2 characters.']}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField
+              <TextValidator
                 variant='outlined'
                 required
                 fullWidth
@@ -152,11 +181,15 @@ export default function SignUp() {
                 label='Last Name'
                 name='lastName'
                 autoComplete='lname'
+                value={user.lastName}
                 onChange={onChangeHandler}
+                validators={['required', 'twoOrMore']}
+                errorMessages={['Last name is required.', 'Must be at least 2 characters.']}
+
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField
+              <TextValidator
                 variant='outlined'
                 required
                 fullWidth
@@ -164,11 +197,15 @@ export default function SignUp() {
                 label='Email Address'
                 name='email'
                 autoComplete='email'
+                value={user.email}
                 onChange={onChangeHandler}
+                validators={['required', 'isEmail']}
+                errorMessages={['Email is required.', 'Invalid email.']}
+
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField
+              <TextValidator
                 variant='outlined'
                 required
                 fullWidth
@@ -176,12 +213,16 @@ export default function SignUp() {
                 label='Password'
                 type='password'
                 id='password'
+                value={user.password}
                 autoComplete='current-password'
                 onChange={onChangeHandler}
+                validators={['required', 'eightOrMore']}
+                errorMessages={['Password required.', 'Must be at least 8 characters.']}
+
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField
+              <TextValidator
                 variant='outlined'
                 required
                 fullWidth
@@ -190,6 +231,10 @@ export default function SignUp() {
                 type='password'
                 id='confirmPassword'
                 onChange={onChangeHandler}
+                value={user.confirmPassword}
+                validators={['isPasswordMatch', 'required']}
+                errorMessages={['Email and password do not match.', 'This field is required.']}
+
               />
             </Grid>
           </Grid>
@@ -199,7 +244,7 @@ export default function SignUp() {
             variant='contained'
             color='primary'
             className={classes.submit}
-            onClick={onSubmitHandler}
+            // onClick={onSubmitHandler}
           >
             Sign Up
           </Button>
@@ -210,7 +255,7 @@ export default function SignUp() {
               </Typography>
             </Grid>
           </Grid>
-        </form>
+        </ValidatorForm>
         {/* </ThemeProvider> */}
       </div>
       {/* <Box mt={5} className={classes.bottom}>

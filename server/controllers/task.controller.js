@@ -1,3 +1,4 @@
+const { Category } = require('../models/category.model');
 const { Task } = require('../models/task.model');
 const { User } = require('../models/user.model');
 
@@ -43,7 +44,7 @@ module.exports = {
       .then(task => res.json({ message: 'success', results: task }))
       .catch(err => res.json({ message: 'error', results: err }));
   },
-
+  
   //Delete methods --> app.delete
   deleteTask: (req, res) => {
     Task.findByIdAndDelete({ _id: req.params.id })

@@ -10,6 +10,8 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import SimpleSnackbar from '../components/SimpleSnackBar';
 
 // function Copyright() {
 //   return (
@@ -81,12 +83,47 @@ const SignInSide = () => {
     email: '',
     password: '',
   });
+  const [openSnack, setOpenSnack] = useState(false);
+  const [snack, setSnack] = useState('');
+  
+
+  const handleOpenSnackBar = (snack) => {
+    setOpenSnack(true);
+    setSnack(snack); 
+  };
+
+  const handleCloseSnackBar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpenSnack(false);
+  };
+
   const onChangeHandler = e => {
     setUserLogin({
       ...userLogin,
       [e.target.name]: e.target.value,
     });
   };
+
+  // const validator = e => {
+  //   let value = (e.target.value);
+  //   let valid = Boolean;
+  //   const validator = /^([\w-\.]+@([\w-]+\.)+[\w-]+)?$/;
+  //   if(e.target.name === 'email'){
+  //       let valid = validator.test(value);
+  //       console.log(valid);
+  //       if(!valid){
+  //         setEmailError(true);
+  //         setEmailHelperText("Invalid Email");
+  //       }
+  //       else if (valid){
+  //         setEmailError(false);
+  //         setEmailHelperText("");
+  //       }
+  //   }
+  // }
 
   const onSubmitHandler = e => {
     e.preventDefault();
@@ -95,16 +132,16 @@ const SignInSide = () => {
         withCredentials: true,
       })
       .then(response => {
-        // validate here...
         setUserLogin({
           email: '',
           password: '',
         });
         navigate('/');
       })
-      .catch(err => {
+      .catch(err => {console.log(err);
       });
-    navigate('/signup');
+      handleOpenSnackBar("Email and password do not match!");
+    navigate('/signin');
   };
 
   return (
@@ -117,36 +154,45 @@ const SignInSide = () => {
             {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
           </Typography>
           <i className='fa fa-2x fa-sign-in' aria-hidden='true'></i>
-          <form
+          <ValidatorForm
             className={classes.form}
             onSubmit={e => {
               onSubmitHandler(e);
             }}
             noValidate
           >
-            <TextField
+            <TextValidator
               variant='outlined'
+              validators={['required', 'isEmail']}
+              errorMessages={['This field is required', 'Invalid email.']}
               margin='normal'
               required
               fullWidth
               id='email'
               label='Email Address'
               name='email'
+              value={userLogin.email}
               autoComplete='email'
               autoFocus
               onChange={e => {
                 onChangeHandler(e);
               }}
+              // onBlur={e => {
+              //   validator(e);
+              // }}
             />
-            <TextField
+            <TextValidator
               variant='outlined'
               margin='normal'
               required
               fullWidth
+              validators={['required']}
+              errorMessages={['Password is required.']}
               name='password'
               label='Password'
               type='password'
               id='password'
+              value={userLogin.password}
               autoComplete='current-password'
               onChange={e => {
                 onChangeHandler(e);
@@ -171,9 +217,14 @@ const SignInSide = () => {
             {/* <Box mt={5}>
               <Copyright />
             </Box> */}
-          </form>
+          </ValidatorForm>
         </div>
       </Grid>
+      <SimpleSnackbar 
+      snack={snack}
+      openSnack={openSnack}
+      handleOpenSnackBar={handleOpenSnackBar}
+      handleCloseSnackBar={handleCloseSnackBar} />
     </Grid>
   );
 };

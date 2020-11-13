@@ -207,7 +207,6 @@ const ScheduleComponent = props => {
     onClickHandler(e, id);
     setOpenEdit(true);
   };
-  console.log(task);
 
   const handleCloseEdit = () => {
     setOpenEdit(false);
@@ -273,6 +272,45 @@ const ScheduleComponent = props => {
     result.splice(endIndex, 0, removed);
     return result;
   };
+
+  const getCategoryId = (allCategories) => {
+    let categoryId = [];
+    let categoryLengths = [];
+    for (let i = 0; i<allCategories.length; i++){
+      categoryId.push(allCategories[i]._id);
+      categoryLengths.push(allCategories[i].tasks.length);
+    }
+    return (categoryId, categoryLengths);
+  }
+  console.log(getCategoryId(allCategories));
+
+  const getCategory = (id) => {
+    axios.get('http://localhost:8000/api/categories/' + id, {withCredentials: true})
+    .then(res => {
+      if(res.data.message === 'success'){
+        console.log(res.data.results);
+      }
+    }).catch(err => console.log(err));
+  }
+
+  const getCategoryTaskCounts = (allCategories) => {
+    let categoryIds = [];
+    let categoryList = [];
+    for (let i = 0; i<allCategories.length; i++){
+      categoryIds.push(allCategories[i]._id);
+      categoryList = getCategory(allCategories[i]._id);
+    }
+    return (categoryIds, categoryList);
+  }
+  // console.log(getCategoryTaskCounts(allCategories));
+
+
+  const getTaskCounts = (allTasks) => {
+    const count = allTasks.length;
+    const categoryList = allTasks.filter(t => t.category === 'Creative');
+    return (count, categoryList, categoryList.length);
+  }
+  // console.log(getTaskCounts(allTasks));
 
   const onChangeHandler = e => {
     setTask({
@@ -358,8 +396,7 @@ const ScheduleComponent = props => {
     console.log(task);
     setSelectedDate(date);
     task.scheduledAt = date;
-  };
-  console.log(task); 
+  }; 
 
   const onPatchDateHandler = (e, id) => {
     // setSelectedDate(date);
@@ -448,19 +485,21 @@ const ScheduleComponent = props => {
               }}
             className={classes.radioStyle}
             defaultValue=''>
-
-            {allCategories.map((category, catIdx)=> 
-            <FormControlLabel
+              {allCategories.map((category, catIdx)=> 
+              <FormControlLabel
               key={catIdx}
               value={category.name}
-              label={<Typography style={{fontSize:15}}>
-                {category.name}
-              </Typography>}
+              label={
+                <Typography style={{fontSize:15}}>
+                  {category.name}<br></br>
+                  {category.tasks.length === 0 ? (null) : (category.tasks.length)}
+                  {/* {task.name}  */}
+                </Typography>
+              }
               labelPlacement="bottom"
               control={<Radio style={{color:category.color, fontSize:15}}/>}
             />
             )}
-
           </RadioGroup>
         </FormControl>
           {/* <FormControl variant='standard' className={classes.formControl}>
@@ -516,7 +555,7 @@ const ScheduleComponent = props => {
                   {...provided.droppableProps}
                 >
                   <div>
-                    <List dense secondary
+                    <List dense secondary="true"
                     className={classes.list}>
                       {allTasks.map((task, i) =>
                         selectedCategory === task.category &&

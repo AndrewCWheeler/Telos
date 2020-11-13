@@ -1,5 +1,6 @@
 const { Category } = require('../models/category.model');
 const { User } = require('../models/user.model');
+const { Task } = require('../models/task.model');
 
 module.exports = {
 
@@ -12,6 +13,7 @@ module.exports = {
   },
   oneCategory: (req, res) => {
     Category.findOne({ _id: req.params.id })
+      .populate('tasks')
       .then(category => res.json({ message: 'success', results: category }))
       .catch(err => res.json({ message: 'error', results: err }));
   },
@@ -32,7 +34,9 @@ module.exports = {
 
   //Update methods --> app.put or app.patch
   editCategory: (req, res) => {
-    Category.findByIdAndUpdate({ _id: req.params.id }, req.body, {
+    Category.findByIdAndUpdate(
+      { _id: req.params.id }, 
+      { $push: { tasks: req.body.id}}, {
       runValidators: true,
       new: true,
       useFindAndModify: false,

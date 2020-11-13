@@ -43,7 +43,7 @@ const Main = (props) => {
         {/* <CategoryList path='/categorylist' /> */}
         {/* <ChunkComponent path='/chunk' /> */}
       </Router>
-      <BottomNavComponent 
+      <BottomNavComponent
       navigatePage={navigatePage}
       navValue={navValue}
       setNavValue={setNavValue}

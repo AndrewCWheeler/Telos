@@ -291,6 +291,7 @@ const DoComponent = () => {
         setAllTasks(response.data.results);
       })
       .catch(error => {
+        console.log(error);
       });
       let three = 'http://localhost:8000/api/categories/user';
       const requestThree = axios.get(three, {withCredentials: true });
@@ -695,7 +696,7 @@ const DoComponent = () => {
                       primary={
                       <Tooltip title="Change Date" placement="right">
                         <Button
-                          onClick={handleOpenCal}
+                          onClick={e => {handleOpenCal(e, task._id)}}
                           className={classes.itemWhite}
                           >
                           <div>

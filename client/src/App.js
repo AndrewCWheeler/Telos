@@ -8,6 +8,7 @@ import 'fontsource-roboto';
 import SignInSide from './views/SignInSide';
 import SignUp from './views/SignUp';
 import Container from '@material-ui/core/Container';
+// import Admin from './views/Admin';
 
 const themeObject = {
   palette: {
@@ -81,6 +82,7 @@ const App = () => {
         <Router>
           <SignInSide path='/signin' />
           <SignUp path='/signup' />
+          {/* <Admin path='/admin' /> */}
           <Main 
           path='/*'
           toggleDarkMode={toggleDarkMode}

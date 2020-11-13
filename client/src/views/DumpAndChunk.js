@@ -34,7 +34,8 @@ const DumpAndChunk = (props) => {
   const [load, setLoad] = useState(0);
   const [allTasks, setAllTasks] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
-  const [selectedIndex, setSelectedIndex] = useState([]);
+  // const [selectedCategoryIdx, setSelectedCategoryIdx] = useState('');
+  const [selectedObject, setSelectedObject] = useState({});
   const [sessionUserId, setSessionUserId] = useState('');
   const [open, setOpen] = useState(false);
   const [openSnack, setOpenSnack] = useState(false);
@@ -122,7 +123,7 @@ const DumpAndChunk = (props) => {
       .then(res => {
         if (res.data.message === 'success') {
           setTask(res.data.results);
-          setSelectedIndex(res.data.results);
+          // setSelectedObject(res.data.results);
         }
       })
       .catch(err => console.log(err));
@@ -136,22 +137,65 @@ const DumpAndChunk = (props) => {
     });
   };
 
-  const onPatchHandler = (e, id, snack) => {
-    task.category = e.target.value;
+  const onChangeChunkHandler = (e) => {
+    setSelectedObject(e.target.value);
+    console.log(selectedObject);
+  };
+  console.log(selectedObject);
+  console.log(selectedObject.name);
+  console.log(selectedObject._id);
+
+  // const handleTaskChange = (selectedObject) => {
+
+  // }
+
+  const onPatchHandler = (e, taskId, cat, snack) => {
+    console.log("Category name:", cat.name);
+    console.log("Category id:", cat._id);
+    // Assign arguments to applicable targets:
+    let catId = '';
+    catId = cat._id;
+    task.labelIdentity = cat._id;
+    task.category = cat.name;
     task.chunked = true;
-    axios
-      .patch('http://localhost:8000/api/tasks/' + id, task, {
-        withCredentials: true,
-      })
+
+    // Split up axios calls to update both task component and category component:
+    let one = `http://localhost:8000/api/tasks/${taskId}`
+    const requestOne = axios.patch(one, task, { withCredentials: true });
+    requestOne
       .then(res => {
-        if (res.data.message = 'success'){
+        if(res.data.message === 'success'){
           handleOpenSnackBar(snack);
-          removeFromDom(id);
+          removeFromDom(taskId);
           handleClose();
         }
       })
       .catch(err => console.log(err));
+    let two = `http://localhost:8000/api/categories/${catId}`;
+    const requestTwo = axios.patch(two, task, { withCredentials: true});
+    requestTwo
+      .then(res => {
+        if (res.data.message === 'success'){
+          console.log("YOU ARE A SUCCESS TODAY!");
+        }
+      }).catch(err => console.log("Something went wrong, but you are still loved.", err));
+    axios
+      .all([requestOne, requestTwo])
+      .then(
+        axios.spread((...responses) => {
+          const responseOne = responses[0];
+          const responseTwo = responses[1];
+          console.log(responseOne, responseTwo);
+        })
+      ).catch(errors => {
+        console.log(errors);
+      });
   };
+
+  // const passCategoryIdx = (e, cat) => {
+  //   setSelectedCategoryIdx(cat);
+  // }
+  // console.log(selectedCategoryIdx);
 
   const onPatchEditNameHandler = (e, id) => {
     axios
@@ -204,11 +248,15 @@ const DumpAndChunk = (props) => {
         setAllTasks={setAllTasks}
         allCategories={allCategories}
         removeFromDom={removeFromDom}
-        selectedIndex={selectedIndex}
-        setSelectedIndex={setSelectedIndex}
+        selectedObject={selectedObject}
+        setSelectedObject={setSelectedObject}
+        // selectedCategoryIdx={selectedCategoryIdx}
+        // setSelectedCategoryIdx={setSelectedCategoryIdx}
         onPatchHandler={onPatchHandler}
         onChangeHandler={onChangeHandler}
+        onChangeChunkHandler={onChangeChunkHandler}
         onPatchEditNameHandler={onPatchEditNameHandler}
+        // passCategoryIdx={passCategoryIdx}
       />
       <SimpleSnackbar 
       snack={snack}

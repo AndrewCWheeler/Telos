@@ -105,6 +105,9 @@ const useStyles = makeStyles(theme => ({
 
 const AllDumpedList = props => {
   const {
+    // selectedCategoryIdx,
+    // setSelectedCategoryIdx,
+    // passCategoryIdx,
     task, 
     setTask,
     open,
@@ -114,11 +117,11 @@ const AllDumpedList = props => {
     allCategories,
     setAllTasks,
     onClickHandler,
-    onChunkHandler,
+    onChangeChunkHandler,
     removeFromDom,
     onPatchHandler,
-    selectedIndex,
-    setSelectedIndex,
+    selectedObject,
+    setSelectedObject,
     onChangeHandler,
     onPatchEditNameHandler,
 
@@ -222,7 +225,7 @@ const AllDumpedList = props => {
         BackdropProps={{
           timeout: 500,
         }}
-      >
+        >
         <DialogContent className={classes.dialogStyle}>
           <Typography className={classes.title}>
             <h2>
@@ -241,45 +244,49 @@ const AllDumpedList = props => {
             onChangeHandler(e);
           }}
           // onClick={e => {
-          //   onClickHandler(e, task._id);
-          // }}
-          onBlur={e => {
-            onPatchEditNameHandler(e, task._id);
-          }}
-          placeholder={task.name}
-          name='name'
-          value={task.name}
-          />
+            //   onClickHandler(e, task._id);
+            // }}
+            onBlur={e => {
+              onPatchEditNameHandler(e, task._id);
+            }}
+            placeholder={task.name}
+            name='name'
+            value={task.name}
+            />
           <FormControl
             variant='standard'
             className={classes.formControl}
-          >
+            >
             <InputLabel
               // className={classes.textModal}
               id='category'
-            >
+              >
               Chunk...
             </InputLabel>
             <Select
               // native
               // className={classes.textModal}
-              value={task.category}
+              value={selectedObject}
               onChange={e => {
-                onPatchHandler(e, task._id, 'Task Chunked!');
+                onChangeChunkHandler(e);
               }}
               labelId='category'
               label='Chunk...'
-              name='category'
-            >
+              name='categoryObject'
+              >
               <MenuItem aria-label='None' value=''><em>None</em></MenuItem>
               {allCategories.map((category, catIdx) => 
-                <MenuItem key={catIdx} value={category.name}
-                style={{color:category.color}}
+                <MenuItem
+                  key={catIdx}
+                  value={category}
+                  placeholder={category.name}
+                  style={{color:category.color}}
+                  // onChange={e => {passCategoryIdx(e, category.name)}}
                 >
-                  <LabelIcon
-                    style={{fontSize:18,marginRight:12}}
-                  />
-                  {category.name}
+                    <LabelIcon
+                      style={{fontSize:18,marginRight:12}}
+                    />
+                    {category.name}
                 </MenuItem>
               )}
             </Select>
@@ -296,7 +303,9 @@ const AllDumpedList = props => {
           <IconButton
             className={classes.icon}
             aria-label='update task'
-            onClick={handleClose}
+            onClick={e => {
+              onPatchHandler(e, task._id, selectedObject, 'Task Chunked!');
+            }}
             >
             <LibraryAddIcon />
           </IconButton>
