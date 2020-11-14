@@ -36,6 +36,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import { red } from '@material-ui/core/colors';
 import { FormControlLabel, Menu, MenuItem, Snackbar, Switch } from '@material-ui/core';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
+import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 
 const drawerWidth = 240;
 
@@ -349,6 +350,17 @@ const PersistentDrawer = (props) => {
             <LabelIcon />
           </ListItemIcon>
           <ListItemText primary='Categories' />
+        </ListItem>
+
+        <ListItem 
+        button
+        value='trajectory'
+        onClick={e => {navigatePage(e, 'trajectory')}}
+        >
+          <ListItemIcon>
+            <TrackChangesIcon />
+          </ListItemIcon>
+          <ListItemText primary='Trajectory' />
         </ListItem>
       </List>
       <Divider />

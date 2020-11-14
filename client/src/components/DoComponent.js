@@ -344,12 +344,18 @@ const DoComponent = () => {
     }
     return found;
   });
+
+  console.log(filteredTasks);
+  const sortedTasks = filteredTasks.sort((a, b) => a.priority - b.priority);
+  console.log(filteredTasks);
+  console.log(sortedTasks);
   // setFiltered(filteredTasks);
 
   const reorder = (filteredTasks, startIndex, endIndex) => {
     const result = Array.from(filteredTasks);
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
+    console.log(result);
     return result;
   };
 
@@ -648,7 +654,7 @@ const DoComponent = () => {
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
                       innerRef={provided.innerRef}
-                      key={i}
+                      key={task._id}
                       // role={undefined}
                       // onClick={handleToggle(i)}
                       >

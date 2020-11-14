@@ -12,6 +12,7 @@ import BottomNavComponent from '../components/BottomNavComponent';
 // import ChunkComponent from '../components/ChunkComponent';
 import PersistentDrawer from '../components/PersistentDrawer';
 import CategoryComponent from '../components/CategoryComponent';
+import Trajectory from '../components/Trajectory';
 // import CategoryList from '../components/CategoryList';
 
 
@@ -29,6 +30,8 @@ const Main = (props) => {
       navigate('/do');
     } else if (navValue === 'category') {
       navigate('/category');
+    } else if (navValue === 'trajectory') {
+      navigate('/trajectory');
     }
   };
   return (
@@ -40,6 +43,7 @@ const Main = (props) => {
         <ScheduleComponent path='/schedule' />
         <DoComponent path='/do' />
         <Admin path='/admin' />
+        <Trajectory path='/trajectory' />
         {/* <CategoryList path='/categorylist' /> */}
         {/* <ChunkComponent path='/chunk' /> */}
       </Router>

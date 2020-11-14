@@ -7,7 +7,8 @@ module.exports = {
   // Read methods --> app.get
   allUserCategories: (req, res) => {
     Category.find({ owner: req.session.userId })
-      .populate('categories')
+      .populate({
+        path: 'tasks'})
       .then(categories => res.json({ message: 'success', results: categories }))
       .catch(err => res.json({ message: 'error', results: err }));
   },
@@ -36,7 +37,7 @@ module.exports = {
   editCategory: (req, res) => {
     Category.findByIdAndUpdate(
       { _id: req.params.id }, 
-      { $push: { tasks: req.body.id}}, {
+      { $push: { tasks: req.body}}, {
       runValidators: true,
       new: true,
       useFindAndModify: false,

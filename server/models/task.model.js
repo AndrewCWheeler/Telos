@@ -24,6 +24,10 @@ const TaskSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    priority: {
+      type: Number,
+      default: 0, 
+    },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

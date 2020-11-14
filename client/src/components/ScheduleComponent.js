@@ -254,6 +254,8 @@ const ScheduleComponent = props => {
         });
     }, [load]);
 
+    console.log(allCategories);
+
   const onClickHandler = (e, id) => {
     axios
       .get(`http://localhost:8000/api/tasks/${id}`, { withCredentials: true })
@@ -273,16 +275,16 @@ const ScheduleComponent = props => {
     return result;
   };
 
-  const getCategoryId = (allCategories) => {
-    let categoryId = [];
-    let categoryLengths = [];
-    for (let i = 0; i<allCategories.length; i++){
-      categoryId.push(allCategories[i]._id);
-      categoryLengths.push(allCategories[i].tasks.length);
-    }
-    return (categoryId, categoryLengths);
-  }
-  console.log(getCategoryId(allCategories));
+  // const getCategoryId = (allCategories) => {
+  //   let categoryId = [];
+  //   let categoryLengths = [];
+  //   for (let i = 0; i<allCategories.length; i++){
+  //     categoryId.push(allCategories[i]._id);
+  //     categoryLengths.push(allCategories[i].tasks.length);
+  //   }
+  //   return (categoryId, categoryLengths);
+  // }
+  // console.log(getCategoryId(allCategories));
 
   const getCategory = (id) => {
     axios.get('http://localhost:8000/api/categories/' + id, {withCredentials: true})
@@ -304,13 +306,28 @@ const ScheduleComponent = props => {
   }
   // console.log(getCategoryTaskCounts(allCategories));
 
-
-  const getTaskCounts = (allTasks) => {
-    const count = allTasks.length;
-    const categoryList = allTasks.filter(t => t.category === 'Creative');
-    return (count, categoryList, categoryList.length);
+  const unscheduledTasks = (arr, category) => {
+    let filtered = '';
+    // let count = 0;
+    filtered = arr.filter(t => t.scheduled !== true && t.category === category);
+    console.log(filtered);
+    if (filtered.length > 0){
+      return filtered.length;
+    } else return null; 
   }
-  // console.log(getTaskCounts(allTasks));
+  console.log(unscheduledTasks(allTasks));
+
+
+
+  // const getTaskCounts = (allCategories) => {
+  //   const tasks = [];
+  //   for (let i = 0; i<allCategories.length; i++){
+  //     tasks.push(allCategories[i].tasks);
+  //     console.log(tasks);
+  //   }
+  //   return tasks;
+  // }
+  // console.log(getTaskCounts(allCategories));
 
   const onChangeHandler = e => {
     setTask({
@@ -485,15 +502,16 @@ const ScheduleComponent = props => {
               }}
             className={classes.radioStyle}
             defaultValue=''>
-              {allCategories.map((category, catIdx)=> 
+              {allCategories.map((category, catIdx)=>
               <FormControlLabel
               key={catIdx}
               value={category.name}
               label={
                 <Typography style={{fontSize:15}}>
                   {category.name}<br></br>
-                  {category.tasks.length === 0 ? (null) : (category.tasks.length)}
-                  {/* {task.name}  */}
+                  {unscheduledTasks(allTasks, category.name)}
+                  {/* {category.tasks.length !== 0 ? category.tasks.length : (null)} */}
+                  
                 </Typography>
               }
               labelPlacement="bottom"

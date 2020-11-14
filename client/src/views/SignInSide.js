@@ -139,8 +139,8 @@ const SignInSide = () => {
         navigate('/');
       })
       .catch(err => {console.log(err);
+        handleOpenSnackBar("Email and password do not match!");
       });
-      handleOpenSnackBar("Email and password do not match!");
     navigate('/signin');
   };
 

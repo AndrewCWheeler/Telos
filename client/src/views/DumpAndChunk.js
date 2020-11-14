@@ -48,6 +48,7 @@ const DumpAndChunk = (props) => {
     scheduled: false,
     scheduledAt: '',
     completed: false,
+    priority: 0,
   });
 
   const handleOpenSnackBar = (snack) => {
@@ -133,6 +134,7 @@ const DumpAndChunk = (props) => {
     setTask({
       ...task,
       owner: sessionUserId,
+      priority: 3,
       [e.target.name]: e.target.value,
     });
   };
