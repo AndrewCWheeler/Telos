@@ -49,6 +49,7 @@ import EventIcon from '@material-ui/icons/Event';
 import EditIcon from '@material-ui/icons/Edit';
 import UpdateIcon from '@material-ui/icons/Update';
 import Button from '@material-ui/core/Button';
+import Meditate from '../images/Meditate.svg';
 
 import 'date-fns';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -170,6 +171,7 @@ const ScheduleComponent = props => {
   const [openEditTask, setOpenEditTask] = useState(false);
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
+  const [show, setShow] = useState(true);
   
 
   const handleOpenSnackBar = (snack) => {
@@ -461,6 +463,9 @@ const ScheduleComponent = props => {
     setAllTasks(items);
   };
 
+  const hideMeditate = (x) => {
+    setShow(x);
+  }
   // const toUpperCaseFilter = d => {
   //   return d.toUpperCase();
   // };
@@ -605,7 +610,8 @@ const ScheduleComponent = props => {
                                     </IconButton>
                                 </Tooltip>
                                 {allCategories.map((category, catIdx) => 
-                                  task.category === category.name ? (
+                                  task.category === category.name ?
+                                  (
                                 <ListItemText
                                 disableTypography
                                 textoverflow='ellipsis'

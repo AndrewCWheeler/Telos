@@ -42,10 +42,24 @@ module.exports = {
       useFindAndModify: false,
     }).then(task=> { return 
     }
-      
       )
       .then(task => res.json({ message: 'success', results: task }))
       .catch(err => res.json({ message: 'error', results: err }));
+  },
+
+  // Update the filtered selection (array) of task objects priority property only.
+  updateTasks: (req, res) => {
+    let array = req.body;
+    Task.bulkWrite(
+      array.map((data) => 
+      ({
+        updateOne: {
+          filter: { _id: data._id },
+          update: { $set: data }
+        }
+      }))
+    ).then(taskArr => res.json({message: 'success', results: taskArr }))
+    .catch(err => res.json({message: 'error', results: err }));
   },
   
   //Delete methods --> app.delete

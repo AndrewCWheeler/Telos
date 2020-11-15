@@ -10,6 +10,7 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import SettingsIcon from '@material-ui/icons/Settings';
 import LabelIcon from '@material-ui/icons/Label';
 import { Typography } from '@material-ui/core';
+import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 
 // import Paper from '@material-ui/core/Paper';
 
@@ -74,10 +75,10 @@ const BottomNavComponent = (props) => {
         <BottomNavigationAction
           label={<Typography 
             style={{fontSize:15}}>
-            Categories
+            Trajectory
           </Typography>}
-          value='category'
-          icon={<LabelIcon 
+          value='trajectory'
+          icon={<TrackChangesIcon 
           style={{fontSize:24}}
           />}
         />

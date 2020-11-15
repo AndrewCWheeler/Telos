@@ -28,6 +28,17 @@ module.exports = {
       .then(userTasks => res.json({ message: 'success', results: userTasks }))
       .catch(err => res.json({ message: 'error', results: err }));
   },
+  updateTasks: (req, res) => {
+    User.tasks.bulkWrite(
+      req.body.map((data)=>({
+        updateOne: {
+          filter: { _id: data._id },
+          update: { $set: data }
+        }
+      }))
+    ).then(taskArr => res.json({message: 'success', results: taskArr }))
+    .catch(err => res.json({ message: 'error', results: err}))
+  },
   getAllUserCategories: async (req, res) => {
     await User.findOne({ _id: req.session.userId })
       .populate('categories')

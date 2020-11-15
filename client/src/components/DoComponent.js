@@ -46,9 +46,9 @@ import { MenuItem, RootRef, Tooltip } from '@material-ui/core';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is required for IE 11 support
 import SimpleSnackbar from './SimpleSnackBar';
 import Undo from '@material-ui/icons/Undo';
+import session from 'express-session';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -82,9 +82,6 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(-1, 0, 0),
     color: theme.palette.primary.main,
   },
-  // textMain: {
-  //   color: theme.palette.primary.main,
-  // },
   text: {
     color: theme.palette.text.primary,
     display: 'inline-block',
@@ -158,36 +155,6 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-// const Fade = React.forwardRef(function Fade(props, ref) {
-//   const { in: open, children, onEnter, onExited, ...other } = props;
-//   const style = useSpring({
-//     from: { opacity: 0 },
-//     to: { opacity: open ? 1 : 0 },
-//     onStart: () => {
-//       if (open && onEnter) {
-//         onEnter();
-//       }
-//     },
-//     onRest: () => {
-//       if (!open && onExited) {
-//         onExited();
-//       }
-//     },
-//   });
-
-//   Fade.propTypes = {
-//     children: PropTypes.element,
-//     in: PropTypes.bool.isRequired,
-//     onEnter: PropTypes.func,
-//     onExited: PropTypes.func,
-//   };
-//   return (
-//     <animated.div ref={ref} style={style} {...other}>
-//       {children}
-//     </animated.div>
-//   );
-// });
-
 const DoComponent = () => {
   const [load, setLoad] = useState(0);
   const [task, setTask] = useState({
@@ -195,6 +162,7 @@ const DoComponent = () => {
     category: '',
     chunked: '',
     owner: '',
+    priority: 0,
     scheduled: '',
     scheduledAt: '',
     complete: '',
@@ -227,7 +195,6 @@ const DoComponent = () => {
     if (reason === 'clickaway') {
       return;
     }
-
     setOpenSnack(false);
   };
 
@@ -240,7 +207,6 @@ const DoComponent = () => {
       newChecked.splice(currentIndex, 1);
     }
     setChecked(newChecked);
-    console.log("handleToggled()!!")
   }
 
   const handleOpenCal = (e, id) => {
@@ -250,20 +216,6 @@ const DoComponent = () => {
   const handleCloseCal = () => {
     setOpenCal(false);
   };
-
-  // const handleEditTask = () => {
-  //   setOpenEditTask(true);
-  // };
-  // const handleCloseEditTask = () => {
-  //   setOpenEditTask(false);
-  // };
-
-  // const handleOpenChunk = () => {
-  //   setOpenChunk(true);
-  // };
-  // const handleCloseChunk = () => {
-  //   setOpenChunk(false);
-  // };
   
   const handleOpenEdit = (e, id) => {
     onClickHandler(e, id);
@@ -288,7 +240,11 @@ const DoComponent = () => {
     const requestTwo = axios.get(two, { withCredentials: true });
     requestTwo
       .then(response => {
-        setAllTasks(response.data.results);
+        if (response.data.message = 'success'){
+          let orderedTasks = response.data.results;
+          orderedTasks.sort((a,b) => a.priority - b.priority)
+          setAllTasks(orderedTasks);
+        }
       })
       .catch(error => {
         console.log(error);
@@ -334,22 +290,41 @@ const DoComponent = () => {
     day: 'numeric',
   };
 
+  const assignPriority = (arr) => {
+    // arr.sort((a, b) => a.priority - b.priority); 
+    for (let i=0; i<arr.length; i++){
+      arr[i].priority = i;
+      console.log(arr[i]);
+    }
+    axios.put('http://localhost:8000/api/bulk/' + sessionUserId, arr, {withCredentials: true})
+    .then(response => {
+      console.log(response.data.message);
+      console.log(response.data.results);
+    })
+    .catch(error => {
+      console.log(error);
+    });
+    console.log(arr); 
+    return arr;
+  }
+  
   const filteredTasks = allTasks.filter(tasks => {
     let found = '';
+    let result = '';
     if (
       moment(moment(tasks.scheduledAt)).isSame(dateParameter, 'day') === true 
       && tasks.completed === false
       ) {
-      found = tasks.name;
+      found = tasks;
+      console.log(found);
     }
     return found;
   });
-
-  console.log(filteredTasks);
-  const sortedTasks = filteredTasks.sort((a, b) => a.priority - b.priority);
-  console.log(filteredTasks);
-  console.log(sortedTasks);
-  // setFiltered(filteredTasks);
+  
+  // console.log(assignPriorities(filteredTasks));
+  
+  const sortedTasks = assignPriority(filteredTasks).sort((a, b) => a.priority - b.priority);
+  // console.log(sortedTasks);
 
   const reorder = (filteredTasks, startIndex, endIndex) => {
     const result = Array.from(filteredTasks);
@@ -396,17 +371,10 @@ const DoComponent = () => {
       })
       .then(res => {
         if (res.data.message === 'success') {
-          console.log(res.data.results);
           removeFromDom(id);
           handleCloseEdit();
           handleOpenSnackBar(snack);
         }
-        // let count = load;
-        // if (count >= 0) {
-        //   count++;
-        //   setLoad(count);
-        // }
-        // console.log(load);
       })
       .catch(err => console.log(err));
   };
@@ -423,36 +391,9 @@ const DoComponent = () => {
           // removeFromDom(id);
           handleCloseEdit();
         }
-        // let count = load;
-        // if (count >= 0) {
-        //   count++;
-        //   setLoad(count);
-        // }
       })
       .catch(err => console.log(err));
   };
-
-  // const onPatchHandler = (e, i) => {
-  //   e.preventDefault();
-  //   if (task.chunked === true) {
-  //     axios
-  //       .patch('http://localhost:8000/api/tasks/' + i, task, {
-  //         withCredentials: true,
-  //       })
-  //       .then(res => {
-  //         let count = load;
-  //         if (count >= 0) {
-  //           count++;
-  //           setLoad(count);
-  //         }
-  //       })
-  //       .catch(err => console.log(err));
-  //   }
-  // };
-
-  // const onSelectHandler = e => {
-  //   setSelectedCategory(e.target.value);
-  // };
 
   const onChangeDate = (date, id) => {
     setSelectedDate(date);
@@ -460,7 +401,6 @@ const DoComponent = () => {
   };
 
   const onPatchDateHandler = (e, id, snack) => {
-    // setSelectedDate(date);
     task.scheduledAt = selectedDate;
     task.scheduled = true;
     axios
@@ -469,16 +409,10 @@ const DoComponent = () => {
       })
       .then(res => {
         if(res.data.message = 'success') {
-          console.log(res.data.results);
           removeFromDom(id);
           handleCloseCal();
           handleOpenSnackBar(snack);
         };
-        // let count = load;
-        // if (count >= 0) {
-        //   count++;
-        //   setLoad(count);
-        // }
       })
       .catch(err => console.log(err));
   };
@@ -509,52 +443,23 @@ const DoComponent = () => {
     axios.get(`http://localhost:8000/api/tasks/${id}`, {withCredentials: true})
     .then(res => { 
       let completedTask = {};
-      console.log(res.data.message);
-      console.log(res.data.results);
-      console.log(res.data.results.completed);
       completedTask = res.data.results;
       completedTask.completed = true;
       return axios.patch(`http://localhost:8000/api/tasks/${id}`, completedTask, {withCredentials: true})
       .then(res => {
         if (res.data.message === 'success'){
-          console.log(res.data.message);
           removeFromDom(id);
           handleOpenSnackBar(snack);
         }
       }).catch(err=> console.log(err));
     }).catch(err => console.log(err));
-
-    // axios.patch(`http://localhost:8000/api/tasks/${id}`, task, { withCredentials: true })
-    // .then(res => {
-    //   if (res.data.message === 'success') {
-    //   removeFromDom();
-    //   setTask({
-    //     name: '',
-    //     category: '',
-    //     chunked: false,
-    //     scheduled: false,
-    //     scheduledAt: '',
-    //     completed: false,
-    //     owner: '',
-    //   });
-    //   let count = load;
-    //   if (count >= 0) {
-    //     count++;
-    //     setLoad(count);
-    //   }
-    // }})
-    // .catch(err => console.log(err));
   };
 
-  // const toUpperCaseFilter = d => {
-  //   return d.toUpperCase();
-  // };
-
   const handleDateParameter = date => {
-    console.log(date);
-    console.log(typeof date);
-    console.log(date.toLocaleString('en-US', DATE_OPTIONS));
-    console.log(moment.utc(date));
+    // console.log(date);
+    // console.log(typeof date);
+    // console.log(date.toLocaleString('en-US', DATE_OPTIONS));
+    // console.log(moment.utc(date));
     setDateParameter(date);
   };
 
@@ -562,13 +467,6 @@ const DoComponent = () => {
     <Container className={classes.root}>
       <CssBaseline />
       <div style={{marginTop:'90px'}}>
-      {/* <Typography
-        variant='h2'
-        // component='h2'
-        className={classes.title}
-      >
-        {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
-      </Typography> */}
       <Typography 
       className={classes.title}
       variant='h5'>
@@ -585,7 +483,7 @@ const DoComponent = () => {
       >
         <CssBaseline />
         <Grid container justify='space-around'>
-          <DatePicker
+          <KeyboardDatePicker
 
             className={classes.primaryIconStyle}
             margin='normal'
@@ -603,28 +501,6 @@ const DoComponent = () => {
           />
         </Grid>
       </MuiPickersUtilsProvider>
-      {/* <Grid container direction='row' justify='center'>
-        <FormGroup row>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={dense}
-                onChange={event => setDense(event.target.checked)}
-              />
-            }
-            label='Enable dense'
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={secondary}
-                onChange={event => setSecondary(event.target.checked)}
-              />
-            }
-            label='Enable secondary text'
-          />
-        </FormGroup>
-      </Grid> */}
 
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId='droppable'>
@@ -633,13 +509,13 @@ const DoComponent = () => {
               rootRef={provided.innerRef}
               {...provided.droppableProps}
             >
-              <div>
+              {/* <div> */}
                 <List 
                 dense
-                secondary
+                secondary="true"
                 className={classes.list}
                 >
-                {filteredTasks.map((task, i) =>
+                {sortedTasks.map((task, i) =>
                   task.chunked && task.scheduled ? (
                   <Draggable
                     draggableId={task._id}
@@ -649,7 +525,7 @@ const DoComponent = () => {
                     {provided => (
                       <ListItem
                       className={classes.listItem}
-                      ContainerProps={{ ref: provided.innerRef }}
+                      // ContainerProps={{ ref: provided.innerRef }}
                       id='Task'
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
@@ -736,7 +612,7 @@ const DoComponent = () => {
                 )
               )}
             </List>
-          </div>
+          {/* </div> */}
           {provided.placeholder}
           </RootRef>
           )}
@@ -860,7 +736,6 @@ const DoComponent = () => {
         </DialogContent>
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
           <CssBaseline />
-          {/* <Grid container justify='space-around'> */}
           <KeyboardDatePicker
             color="primary"
             key={task.scheduledAt}
@@ -883,7 +758,6 @@ const DoComponent = () => {
               'aria-label': 'change date',
             }}
           />
-          {/* </Grid> */}
         </MuiPickersUtilsProvider>
         {/* <IconButton edge='end' aria-label='delete'>
           <DeleteComponent

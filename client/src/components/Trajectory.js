@@ -3,15 +3,21 @@ import axios from 'axios';
 import { navigate } from '@reach/router';
 import { Radar }  from 'react-chartjs-2';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { withStyles } from '@material-ui/core/styles';
 // const randomColor = require('../lib/randomColor')
+
 
 const useStyles = makeStyles(theme => ({
   root: {
-    width: '100%',
-    maxWidth: 840,
+    // width: '100%',
+    height: '100%',
+    // maxWidth: 840,
+    marginTop: 90,
+    marginBottom: 90,
     // flexGrow: 1,
     },
+  chart: {
+    color: theme.palette.text.primary,
+  },
 }));
 
 const Trajectory = () => {
@@ -21,8 +27,8 @@ const Trajectory = () => {
   const [load, setLoad] = useState('');
 
   const classes = useStyles();
-  
 
+  const textPrimary = classes.chart;
 
   useEffect(() => {
     let one = 'http://localhost:8000/api/users/one';
@@ -96,7 +102,7 @@ const data = {
     labels: myLabels,
     datasets: [
       {
-        label: "Week 1",
+        label: "Completed",
         backgroundColor: "rgba(220,220,220,0.2)",
         pointBackgroundColor: "rgba(220,220,220,1)",
         data: completed
@@ -104,14 +110,7 @@ const data = {
         label: 'Hidden dataset',
         hidden: true,
         data: [
-          1,
-          0,
-          2,
-          0,
-          0,
-          0,
-          1,
-          2
+          null
         ]
       }, {
         label: "My Second dataset",
@@ -130,16 +129,14 @@ const data = {
     legend: {
       position: 'top',
       labels: {
-        fontColor: '#fff',
+        // fontColor: textPrimary,
         fontSize: 18,
       }
     },
-    labels: {
-      fontColor: '#fff',
-    },
     title: {
       display: true,
-      text: 'Trajectory'
+      text: 'Trajectory',
+      fontSize: 21,
     },
     scale: {
       reverse: false,
@@ -155,14 +152,28 @@ const data = {
           'violet'
         ]
       },
+      pointLabels: {
+        fontSize: 15,
+        // fontColor: textPrimary,
+      },
       ticks: {
-        beginAtZero: true
-      }
-    }
+        beginAtZero: true, 
+      },
+      maintainAspectRatio: true,
+    },
   }
   
   return (
-    <Radar data={data} options={options}/>
+    <div className={classes.root}>
+      <Radar
+        className={classes.chart}
+        data={data}
+        options={options}
+        width={42}
+        height={51}
+        style={{paddingTop: 20, paddingBottom: 20}}
+        />
+    </div>
   );
 }
 

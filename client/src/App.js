@@ -8,6 +8,7 @@ import 'fontsource-roboto';
 import SignInSide from './views/SignInSide';
 import SignUp from './views/SignUp';
 import Container from '@material-ui/core/Container';
+
 // import Admin from './views/Admin';
 
 const themeObject = {
@@ -45,6 +46,10 @@ const themeObject = {
       main: '#4caf50',
       dark: '#388e3c',
     },
+    // text: {
+    //   primary: '#fff',
+    //   secondary: 'rgba(255, 255, 255, 0.7)'
+    // },
     // Used by `getContrastText()` to maximize the contrast between
     // the background and the text.
     contrastThreshold: 3,
@@ -80,6 +85,7 @@ const App = () => {
       <Container className='App'>
         <CssBaseline />
         <Router>
+          {/* <LandingPage path='/landing' /> */}
           <SignInSide path='/signin' />
           <SignUp path='/signup' />
           {/* <Admin path='/admin' /> */}

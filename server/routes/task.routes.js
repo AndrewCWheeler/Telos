@@ -19,5 +19,6 @@ module.exports = app => {
   app.get('/api/tasks/:id', authenticate, TaskController.oneTask);
   app.post('/api/tasks/:id', authenticate, TaskController.newTask);
   app.patch('/api/tasks/:id', authenticate, TaskController.editTask);
+  app.put('/api/bulk/:id', authenticate, TaskController.updateTasks);
   app.delete('/api/tasks/:id', authenticate, TaskController.deleteTask);
 };

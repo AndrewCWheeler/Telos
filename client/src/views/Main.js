@@ -19,9 +19,11 @@ import Trajectory from '../components/Trajectory';
 
 const Main = (props) => {
   const {theme, toggleDarkMode, useDarkMode} = props;
+  const [open, setOpen] = useState(false);
   const [navValue, setNavValue] = useState('dump');
   const navigatePage = (e, navValue) => {
     setNavValue(navValue);
+    handleDrawerClose();
     if (navValue === 'dump') {
       navigate('/');
     } else if (navValue === 'schedule') {
@@ -34,6 +36,14 @@ const Main = (props) => {
       navigate('/trajectory');
     }
   };
+    const handleDrawerOpen = () => {
+    setOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
+
   return (
     <div className='center'>
       <CssBaseline />
@@ -44,19 +54,23 @@ const Main = (props) => {
         <DoComponent path='/do' />
         <Admin path='/admin' />
         <Trajectory path='/trajectory' />
-        {/* <CategoryList path='/categorylist' /> */}
-        {/* <ChunkComponent path='/chunk' /> */}
       </Router>
       <BottomNavComponent
-      navigatePage={navigatePage}
-      navValue={navValue}
-      setNavValue={setNavValue}
-      position="fixed"/>
+        navigatePage={navigatePage}
+        navValue={navValue}
+        setNavValue={setNavValue}
+        position="fixed"
+      />
       <PersistentDrawer 
-      navigatePage={navigatePage}
-      navValue={navValue}
-      setNavValue={setNavValue}
-      toggleDarkMode={toggleDarkMode}/>
+        handleDrawerOpen={handleDrawerOpen}
+        handleDrawerClose={handleDrawerClose}
+        open={open}
+        setOpen={setOpen}
+        navigatePage={navigatePage}
+        navValue={navValue}
+        setNavValue={setNavValue}
+        toggleDarkMode={toggleDarkMode}
+      />
     </div>
   );
 };

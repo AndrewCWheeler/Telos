@@ -182,12 +182,11 @@ function HideOnScroll(props) {
 const PersistentDrawer = (props) => {
   const classes = useStyles();
   const theme = useTheme();
-  const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-  const {toggleDarkMode, navigatePage, navValue} = props;
+  const {toggleDarkMode, navigatePage, handleDrawerOpen, handleDrawerClose, open, setOpen, navValue} = props;
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
   
@@ -200,7 +199,6 @@ const PersistentDrawer = (props) => {
     if (reason === 'clickaway') {
       return;
     }
-
     setOpenSnack(false);
   };
 
@@ -221,13 +219,13 @@ const PersistentDrawer = (props) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
+  // const handleDrawerOpen = () => {
+  //   setOpen(true);
+  // };
 
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
+  // const handleDrawerClose = () => {
+  //   setOpen(false);
+  // };
 
   // const navigateDump = (e) => {
   //   navigate('/');

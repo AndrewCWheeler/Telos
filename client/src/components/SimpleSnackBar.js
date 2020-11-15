@@ -17,7 +17,7 @@ const SimpleSnackbar = props => {
       {/* <Button onClick={handleClick}>Open simple snackbar</Button> */}
       <Snackbar
         anchorOrigin={{
-          vertical: 'bottom',
+          vertical: 'top',
           horizontal: 'center',
         }}
         open={openSnack}
