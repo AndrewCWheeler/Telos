@@ -226,7 +226,7 @@ const Admin = () => {
         })
       )
       .catch(errors => {
-        navigate('/signup');
+        navigate('/landing');
       });
   }, [load]);
 
@@ -252,7 +252,7 @@ const Admin = () => {
       .get('http://localhost:8000/api/users/logout', { withCredentials: true })
       .then(response => {
         console.log(response.data.results);
-        navigate('/signup');
+        navigate('/landing');
       })
       .catch(err => console.log(err));
   };

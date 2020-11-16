@@ -8,6 +8,7 @@ import 'fontsource-roboto';
 import SignInSide from './views/SignInSide';
 import SignUp from './views/SignUp';
 import Container from '@material-ui/core/Container';
+import LandingPage from './views/LandingPage/LandingPage';
 
 // import Admin from './views/Admin';
 
@@ -46,6 +47,12 @@ const themeObject = {
       main: '#4caf50',
       dark: '#388e3c',
     },
+    background: {
+      default: '#252525',
+      // default: '#0f0f16',
+      paper: '#363636',
+    },
+    
     // text: {
     //   primary: '#fff',
     //   secondary: 'rgba(255, 255, 255, 0.7)'
@@ -82,10 +89,12 @@ const App = () => {
 
   return (
     <ThemeProvider theme={themeConfig}>
-      <Container className='App'>
+      <div
+      className='App'
+      >
         <CssBaseline />
         <Router>
-          {/* <LandingPage path='/landing' /> */}
+          <LandingPage path='/landing' />
           <SignInSide path='/signin' />
           <SignUp path='/signup' />
           {/* <Admin path='/admin' /> */}
@@ -95,7 +104,7 @@ const App = () => {
           // themeObject={themeObject}
           />
         </Router>
-      </Container>
+      </div>
     </ThemeProvider>
   );
 }

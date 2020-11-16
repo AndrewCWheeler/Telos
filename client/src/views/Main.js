@@ -5,16 +5,18 @@ import { Container } from '@material-ui/core';
 import DumpAndChunk from './DumpAndChunk';
 // import CreateCategories from './CreateCategories';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import ScheduleComponent from '../components/ScheduleComponent';
-import DoComponent from '../components/DoComponent';
+import ScheduleComponent from './ScheduleComponent';
+import DoComponent from './DoComponent';
 import Admin from './Admin';
 import BottomNavComponent from '../components/BottomNavComponent';
 // import ChunkComponent from '../components/ChunkComponent';
 import PersistentDrawer from '../components/PersistentDrawer';
 import CategoryComponent from '../components/CategoryComponent';
-import Trajectory from '../components/Trajectory';
+import Trajectory from './Trajectory';
 // import CategoryList from '../components/CategoryList';
 
+// import "assets/scss/material-kit-pro-react.scss?v=1.9.0";
+import "../assets/scss/material-kit-pro-react.scss";
 
 
 const Main = (props) => {

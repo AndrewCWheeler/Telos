@@ -1,3 +1,5 @@
+// Not currently in use. Optional for future design changes. 
+
 import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import AppBar from '@material-ui/core/AppBar';

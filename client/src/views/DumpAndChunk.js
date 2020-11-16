@@ -110,7 +110,7 @@ const DumpAndChunk = (props) => {
         })
       )
       .catch(errors => {
-        navigate('/signup');
+        navigate('/landing');
       });
   }, [load]);
 

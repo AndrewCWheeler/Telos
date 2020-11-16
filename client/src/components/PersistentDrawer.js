@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import clsx from 'clsx';
 import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
@@ -108,9 +108,9 @@ const useStyles = makeStyles((theme) => ({
       display: 'block',
     },
   },
-  // myTitle: {
-  //   color: theme.palette.primary.main,
-  // },
+  myTitle: {
+    margin: theme.spacing(0,0),
+  },
   search: {
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
@@ -188,6 +188,8 @@ const PersistentDrawer = (props) => {
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
   const {toggleDarkMode, navigatePage, handleDrawerOpen, handleDrawerClose, open, setOpen, navValue} = props;
   const [openSnack, setOpenSnack] = useState(false);
+  const [sessionUserId, setSessionUserId] = useState('');
+  const [sessionUserFirstName, setSessionUserFirstName] = useState('');
   const [snack, setSnack] = useState('');
   
   const handleOpenSnackBar = (snack) => {
@@ -219,26 +221,17 @@ const PersistentDrawer = (props) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
-  // const handleDrawerOpen = () => {
-  //   setOpen(true);
-  // };
-
-  // const handleDrawerClose = () => {
-  //   setOpen(false);
-  // };
-
-  // const navigateDump = (e) => {
-  //   navigate('/');
-  // };
-  // const navigateSchedule = (e) => {
-  //   navigate('/schedule');
-  // };
-  // const navigateDo = (e) => {
-  //   navigate('/do');
-  // };
-  // const navigateCategories = (e) => {
-  //   navigate('/category');
-  // }; 
+  useEffect(() => {
+    axios.get('http://localhost:8000/api/users/one', {withCredentials: true})
+      .then(res => {
+        if (res.data.message === 'success'){
+          setSessionUserId(res.data.results._id);
+          setSessionUserFirstName(res.data.results.firstName);
+        }
+      })
+      .catch(err => {console.log(err);
+      });
+  }, []);
 
   const logoutUser = (e, snack) => {
     axios
@@ -248,7 +241,7 @@ const PersistentDrawer = (props) => {
           handleOpenSnackBar(snack);
         }
         console.log(res.data.results);
-        navigate('/signup');
+        navigate('/landing');
       })
       .catch(err => console.log(err));
   };
@@ -417,14 +410,19 @@ const PersistentDrawer = (props) => {
             <MenuIcon />
           </IconButton>
           <Typography 
-            variant="h6" 
+            variant="h5" 
             noWrap
-            // className={classes.myTitle}
+            className={classes.myTitle}
             >
             {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
           </Typography>
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
+          <Typography 
+            style={{marginTop: 12}}
+          >
+            {sessionUserFirstName}
+          </Typography>
           <IconButton
               edge="end"
               aria-label="account of current user"

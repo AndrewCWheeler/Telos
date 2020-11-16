@@ -232,7 +232,7 @@ const CategoryComponent = props => {
         })
       )
       .catch(errors => {
-        navigate('/signup');
+        navigate('/landing');
       });
   }, [load]);
 

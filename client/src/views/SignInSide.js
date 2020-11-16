@@ -30,7 +30,7 @@ const useStyles = makeStyles(theme => ({
   root: {
     height: '100vh',
     margin: theme.spacing(3, 0),
-    backgroundColor: '#212121',
+    backgroundColor: theme.palette.background.default,
   },
   image: {
     backgroundImage: 'url(https://source.unsplash.com/random)',
@@ -41,6 +41,9 @@ const useStyles = makeStyles(theme => ({
         : theme.palette.grey[900],
     backgroundSize: 'cover',
     backgroundPosition: 'center',
+  },
+  backgroundDefault: {
+    backgroundColor: theme.palette.background.default,
   },
   paper: {
     margin: theme.spacing(8, 4),
@@ -55,6 +58,7 @@ const useStyles = makeStyles(theme => ({
   form: {
     width: '100%', // Fix IE 11 issue.
     marginTop: theme.spacing(1),
+
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
@@ -148,7 +152,7 @@ const SignInSide = () => {
     <Grid container component='main' className={classes.root}>
       <CssBaseline />
       <Grid item xs={false} sm={4} md={7} className={classes.image} />
-      <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square >
+      <Grid item xs={12} sm={8} md={5} component={Paper} className={classes.backgroundDefault} elevation={6} square >
         <div className={classes.paper}>
           <Typography variant='h2' gutterBottom className={classes.title}>
             {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
