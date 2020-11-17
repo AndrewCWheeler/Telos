@@ -22,6 +22,15 @@ module.exports = {
       .then(user => res.json({ message: 'success', results: user }))
       .catch(err => res.json({ message: 'error', results: err }));
   },
+  editUser: (req, res) => {
+    User.findByIdAndUpdate({ _id: req.session.userId }, req.body, {
+      runValidators: true,
+      new: true,
+      useFindAndModify: false,
+    })
+    .then(user => res.json({ message: 'success', results: user }))
+    .catch(err => res.json({ message: 'error', results: err }));
+  },
   getAllUserTasks: async (req, res) => {
     await User.findOne({ _id: req.session.userId })
       .populate('tasks')

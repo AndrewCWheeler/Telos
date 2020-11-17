@@ -44,11 +44,12 @@ const DumpAndChunk = (props) => {
     name: '',
     category: '',
     chunked: false,
-    owner: '',
     scheduled: false,
     scheduledAt: '',
     completed: false,
+    completedAt: '',
     priority: 0,
+    owner: '',
   });
 
   const handleOpenSnackBar = (snack) => {

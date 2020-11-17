@@ -161,11 +161,12 @@ const Do = () => {
     name: '',
     category: '',
     chunked: '',
-    owner: '',
-    priority: 0,
     scheduled: '',
     scheduledAt: '',
-    complete: '',
+    completed: '',
+    completedAt: '',
+    priority: 0,
+    owner: '',
   });
   const [allTasks, setAllTasks] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
@@ -447,11 +448,15 @@ const Do = () => {
       let completedTask = {};
       completedTask = res.data.results;
       completedTask.completed = true;
+      completedTask.completedAt = new Date();
+      console.log(completedTask);
+      console.log(typeof completedTask.completedAt);
       return axios.patch(`http://localhost:8000/api/tasks/${id}`, completedTask, {withCredentials: true})
       .then(res => {
         if (res.data.message === 'success'){
           removeFromDom(id);
           handleOpenSnackBar(snack);
+          
         }
       }).catch(err=> console.log(err));
     }).catch(err => console.log(err));

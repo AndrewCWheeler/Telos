@@ -170,7 +170,7 @@ const useStyles = makeStyles((theme) => ({
   },
   link: {
     textDecoration: 'none',
-    color: theme.palette.info.light,
+    color: theme.palette.text.primary,
     "&:active": {
       color: theme.palette.secondary.dark,
     },
@@ -236,7 +236,10 @@ const PersistentDrawer = (props) => {
   const handleProfileMenuNavClose = (e) => {
     handleMenuClose();
     navigatePage(e, 'profile');
-  }
+  };
+  // const handleOnMouseOut = (e) => {
+  //   handleMenuClose();
+  // };
 
   const handleMobileMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget);
@@ -278,6 +281,7 @@ const PersistentDrawer = (props) => {
       transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       open={isMenuOpen}
       onClose={handleMenuClose}
+      // onMouseOut={handleOnMouseOut}
     >
       <MenuItem onClick={handleProfileMenuNavClose}>
           Profile

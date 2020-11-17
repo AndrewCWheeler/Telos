@@ -52,10 +52,12 @@ const DumpComponent = props => {
     name: '',
     category: '',
     chunked: false,
-    owner: '',
     scheduled: false,
     scheduledAt: '',
     completed: false,
+    completedAt: '',
+    owner: '',
+    priority: 0,
   });
 
   const onChangeHandler = e => {
@@ -91,6 +93,7 @@ const DumpComponent = props => {
           scheduled: false,
           scheduledAt: '',
           completed: false,
+          completedAt: '',
           owner: '',
         });
         let count = load;

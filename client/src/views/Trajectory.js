@@ -3,6 +3,9 @@ import axios from 'axios';
 import { navigate } from '@reach/router';
 import { Radar }  from 'react-chartjs-2';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
+import Moment from 'react-moment';
+import 'moment-timezone';
+import moment from 'moment';
 // const randomColor = require('../lib/randomColor')
 
 
@@ -25,6 +28,8 @@ const Trajectory = () => {
   const [allTasks, setAllTasks] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
   const [load, setLoad] = useState('');
+  const [weekDate, setWeekDate] = useState(new Date());
+  const [monthDate, setMonthDate] = useState(new Date());
 
   const classes = useStyles();
 
@@ -85,46 +90,112 @@ const Trajectory = () => {
   }
   const myLabels = getCategoryNames(allCategories);
   
-  const completedTasks = (arr, category) => {
-    let filtered = [];
+  // Get 1 week of completed tasks, 'rolling' (1 week ago from now);
+  const getWeekTasks = (arr, category) => {
+    let filteredLength = [];
+    let filteredTasks = [];
+    let now = moment().calendar();
+    let weekAgo = moment().subtract(7, 'days').calendar();
+    moment(now).toISOString();
+    moment(weekAgo).toISOString();
+    console.log(now);
+    console.log(weekAgo);
+    console.log(now > weekAgo);
+
     for (let i = 0; i<category.length; i++){
-      filtered.push(arr.filter(t => t.completed === true 
-        && t.category === category[i]
+      filteredLength.push(arr.filter(t => t.completed === true
+        && t.category === category[i] 
         ).length);
-      console.log(filtered);
+      console.log(filteredLength);
+      filteredTasks.push(arr.filter(t => (t.completed === true && t.category === category[i]) 
+      && (t.completedAt < now && t.completedAt > weekAgo)
+      ));
+      console.log(filteredTasks);
     }
-    return filtered;  
+    return filteredLength;
   }
-  const completed = completedTasks(allTasks, myLabels);
-  console.log(completed); 
+  const WeeklyCompleted = getWeekTasks(allTasks, myLabels);
+  console.log(WeeklyCompleted); 
+
+  // Get 1 month of completed tasks, 'rolling' (1 month ago from now);
+  const getMonthTasks = (arr, category) => {
+    let filteredLength = [];
+    let filteredTasks = [];
+    let now = moment().calendar();
+    let monthAgo = moment().subtract(1, 'months').calendar();
+    moment(now).toISOString();
+    moment(monthAgo).toISOString();
+    console.log(now);
+    console.log(monthAgo);
+    console.log(now > monthAgo);
+
+    for (let i = 0; i<category.length; i++){
+      filteredLength.push(arr.filter(t => t.completed === true
+        && t.category === category[i] 
+        ).length);
+      console.log(filteredLength);
+      filteredTasks.push(arr.filter(t => (t.completed === true && t.category === category[i]) 
+      && (t.completedAt < now && t.completedAt > monthAgo)
+      ));
+      console.log(filteredTasks);
+    }
+    return filteredLength;
+  }
+
+  const MonthlyCompleted = getMonthTasks(allTasks, myLabels);
+  console.log(MonthlyCompleted);
+
+
+  // Get 1 year of completed tasks, 'rolling' (1 year ago from now);
+  const getYearTasks = (arr, category) => {
+    let filteredLength = [];
+    let filteredTasks = [];
+    let now = moment().calendar();
+    let yearAgo = moment().subtract(1, 'years').calendar();
+    moment(now).toISOString();
+    moment(yearAgo).toISOString();
+    console.log(now);
+    console.log(yearAgo);
+    console.log(now > yearAgo);
+
+    for (let i = 0; i<category.length; i++){
+      filteredLength.push(arr.filter(t => t.completed === true
+        && t.category === category[i] 
+        ).length);
+      console.log(filteredLength);
+      filteredTasks.push(arr.filter(t => (t.completed === true && t.category === category[i]) 
+      && (t.completedAt < now && t.completedAt > yearAgo)
+      ));
+      console.log(filteredTasks);
+    }
+    return filteredLength;
+  }
+
+  const YearlyCompleted = getYearTasks(allTasks, myLabels);
+  console.log(YearlyCompleted); 
   
 const data = {
     labels: myLabels,
     datasets: [
       {
-        label: "Completed",
+        label: "Rolling Weekly",
         backgroundColor: "rgba(220,220,220,0.2)",
         pointBackgroundColor: "rgba(220,220,220,1)",
-        data: completed
+        data: WeeklyCompleted
       }, {
-        label: 'Hidden dataset',
+        label: 'Rolling Monthly',
         hidden: true,
-        data: [
-          null
-        ]
+        data: MonthlyCompleted
       }, {
-        label: "My Second dataset",
+        label: "Rolling Yearly",
         backgroundColor: "rgba(151,187,205,0.2)",
         pointBackgroundColor: "rgba(151,187,205,1)",
         hoverPointBackgroundColor: "#fff",
         pointHighlightStroke: "rgba(151,187,205,1)",
-        data: [
-          null
-        ]
+        data: YearlyCompleted
       }
     ]
   }
-  
   const options = {
     legend: {
       position: 'top',
@@ -172,7 +243,7 @@ const data = {
         width={39}
         height={51}
         style={{paddingTop: 20, paddingBottom: 20}}
-        />
+      />
     </div>
   );
 }

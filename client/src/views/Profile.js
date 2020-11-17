@@ -66,7 +66,7 @@ const useStyles = makeStyles(theme => ({
     // flexGrow: 1,
   },
   card: {
-    maxWidth: 345,
+    maxWidth: 519,
     marginTop: 90,
   },
   media: {
@@ -206,11 +206,12 @@ const Profile = () => {
     name: '',
     category: '',
     chunked: '',
-    owner: '',
-    priority: 0,
     scheduled: '',
     scheduledAt: '',
-    complete: '',
+    completed: '',
+    completedAt: '',
+    owner: '',
+    priority: 0,
   });
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');

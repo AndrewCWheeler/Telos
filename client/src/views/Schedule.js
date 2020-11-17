@@ -154,10 +154,12 @@ const Schedule = props => {
     name: '',
     category: '',
     chunked: '',
-    owner: '',
     scheduled: '',
     scheduledAt: '',
     completed: '',
+    completedAt: '',
+    owner: '',
+    priority: 0,
   });
   const [allTasks, setAllTasks] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
@@ -414,6 +416,8 @@ const Schedule = props => {
   const onChangeDate = (date, id) => {
     console.log(task);
     setSelectedDate(date);
+    console.log(date);
+    console.log(typeof date);
     task.scheduledAt = date;
   }; 
 
