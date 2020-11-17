@@ -5,18 +5,19 @@ import { Container } from '@material-ui/core';
 import DumpAndChunk from './DumpAndChunk';
 // import CreateCategories from './CreateCategories';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import ScheduleComponent from './ScheduleComponent';
-import DoComponent from './DoComponent';
-import Admin from './Admin';
+import Schedule from './Schedule';
+import Do from './Do';
+import Profile from './Profile';
 import BottomNavComponent from '../components/BottomNavComponent';
 // import ChunkComponent from '../components/ChunkComponent';
 import PersistentDrawer from '../components/PersistentDrawer';
-import CategoryComponent from '../components/CategoryComponent';
+import Category from './Category';
 import Trajectory from './Trajectory';
 // import CategoryList from '../components/CategoryList';
 
 // import "assets/scss/material-kit-pro-react.scss?v=1.9.0";
 import "../assets/scss/material-kit-pro-react.scss";
+import Vision from './Vision';
 
 
 const Main = (props) => {
@@ -36,6 +37,10 @@ const Main = (props) => {
       navigate('/category');
     } else if (navValue === 'trajectory') {
       navigate('/trajectory');
+    } else if (navValue === 'profile') {
+      navigate('/profile');
+    } else if (navValue === 'vision') {
+      navigate('/vision');
     }
   };
     const handleDrawerOpen = () => {
@@ -51,11 +56,12 @@ const Main = (props) => {
       <CssBaseline />
       <Router>
         <DumpAndChunk path='/' />
-        <CategoryComponent path='/category' />
-        <ScheduleComponent path='/schedule' />
-        <DoComponent path='/do' />
-        <Admin path='/admin' />
+        <Schedule path='/schedule' />
+        <Do path='/do' />
         <Trajectory path='/trajectory' />
+        <Category path='/category' />
+        <Vision path='/vision' />
+        <Profile path='/profile' />
       </Router>
       <BottomNavComponent
         navigatePage={navigatePage}

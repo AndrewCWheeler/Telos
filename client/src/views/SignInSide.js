@@ -74,9 +74,14 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.secondary.main,
   },
   link: {
+    textDecoration: 'none',
     color: theme.palette.info.light,
     "&:active": {
+      color: theme.palette.secondary.dark,
+    },
+    "&:hover": {
       color: theme.palette.info.main,
+      textDecoration: 'none',
     }
   },
 }));

@@ -26,10 +26,10 @@ import Box from '@material-ui/core/Box';
 import Container from '@material-ui/core/Container';
 import Slide from '@material-ui/core/Slide';
 
-
 import { navigate } from '@reach/router';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import AddIcon from '@material-ui/icons/Add';
+import Avatar from '@material-ui/core/Avatar';
 import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import SettingsIcon from '@material-ui/icons/Settings';
@@ -37,6 +37,7 @@ import { red } from '@material-ui/core/colors';
 import { FormControlLabel, Menu, MenuItem, Snackbar, Switch } from '@material-ui/core';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import TrackChangesIcon from '@material-ui/icons/TrackChanges';
+import CompassCalibrationIcon from '@material-ui/icons/CompassCalibration';
 
 const drawerWidth = 240;
 
@@ -163,6 +164,21 @@ const useStyles = makeStyles((theme) => ({
       display: 'none',
     },
   },
+  avatar: {
+    backgroundColor: red[500],
+    fontSize: 24,
+  },
+  link: {
+    textDecoration: 'none',
+    color: theme.palette.info.light,
+    "&:active": {
+      color: theme.palette.secondary.dark,
+    },
+    "&:hover": {
+      color: theme.palette.info.main,
+      textDecoration: 'none',
+    }
+  },
 }));
 
 function HideOnScroll(props) {
@@ -190,6 +206,7 @@ const PersistentDrawer = (props) => {
   const [openSnack, setOpenSnack] = useState(false);
   const [sessionUserId, setSessionUserId] = useState('');
   const [sessionUserFirstName, setSessionUserFirstName] = useState('');
+  const [firstInitial, setFirstInitial] = useState('');
   const [snack, setSnack] = useState('');
   
   const handleOpenSnackBar = (snack) => {
@@ -212,10 +229,14 @@ const PersistentDrawer = (props) => {
     setMobileMoreAnchorEl(null);
   };
 
-  const handleMenuClose = () => {
+  const handleMenuClose = (e) => {
     setAnchorEl(null);
     handleMobileMenuClose();
   };
+  const handleProfileMenuNavClose = (e) => {
+    handleMenuClose();
+    navigatePage(e, 'profile');
+  }
 
   const handleMobileMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget);
@@ -227,6 +248,7 @@ const PersistentDrawer = (props) => {
         if (res.data.message === 'success'){
           setSessionUserId(res.data.results._id);
           setSessionUserFirstName(res.data.results.firstName);
+          setFirstInitial(res.data.results.firstName.charAt());
         }
       })
       .catch(err => {console.log(err);
@@ -257,12 +279,13 @@ const PersistentDrawer = (props) => {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem onClick={handleProfileMenuNavClose}>
+          Profile
+      </MenuItem>
       <MenuItem>
         <Typography>
           <Link
-          color="secondary"
+          className={classes.link}
           onClick={e => {logoutUser(e, "Successfully logged out!")}}
           >
             Logout
@@ -289,8 +312,11 @@ const PersistentDrawer = (props) => {
           aria-controls="primary-search-account-menu"
           aria-haspopup="true"
           color="inherit"
+          style={{fontSize: 24}}
         >
-          <AccountCircle />
+          <Avatar aria-label="user" className={classes.avatar}>
+            {firstInitial}
+          </Avatar>
         </IconButton>
         <p>Profile</p>
       </MenuItem>
@@ -332,6 +358,21 @@ const PersistentDrawer = (props) => {
           </ListItemIcon>
           <ListItemText primary='Do' />
         </ListItem>
+
+        <ListItem 
+        button
+        value='trajectory'
+        onClick={e => {navigatePage(e, 'trajectory')}}
+        >
+          <ListItemIcon>
+            <TrackChangesIcon />
+          </ListItemIcon>
+          <ListItemText primary='Trajectory' />
+        </ListItem>
+      </List>
+        <Divider />
+
+      <List>
         <ListItem 
         button
         value='category'
@@ -345,13 +386,13 @@ const PersistentDrawer = (props) => {
 
         <ListItem 
         button
-        value='trajectory'
-        onClick={e => {navigatePage(e, 'trajectory')}}
+        value='vision'
+        onClick={e => {navigatePage(e, 'vision')}}
         >
           <ListItemIcon>
-            <TrackChangesIcon />
+            <CompassCalibrationIcon />
           </ListItemIcon>
-          <ListItemText primary='Trajectory' />
+          <ListItemText primary='Vision' />
         </ListItem>
       </List>
       <Divider />
@@ -365,6 +406,16 @@ const PersistentDrawer = (props) => {
         Dark Mode
         {/* <FormControlLabel control = {<Switch onClick={toggleDarkMode}/>} /> */}
       </ListItem>
+      <ListItem 
+        button
+        value='profile'
+        onClick={e => {navigatePage(e, 'profile')}}
+        >
+          <ListItemIcon>
+            <AccountCircle />
+          </ListItemIcon>
+          <ListItemText primary='Profile' />
+      </ListItem>
       <ListItem
         button
         onClick={e => {logoutUser(e, "Successfully logged out!")}}
@@ -376,7 +427,7 @@ const PersistentDrawer = (props) => {
         </ListItemIcon>
         <Typography>
           <Link
-          color="secondary"
+          className={classes.link}
           >
             Logout
           </Link>
@@ -419,7 +470,7 @@ const PersistentDrawer = (props) => {
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
           <Typography 
-            style={{marginTop: 12}}
+            style={{marginTop: 18}}
           >
             {sessionUserFirstName}
           </Typography>
@@ -430,8 +481,11 @@ const PersistentDrawer = (props) => {
               aria-haspopup="true"
               onClick={handleProfileMenuOpen}
               // color="primary"
+              
             >
-              <AccountCircle />
+            <Avatar aria-label="user" className={classes.avatar}>
+              {firstInitial}
+            </Avatar>
           </IconButton>
           </div>
         </Toolbar>

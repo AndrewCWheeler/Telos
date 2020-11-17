@@ -11,7 +11,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import FolderOpenIcon from '@material-ui/icons/FolderOpen';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import DeleteCategoryComponent from './DeleteCategoryComponent';
+import DeleteCategoryComponent from '../components/DeleteCategoryComponent';
 
 import LabelIcon from '@material-ui/icons/Label';
 import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
@@ -37,12 +37,12 @@ import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import SaveIcon from '@material-ui/icons/Save';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import SimpleSnackbar from './SimpleSnackBar';
+import SimpleSnackbar from '../components/SimpleSnackBar';
 import InputLabel from '@material-ui/core/InputLabel';
 
 import { green } from '@material-ui/core/colors';
 import Radio from '@material-ui/core/Radio';
-import RadioColorButtons from './RadioColorButtons';
+import RadioColorButtons from '../components/RadioColorButtons';
 
 
 const useStyles = makeStyles(theme => ({
@@ -104,7 +104,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const CategoryComponent = props => {
+const Category = props => {
   const classes = useStyles();
   const [sessionUserId, setSessionUserId] = useState('');
   const [category, setCategory] = useState({
@@ -462,4 +462,4 @@ const CategoryComponent = props => {
   );
 };
 
-export default CategoryComponent;
+export default Category;

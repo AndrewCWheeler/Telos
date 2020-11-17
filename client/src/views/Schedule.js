@@ -148,7 +148,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const ScheduleComponent = props => {
+const Schedule = props => {
   const [load, setLoad] = useState(0);
   const [task, setTask] = useState({
     name: '',
@@ -827,4 +827,4 @@ const ScheduleComponent = props => {
   );
 };
 
-export default ScheduleComponent;
+export default Schedule;

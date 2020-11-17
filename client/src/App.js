@@ -47,11 +47,11 @@ const themeObject = {
       main: '#4caf50',
       dark: '#388e3c',
     },
-    background: {
-      default: '#252525',
-      // default: '#0f0f16',
-      paper: '#363636',
-    },
+    // background: {
+    //   default: '#252525',
+    //   // default: '#0f0f16',
+    //   paper: '#363636',
+    // },
     
     // text: {
     //   primary: '#fff',

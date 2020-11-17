@@ -46,11 +46,11 @@ export default function SectionTeam() {
         <GridContainer justify='center'>
             <GridItem cs={12} sm={8} md={8}>
             <h4 className={classes.description}>
-                Before you begin, start with why. When you <a role="button" onClick={e => {navigate('/signup')}} style={{textDecoration: 'none', color:'white'}}>sign-up</a> for your free {'\u03C4\u03AD\u03BB\u03BF\u03C2'} account, you'll be invited to write your own personal vision statement. Who do you want to be? Who will you show up as in the world today? Then let all your activity flow from this beautiful vision of you! 
+            Aristotle famously said, "We are what we repeatedly do." What if the reverse were also true? "We do what we repeatedly tell ourselves we are." In other words, we act out of who we perceive ourselves to be. Before you begin creating task lists, take a moment to create your own personal vision statement. Then let this vision influence the categories you create. 
               </h4>
             </GridItem>
         </GridContainer>
-        <GridContainer>
+        {/* <GridContainer>
           <GridItem xs={12} sm={6} md={6}>
             <Card profile plain className={classes.card3}>
               <GridContainer>
@@ -114,7 +114,7 @@ export default function SectionTeam() {
             </Card>
           </GridItem>
           
-        </GridContainer>
+        </GridContainer> */}
       </div>
     </div>
   );

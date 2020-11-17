@@ -27,6 +27,7 @@ import landingPageStyle from "../../assets/jss/material-kit-pro-react/views/land
 import SectionProduct from "./Sections/SectionProduct.js";
 import SectionTeam from "./Sections/SectionTeam.js";
 import SectionWork from "./Sections/SectionWork.js";
+import { Tooltip } from "@material-ui/core";
 
 const useStyles = makeStyles(landingPageStyle);
 
@@ -60,7 +61,7 @@ export default function LandingPage({ ...rest }) {
                 Task Manager
               </Typography>
               <h4>
-                An intuitive task manager that helps you clear your mind and fulfill your {'\u03C4\u03AD\u03BB\u03BF\u03C2'} - your uniquely designed purpose.
+                An intuitive task manager that helps you clear your mind and fulfill your uniquely designed purpose.
               </h4>
               <br />
               {/* <Button
@@ -88,15 +89,16 @@ export default function LandingPage({ ...rest }) {
             <div className={classes.right}>
               <List className={classes.list}>
                 <ListItem className={classes.inlineBlock}>
+                  
                   <a
-                    href="#"
+                    href="mailto:creative.andrew@outlook.com"
                     target="_blank"
                     className={classes.block}
                   >
-                    Creative Andrew
+                    Contact: creative.andrew@outlook.com
                   </a>
                 </ListItem>
-                <ListItem className={classes.inlineBlock}>
+                {/* <ListItem className={classes.inlineBlock}>
                   <a
                     href="#"
                     target="_blank"
@@ -104,7 +106,7 @@ export default function LandingPage({ ...rest }) {
                   >
                     Contact
                   </a>
-                </ListItem>
+                </ListItem> */}
                 {/* <ListItem className={classes.inlineBlock}>
                   <a href="//blog.creative-tim.com/" className={classes.block}>
                     Blog

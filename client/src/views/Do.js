@@ -155,7 +155,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const DoComponent = () => {
+const Do = () => {
   const [load, setLoad] = useState(0);
   const [task, setTask] = useState({
     name: '',
@@ -272,16 +272,7 @@ const DoComponent = () => {
         });
     }, [load]);
 
-  const onClickHandler = (e, id) => {
-    axios
-      .get(`http://localhost:8000/api/tasks/${id}`, { withCredentials: true })
-      .then(res => {
-        if (res.data.message === 'success') {
-          setTask(res.data.results);
-        }
-      })
-      .catch(err => console.log(err));
-  };
+    
 
   const DATE_OPTIONS = {
     weekday: 'short',
@@ -344,6 +335,17 @@ const DoComponent = () => {
       owner: sessionUserId,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const onClickHandler = (e, id) => {
+    axios
+      .get(`http://localhost:8000/api/tasks/${id}`, { withCredentials: true })
+      .then(res => {
+        if (res.data.message === 'success') {
+          setTask(res.data.results);
+        }
+      })
+      .catch(err => console.log(err));
   };
 
   const onPatchEditNameHandler = (e, id) => {
@@ -793,4 +795,4 @@ const DoComponent = () => {
   );
 };
 
-export default DoComponent;
+export default Do;

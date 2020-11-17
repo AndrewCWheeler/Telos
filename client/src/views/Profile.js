@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import clsx from 'clsx';
+import Card from '@material-ui/core/Card';
+import CardHeader from '@material-ui/core/CardHeader';
+import CardMedia from '@material-ui/core/CardMedia';
+import CardContent from '@material-ui/core/CardContent';
+import CardActions from '@material-ui/core/CardActions';
+import Collapse from '@material-ui/core/Collapse';
+import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
-import Backdrop from '@material-ui/core/Backdrop';
 import Checkbox from '@material-ui/core/Checkbox';
 import RadioButtonUncheckedRoundedIcon from '@material-ui/icons/RadioButtonUncheckedRounded';
 import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
+import GridItem from '../components/Grid/GridItem';
 
 import Container from '@material-ui/core/Container';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -16,37 +24,24 @@ import {
   KeyboardDatePicker,
 } from '@material-ui/pickers';
 // import DeleteComponent from './DeleteComponent';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import EditIcon from '@material-ui/icons/Edit';
-import FormControl from '@material-ui/core/FormControl';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormGroup from '@material-ui/core/FormGroup';
-import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
-import InputLabel from '@material-ui/core/InputLabel';
 import LabelIcon from '@material-ui/icons/Label';
-import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import { Link, navigate } from '@reach/router';
 import { makeStyles } from '@material-ui/core/styles';
 import Moment from 'react-moment';
 import 'moment-timezone';
 import moment from 'moment';
-import PropTypes from 'prop-types';
-import { MenuItem, RootRef, Tooltip } from '@material-ui/core';
-import Select from '@material-ui/core/Select';
-import TextField from '@material-ui/core/TextField';
+import { Grid, MenuItem, RootRef, Tooltip } from '@material-ui/core';
+
 import Typography from '@material-ui/core/Typography';
-import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is required for IE 11 support
-import Undo from '@material-ui/icons/Undo';
+import { red } from '@material-ui/core/colors';
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import ShareIcon from '@material-ui/icons/Share';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -56,13 +51,40 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import DeleteComponent from '../components/DeleteComponent';
+import landingBackground from '../images/landingBackground.jpg';
+import { array } from 'prop-types';
+import CheckIcon from '@material-ui/icons/Check';
 
+import UndoIcon from '@material-ui/icons/Undo';
+import SimpleSnackbar from '../components/SimpleSnackBar';
+import GridContainer from '../components/Grid/GridContainer';
 
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
     maxWidth: 840,
     // flexGrow: 1,
+  },
+  card: {
+    maxWidth: 345,
+    marginTop: 90,
+  },
+  media: {
+    height: 0,
+    paddingTop: '56.25%', // 16:9
+  },
+  expand: {
+    transform: 'rotate(0deg)',
+    marginLeft: 'auto',
+    transition: theme.transitions.create('transform', {
+      duration: theme.transitions.duration.shortest,
+    }),
+  },
+  expandOpen: {
+    transform: 'rotate(180deg)',
+  },
+  avatar: {
+    backgroundColor: red[500],
   },
   fab: {
     margin: theme.spacing(2),
@@ -124,7 +146,7 @@ const useStyles = makeStyles(theme => ({
   },
   list: {
     marginBottom: 90,
-    marginTop: 60,
+    marginTop: 30,
   },
   listItem: {
     // margin: theme.spacing(1,0,0),
@@ -163,17 +185,48 @@ const useStyles = makeStyles(theme => ({
   },
   undo: {
     color: theme.palette.secondary.main,
-  }
+  },
+  success: {
+    color: theme.palette.success.main,
+  },
 }));
 
-const Admin = () => {
+const Profile = () => {
   const classes = useStyles();
   const [load, setLoad] = useState(0);
   const [allUsers, setAllUsers] = useState([]);
-  const [sessionUserId, setSessionUserId] = useState('');
+  const [sessionUser, setSessionUser] = useState({});
   const [allTasks, setAllTasks] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
   const [secondary, setSecondary] = useState(true);
+  const [expanded, setExpanded] = useState(false);
+  const [firstInitial, setFirstInitial] = useState('');
+  const [lastInitial, setLastInitial] = useState('');
+  const [task, setTask] = useState({
+    name: '',
+    category: '',
+    chunked: '',
+    owner: '',
+    priority: 0,
+    scheduled: '',
+    scheduledAt: '',
+    complete: '',
+  });
+  const [openSnack, setOpenSnack] = useState(false);
+  const [snack, setSnack] = useState('');
+  
+
+  const handleOpenSnackBar = (snack) => {
+    setOpenSnack(true);
+    setSnack(snack); 
+  };
+
+  const handleCloseSnackBar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnack(false);
+  };
 
   const removeFromDom = taskId => {
     setAllTasks(allTasks.filter(task => task._id !== taskId));
@@ -184,7 +237,9 @@ const Admin = () => {
     const requestOne = axios.get(one, { withCredentials: true });
     requestOne
       .then(response => {
-        setSessionUserId(response.data.results._id);
+        setSessionUser(response.data.results);
+        setFirstInitial(response.data.results.firstName.charAt());
+        setLastInitial(response.data.results.lastName.charAt());
       })
       .catch(error => {
         console.log(error);
@@ -230,6 +285,35 @@ const Admin = () => {
       });
   }, [load]);
 
+  const handleExpandClick = () => {
+    setExpanded(!expanded);
+  };
+
+  // const onChangeHandler = e => {
+  //   setTask({
+  //     ...task,
+  //     owner: sessionUserId,
+  //     [e.target.name]: e.target.value,
+  //   });
+  // };
+
+  const handleUndoComplete = (e,id,snack) => {
+    // handleToggle(i);
+    axios.get(`http://localhost:8000/api/tasks/${id}`, {withCredentials: true})
+    .then(res => { 
+      let completedTask = {};
+      completedTask = res.data.results;
+      completedTask.completed = false;
+      return axios.patch(`http://localhost:8000/api/tasks/${id}`, completedTask, {withCredentials: true})
+      .then(res => {
+        if (res.data.message === 'success'){
+          removeFromDom(id);
+          handleOpenSnackBar(snack);
+        }
+      }).catch(err=> console.log(err));
+    }).catch(err => console.log(err));
+  };
+
   const deleteUser = (e, id) => {
     axios
       .delete('http://localhost:8000/api/users/' + id, {
@@ -259,52 +343,74 @@ const Admin = () => {
 
   return (
     <Container className={classes.root}>
-      <TableContainer component={Paper} style={{marginTop:90}}>
-        <Table aria-label='simple table'>
-          <TableHead>
-            <TableRow>
-              <TableCell>User ID</TableCell>
-              <TableCell align='right'>First Name</TableCell>
-              <TableCell align='right'>Last Name</TableCell>
-              <TableCell align='right'>Email</TableCell>
-              <TableCell align='right'>Password</TableCell>
-              <TableCell align='right'>Delete</TableCell>
-              <TableCell align='right'>Logout</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {allUsers.map((user, i) => (
-              <TableRow key={i}>
-                <TableCell component='th' scope='row'>
-                  {user._id}
-                </TableCell>
-                <TableCell align='right'>{user.firstName}</TableCell>
-                <TableCell align='right'>{user.lastName}</TableCell>
-                <TableCell align='right'>{user.email}</TableCell>
-                <TableCell align='right'>{user.password}</TableCell>
-                <TableCell align='right'>
-                  <Button
-                    onClick={(e, id) => {
-                      deleteUser(e, user._id);
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
-                <TableCell align='right'>
-                  <Button 
-                    onClick={logoutUser}>
-                    Logout
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <div>
+      <GridContainer justify="center">
+        <GridItem xs={12} sm={8} md={8}>
+          <Card className={classes.card}>
+            <CardHeader
+              avatar={
+                <Avatar aria-label="user" className={classes.avatar}>
+                  {firstInitial}
+                </Avatar>
+              }
+              // action={
+              //   <IconButton aria-label="settings">
+              //     <MoreVertIcon />
+              //   </IconButton>
+              // }
+              title={<Typography>
+                {sessionUser.firstName}&nbsp;{sessionUser.lastName}
+              </Typography>}
+              subheader={<Typography>
+                {sessionUser.email}
+              </Typography>}
+            />
+            <CardMedia
+              className={classes.media}
+              image={landingBackground}
+            />
+            <CardContent>
+              <Typography variant="body1" color="textPrimary" component="p">
+                My Vision:
+              </Typography>
+              <Typography variant="body2" color="textSecondary" component="p">
+                {sessionUser.vision} I am a child of the living God. Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste accusantium esse dolores eos corrupti recusandae, magnam, incidunt asperiores inventore impedit laboriosam eaque optio perferendis molestias nihil ipsum voluptatem adipisci cupiditate!
+              </Typography>
+            </CardContent>
+            {/* <CardActions disableSpacing>
+              <IconButton aria-label="add to favorites">
+                <FavoriteIcon />
+              </IconButton>
+              <IconButton aria-label="share">
+                <ShareIcon />
+              </IconButton>
+              <IconButton
+                className={clsx(classes.expand, {
+                  [classes.expandOpen]: expanded,
+                })}
+                onClick={handleExpandClick}
+                aria-expanded={expanded}
+                aria-label="show more"
+              >
+                <ExpandMoreIcon />
+              </IconButton>
+            </CardActions> */}
+          </Card>
+        </GridItem>
+      </GridContainer>
+      {/* <Button
+        onClick={(e, id) => {
+          deleteUser(e, sessionUser._id);
+        }}
+      >
+        Delete
+      </Button> */}
+      <div style={{marginTop: 30}}>
+      <Typography variant='h5'>
+        Completed Tasks
+      </Typography>
       <List dense secondary = 'true' className={classes.list}>
         {allTasks.map((task, i) =>
+        task.completed ?
           (
             <ListItem
               className={classes.listItem}
@@ -312,30 +418,42 @@ const Admin = () => {
               disableRipple
               button
             >
-              <Tooltip title="Chunk task" placement="left">
+              <Tooltip title="Task completed!" placement="left">
                 <IconButton type='button' 
                 // onClick={e => handleOpen(e, task._id)}
                 >
-                  <LabelIcon
-                  // className={classes.folderStyle}
+                  <CheckIcon
+                  
+                  className={classes.success}
                   // edge="start" 
                   disableRipple
                   />
                 </IconButton>
               </Tooltip>
-              <ListItemText
-                disableTypography
-                // onClick={e => handleOpen(e, task._id)}
-                primary={
-                  <Typography
-                    style={{fontSize:15}}
-                    color="textPrimary"
-                    >
-                    {task.name}
-                  </Typography>
-                }
-                secondary={<Typography style={{fontSize:12}}>{secondary ? task.category : null}</Typography>}
-              />
+              {allCategories.map((category, catIdx) => 
+                task.category === category.name ? (
+                  <ListItemText
+                    disableTypography
+                    className={classes.text}
+                    textOverflow='ellipsis'
+                    overflow='hidden'
+                    primary={<Typography style={{fontSize:15, textDecoration: 'line-through'}}>{task.name}</Typography>}
+                    secondary={<Typography key={catIdx} style={{fontSize:12, color:category.color}}>{secondary ? task.category : null}</Typography>}
+                  />
+                ) : null
+              )}  <ListItemText >
+                
+              </ListItemText>
+              <Tooltip title="Undo completed?" placement="left">
+                <IconButton 
+                  className={classes.secondaryIconStyle} 
+                  edge='end' 
+                  aria-label='undo completed'
+                  onClick={e => {handleUndoComplete(e, task._id, "Task marked imcomplete.")}}
+                >
+                  <UndoIcon></UndoIcon> 
+                </IconButton>
+              </Tooltip>
               <Tooltip title="Delete Task" placement="right">
                 <IconButton className={classes.deleteStyle} edge='end' aria-label='delete'>
                   <DeleteComponent
@@ -345,12 +463,17 @@ const Admin = () => {
                 </IconButton>
               </Tooltip>
             </ListItem>
-          )
+          ) : (null)
         )}
       </List>
       </div>
+      <SimpleSnackbar 
+      snack={snack}
+      openSnack={openSnack}
+      handleOpenSnackBar={handleOpenSnackBar}
+      handleCloseSnackBar={handleCloseSnackBar} />
     </Container>
   );
 };
 
-export default Admin;
+export default Profile;

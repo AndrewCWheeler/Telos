@@ -28,8 +28,8 @@ export default function SectionProduct() {
         <GridItem xs={12} sm={8} md={8}>
           <h2 className={classes.title}>How does it work?</h2>
           <h5 className={classes.description}>
-            The {'\u03C4\u03AD\u03BB\u03BF\u03C2'} task manager is <em>not</em> your typical organizer!<br></br>
-            Its 3 main components are meant to slow you down and help you work in controlled flow from thought to action. It's main purpose is to help you fulfill your purpose, so you do what you <em>intend</em> to be doing. 
+            {'\u03C4\u03AD\u03BB\u03BF\u03C2'} task manager is <em>not</em> your typical organizer!<br></br>
+            Its 3 main components are meant to slow you down and help you work in controlled flow from thought to action. Its primary purpose is to help you fulfill your purpose, so you do what you <em>intend</em> to be doing. 
           </h5>
         </GridItem>
       </GridContainer>
