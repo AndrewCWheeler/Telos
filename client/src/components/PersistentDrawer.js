@@ -1,43 +1,41 @@
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
+import { navigate } from '@reach/router';
 import clsx from 'clsx';
-import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
-import Drawer from '@material-ui/core/Drawer';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+// Material-ui core components:
 import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-
-import List from '@material-ui/core/List';
-import Typography from '@material-ui/core/Typography';
+import Avatar from '@material-ui/core/Avatar';
+import CssBaseline from '@material-ui/core/CssBaseline';
 import Divider from '@material-ui/core/Divider';
+import Drawer from '@material-ui/core/Drawer';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import LabelIcon from '@material-ui/icons/Label';
+import Link from '@material-ui/core/Link';
+import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import Link from '@material-ui/core/Link';
-
-import useScrollTrigger from '@material-ui/core/useScrollTrigger';
-import Box from '@material-ui/core/Box';
-import Container from '@material-ui/core/Container';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import { red } from '@material-ui/core/colors';
+import Snackbar from '@material-ui/core/Snackbar';
 import Slide from '@material-ui/core/Slide';
-
-import { navigate } from '@reach/router';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import useScrollTrigger from '@material-ui/core/useScrollTrigger';
+// Material-ui icons:
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import AddIcon from '@material-ui/icons/Add';
-import Avatar from '@material-ui/core/Avatar';
-import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import SettingsIcon from '@material-ui/icons/Settings';
-import { red } from '@material-ui/core/colors';
-import { FormControlLabel, Menu, MenuItem, Snackbar, Switch } from '@material-ui/core';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
-import TrackChangesIcon from '@material-ui/icons/TrackChanges';
+import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import CompassCalibrationIcon from '@material-ui/icons/CompassCalibration';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import LabelIcon from '@material-ui/icons/Label';
+import MenuIcon from '@material-ui/icons/Menu';
+import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 
 const drawerWidth = 240;
 
@@ -77,7 +75,6 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     padding: theme.spacing(0, 1),
-    // necessary for content to be below app bar
     ...theme.mixins.toolbar,
     justifyContent: 'flex-end',
   },
@@ -144,7 +141,6 @@ const useStyles = makeStyles((theme) => ({
   },
   inputInput: {
     padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
     paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
     transition: theme.transitions.create('width'),
     width: '100%',
@@ -168,6 +164,9 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: red[500],
     fontSize: 24,
   },
+  red: {
+    color: red[500],
+  },
   link: {
     textDecoration: 'none',
     color: theme.palette.text.primary,
@@ -183,9 +182,6 @@ const useStyles = makeStyles((theme) => ({
 
 function HideOnScroll(props) {
   const { children, window } = props;
-  // Note that you normally won't need to set the window ref as useScrollTrigger
-  // will default to window.
-  // This is only being set here because the demo is in an iframe.
   const trigger = useScrollTrigger({ target: window ? window() : undefined });
 
   return (
@@ -237,9 +233,6 @@ const PersistentDrawer = (props) => {
     handleMenuClose();
     navigatePage(e, 'profile');
   };
-  // const handleOnMouseOut = (e) => {
-  //   handleMenuClose();
-  // };
 
   const handleMobileMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget);
@@ -254,8 +247,7 @@ const PersistentDrawer = (props) => {
           setFirstInitial(res.data.results.firstName.charAt());
         }
       })
-      .catch(err => {console.log(err);
-      });
+      .catch(err => console.log(err));
   }, []);
 
   const logoutUser = (e, snack) => {
@@ -265,7 +257,6 @@ const PersistentDrawer = (props) => {
         if (res.data.message === 'success') {
           handleOpenSnackBar(snack);
         }
-        console.log(res.data.results);
         navigate('/landing');
       })
       .catch(err => console.log(err));
@@ -281,7 +272,6 @@ const PersistentDrawer = (props) => {
       transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       open={isMenuOpen}
       onClose={handleMenuClose}
-      // onMouseOut={handleOnMouseOut}
     >
       <MenuItem onClick={handleProfileMenuNavClose}>
           Profile
@@ -333,9 +323,30 @@ const PersistentDrawer = (props) => {
       <Divider />
       <List>
         <ListItem 
-        button
-        value='dump'
-        onClick={e => {navigatePage(e, 'dump')}}
+          button
+          value='vision'
+          onClick={e => {navigatePage(e, 'vision')}}
+        >
+          <ListItemIcon>
+            <CompassCalibrationIcon />
+          </ListItemIcon>
+          <ListItemText primary='Vision' />
+        </ListItem>
+        <ListItem 
+          button
+          value='category'
+          onClick={e => {navigatePage(e, 'category')}}
+        >
+          <ListItemIcon>
+            <LabelIcon />
+          </ListItemIcon>
+          <ListItemText primary='Categories' />
+        </ListItem>
+        <Divider />
+        <ListItem 
+          button
+          value='dump'
+          onClick={e => {navigatePage(e, 'dump')}}
         >
           <ListItemIcon>
             <AddIcon />
@@ -343,9 +354,9 @@ const PersistentDrawer = (props) => {
           <ListItemText primary='Dump' />
         </ListItem>
         <ListItem
-        button
-        value='schedule'
-        onClick={e => {navigatePage(e, 'schedule')}}
+          button
+          value='schedule'
+          onClick={e => {navigatePage(e, 'schedule')}}
         >
           <ListItemIcon>
             <CalendarTodayIcon />
@@ -353,63 +364,36 @@ const PersistentDrawer = (props) => {
           <ListItemText primary='Schedule' />
         </ListItem>
         <ListItem 
-        button
-        value='do'
-        onClick={e => {navigatePage(e, 'do')}}
+          button
+          value='do'
+          onClick={e => {navigatePage(e, 'do')}}
         >
           <ListItemIcon>
             <CheckCircleIcon />
           </ListItemIcon>
           <ListItemText primary='Do' />
         </ListItem>
-
         <ListItem 
-        button
-        value='trajectory'
-        onClick={e => {navigatePage(e, 'trajectory')}}
+          button
+          value='trajectory'
+          onClick={e => {navigatePage(e, 'trajectory')}}
         >
           <ListItemIcon>
             <TrackChangesIcon />
           </ListItemIcon>
           <ListItemText primary='Trajectory' />
         </ListItem>
-      </List>
         <Divider />
-
-      <List>
-        <ListItem 
-        button
-        value='category'
-        onClick={e => {navigatePage(e, 'category')}}
+        <ListItem
+          button
+          onClick={toggleDarkMode}
         >
-          <ListItemIcon>
-            <LabelIcon />
-          </ListItemIcon>
-          <ListItemText primary='Categories' />
-        </ListItem>
-
-        <ListItem 
-        button
-        value='vision'
-        onClick={e => {navigatePage(e, 'vision')}}
-        >
-          <ListItemIcon>
-            <CompassCalibrationIcon />
-          </ListItemIcon>
-          <ListItemText primary='Vision' />
-        </ListItem>
-      </List>
-      <Divider />
-      <ListItem
-        button
-        onClick={toggleDarkMode}
-      >
         <ListItemIcon>
           <Brightness4Icon />
         </ListItemIcon>
         Dark Mode
-        {/* <FormControlLabel control = {<Switch onClick={toggleDarkMode}/>} /> */}
       </ListItem>
+      <Divider />
       <ListItem 
         button
         value='profile'
@@ -437,6 +421,7 @@ const PersistentDrawer = (props) => {
           </Link>
         </Typography>
       </ListItem>
+    </List>
     </div>
   );
   
@@ -481,11 +466,8 @@ const PersistentDrawer = (props) => {
           <IconButton
               edge="end"
               aria-label="account of current user"
-              // aria-controls={menuId}
               aria-haspopup="true"
               onClick={handleProfileMenuOpen}
-              // color="primary"
-              
             >
             <Avatar aria-label="user" className={classes.avatar}>
               {firstInitial}
@@ -509,7 +491,6 @@ const PersistentDrawer = (props) => {
       >
         <div className={classes.drawerHeader}>
           <IconButton onClick={handleDrawerClose} 
-          // color="primary"
           >
             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>

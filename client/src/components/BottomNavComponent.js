@@ -1,18 +1,15 @@
-import React, {useState} from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import React from 'react';
+// Material-ui core components:
 import BottomNavigation from '@material-ui/core/BottomNavigation';
 import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
 import Grid from '@material-ui/core/Grid';
-import { navigate } from '@reach/router';
+import { makeStyles } from '@material-ui/core/styles';
+import { Typography } from '@material-ui/core';
+// Material-ui icons:
 import AddIcon from '@material-ui/icons/Add';
 import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import SettingsIcon from '@material-ui/icons/Settings';
-import LabelIcon from '@material-ui/icons/Label';
-import { Typography } from '@material-ui/core';
 import TrackChangesIcon from '@material-ui/icons/TrackChanges';
-
-// import Paper from '@material-ui/core/Paper';
 
 const useStyles = makeStyles(theme => ({
   root: {

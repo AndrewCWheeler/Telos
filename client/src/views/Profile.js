@@ -1,63 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import clsx from 'clsx';
+import { navigate } from '@reach/router';
+// Material-ui core components / styles:
+import Avatar from '@material-ui/core/Avatar';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
-import Collapse from '@material-ui/core/Collapse';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import Checkbox from '@material-ui/core/Checkbox';
-import RadioButtonUncheckedRoundedIcon from '@material-ui/icons/RadioButtonUncheckedRounded';
-import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
-import GridItem from '../components/Grid/GridItem';
-
 import Container from '@material-ui/core/Container';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import DateFnsUtils from '@date-io/date-fns';
-import 'date-fns';
-import {
-  MuiPickersUtilsProvider,
-  DatePicker,
-  KeyboardDatePicker,
-} from '@material-ui/pickers';
-// import DeleteComponent from './DeleteComponent';
 import IconButton from '@material-ui/core/IconButton';
-import LabelIcon from '@material-ui/icons/Label';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import { Link, navigate } from '@reach/router';
 import { makeStyles } from '@material-ui/core/styles';
+import { red } from '@material-ui/core/colors';
+import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
+// Material-ui icons:
+import CheckIcon from '@material-ui/icons/Check';
+import UndoIcon from '@material-ui/icons/Undo';
+// My components:
+import DeleteComponent from '../components/DeleteComponent';
+import SimpleSnackbar from '../components/SimpleSnackBar';
+// Material-ui pro-react components:
+import GridContainer from '../components/Grid/GridContainer';
+import GridItem from '../components/Grid/GridItem';
+// Moment and date resources:
+import 'date-fns';
 import Moment from 'react-moment';
 import 'moment-timezone';
-import moment from 'moment';
-import { Grid, MenuItem, RootRef, Tooltip } from '@material-ui/core';
-
-import Typography from '@material-ui/core/Typography';
-import { red } from '@material-ui/core/colors';
-import FavoriteIcon from '@material-ui/icons/Favorite';
-import ShareIcon from '@material-ui/icons/Share';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
-import DeleteComponent from '../components/DeleteComponent';
+// Assets:
 import landingBackground from '../images/landingBackground.jpg';
-import { array } from 'prop-types';
-import CheckIcon from '@material-ui/icons/Check';
-
-import UndoIcon from '@material-ui/icons/Undo';
-import SimpleSnackbar from '../components/SimpleSnackBar';
-import GridContainer from '../components/Grid/GridContainer';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -106,15 +79,11 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     margin: theme.spacing(4, 0, 2),
-    // color: theme.palette.primary.main,
   },
   subtitle: {
     margin: theme.spacing(-1, 0, 0),
     color: theme.palette.primary.main,
   },
-  // textMain: {
-  //   color: theme.palette.primary.main,
-  // },
   text: {
     color: theme.palette.text.primary,
     display: 'inline-block',
@@ -131,31 +100,14 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.primary.main,
     backgroundColor: theme.palette.primary.main,
   },
-  paper: {
-    maxWidth: 840,
-    margin: `${theme.spacing(1)}px auto`,
-    // margin: theme.spacing(2, 0),
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-  },
-  paper2: {
-    backgroundColor: theme.palette.primary.main,
-    border: `2px solid ${theme.palette.primary.contrastText}`,
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
-  },
   list: {
     marginBottom: 90,
     marginTop: 30,
   },
   listItem: {
-    // margin: theme.spacing(1,0,0),
     maxHeight: '100%',
     width: '100%',
     backgroundColor: theme.palette.background.default,
-    // color: theme.palette.primary.contrastText,
-    // boxShadow: theme.shadows[10],
-    // borderRadius: 3,
     borderBottom: '1px solid #e1dfdc',
     paddingLeft: 0,
   },
@@ -194,14 +146,11 @@ const useStyles = makeStyles(theme => ({
 const Profile = () => {
   const classes = useStyles();
   const [load, setLoad] = useState(0);
-  const [allUsers, setAllUsers] = useState([]);
   const [sessionUser, setSessionUser] = useState({});
   const [allTasks, setAllTasks] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
   const [secondary, setSecondary] = useState(true);
-  const [expanded, setExpanded] = useState(false);
   const [firstInitial, setFirstInitial] = useState('');
-  const [lastInitial, setLastInitial] = useState('');
   const [task, setTask] = useState({
     name: '',
     category: '',
@@ -219,7 +168,7 @@ const Profile = () => {
 
   const handleOpenSnackBar = (snack) => {
     setOpenSnack(true);
-    setSnack(snack); 
+    setSnack(snack);
   };
 
   const handleCloseSnackBar = (event, reason) => {
@@ -240,7 +189,6 @@ const Profile = () => {
       .then(response => {
         setSessionUser(response.data.results);
         setFirstInitial(response.data.results.firstName.charAt());
-        setLastInitial(response.data.results.lastName.charAt());
       })
       .catch(error => {
         console.log(error);
@@ -262,23 +210,14 @@ const Profile = () => {
       }).catch(error => {
         console.log(error);
       });
-    let four = 'http://localhost:8000/api/users';
-    const requestFour = axios.get(four, {withCredentials: true });
-    requestFour
-      .then(response => {
-        setAllUsers(response.data.results);
-      }).catch(error => {
-        console.log(error);
-      })
     axios
-      .all([requestOne, requestTwo, requestThree, requestFour])
+      .all([requestOne, requestTwo, requestThree])
       .then(
         axios.spread((...responses) => {
           const responseOne = responses[0];
           const responseTwo = responses[1];
           const responseThree = responses[2];
-          const responseFour = responses[3]
-          console.log(responseOne, responseTwo, responseThree, responseFour);
+          console.log(responseOne, responseTwo, responseThree);
         })
       )
       .catch(errors => {
@@ -286,20 +225,7 @@ const Profile = () => {
       });
   }, [load]);
 
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
-  };
-
-  // const onChangeHandler = e => {
-  //   setTask({
-  //     ...task,
-  //     owner: sessionUserId,
-  //     [e.target.name]: e.target.value,
-  //   });
-  // };
-
   const handleUndoComplete = (e,id,snack) => {
-    // handleToggle(i);
     axios.get(`http://localhost:8000/api/tasks/${id}`, {withCredentials: true})
     .then(res => { 
       let completedTask = {};
@@ -332,16 +258,6 @@ const Profile = () => {
       .catch(err => console.log(err));
   };
 
-  const logoutUser = () => {
-    axios
-      .get('http://localhost:8000/api/users/logout', { withCredentials: true })
-      .then(response => {
-        console.log(response.data.results);
-        navigate('/landing');
-      })
-      .catch(err => console.log(err));
-  };
-
   return (
     <Container className={classes.root}>
       <GridContainer justify="center">
@@ -353,11 +269,6 @@ const Profile = () => {
                   {firstInitial}
                 </Avatar>
               }
-              // action={
-              //   <IconButton aria-label="settings">
-              //     <MoreVertIcon />
-              //   </IconButton>
-              // }
               title={<Typography>
                 {sessionUser.firstName}&nbsp;{sessionUser.lastName}
               </Typography>}
@@ -377,24 +288,6 @@ const Profile = () => {
                 {sessionUser.vision} I am a child of the living God. Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste accusantium esse dolores eos corrupti recusandae, magnam, incidunt asperiores inventore impedit laboriosam eaque optio perferendis molestias nihil ipsum voluptatem adipisci cupiditate!
               </Typography>
             </CardContent>
-            {/* <CardActions disableSpacing>
-              <IconButton aria-label="add to favorites">
-                <FavoriteIcon />
-              </IconButton>
-              <IconButton aria-label="share">
-                <ShareIcon />
-              </IconButton>
-              <IconButton
-                className={clsx(classes.expand, {
-                  [classes.expandOpen]: expanded,
-                })}
-                onClick={handleExpandClick}
-                aria-expanded={expanded}
-                aria-label="show more"
-              >
-                <ExpandMoreIcon />
-              </IconButton>
-            </CardActions> */}
           </Card>
         </GridItem>
       </GridContainer>
@@ -421,12 +314,9 @@ const Profile = () => {
             >
               <Tooltip title="Task completed!" placement="left">
                 <IconButton type='button' 
-                // onClick={e => handleOpen(e, task._id)}
                 >
                   <CheckIcon
-                  
                   className={classes.success}
-                  // edge="start" 
                   disableRipple
                   />
                 </IconButton>
@@ -443,7 +333,17 @@ const Profile = () => {
                   />
                 ) : null
               )}  <ListItemText >
-                
+              <ListItemText
+                disableTypography
+                primary={
+                  <Typography style={{fontSize: 15}}>
+                    Completed: &nbsp;
+                    <Moment format='LL'>
+                      {task.completedAt}
+                    </Moment>
+                  </Typography>}
+              >
+              </ListItemText>
               </ListItemText>
               <Tooltip title="Undo completed?" placement="left">
                 <IconButton 
@@ -469,10 +369,11 @@ const Profile = () => {
       </List>
       </div>
       <SimpleSnackbar 
-      snack={snack}
-      openSnack={openSnack}
-      handleOpenSnackBar={handleOpenSnackBar}
-      handleCloseSnackBar={handleCloseSnackBar} />
+        snack={snack}
+        openSnack={openSnack}
+        handleOpenSnackBar={handleOpenSnackBar}
+        handleCloseSnackBar={handleCloseSnackBar}
+      />
     </Container>
   );
 };

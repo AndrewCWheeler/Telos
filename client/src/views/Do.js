@@ -1,60 +1,59 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Button from '@material-ui/core/Button';
+import { navigate } from '@reach/router';
+// Material-ui core components:
 import Backdrop from '@material-ui/core/Backdrop';
+import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
-// import CircleCheckbox from './CircleCheckbox';
-import RadioButtonUncheckedRoundedIcon from '@material-ui/icons/RadioButtonUncheckedRounded';
-import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
-
 import Container from '@material-ui/core/Container';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import DateFnsUtils from '@date-io/date-fns';
-import 'date-fns';
-import {
-  MuiPickersUtilsProvider,
-  DatePicker,
-  KeyboardDatePicker,
-} from '@material-ui/pickers';
-import DeleteComponent from '../components/DeleteComponent';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import EditIcon from '@material-ui/icons/Edit';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormGroup from '@material-ui/core/FormGroup';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import InputLabel from '@material-ui/core/InputLabel';
-import LabelIcon from '@material-ui/icons/Label';
-import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import { navigate } from '@reach/router';
 import { makeStyles } from '@material-ui/core/styles';
-import Moment from 'react-moment';
-import 'moment-timezone';
-import moment from 'moment';
-import PropTypes from 'prop-types';
-import { MenuItem, RootRef, Tooltip } from '@material-ui/core';
+import MenuItem from '@material-ui/core/MenuItem';
+import RootRef from '@material-ui/core/RootRef';
+import Tooltip from '@material-ui/core/Tooltip';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import SimpleSnackbar from '../components/SimpleSnackBar';
+// Material-ui icons:
+import RadioButtonUncheckedRoundedIcon from '@material-ui/icons/RadioButtonUncheckedRounded';
+import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
+import EditIcon from '@material-ui/icons/Edit';
+import LabelIcon from '@material-ui/icons/Label';
+import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 import Undo from '@material-ui/icons/Undo';
-import session from 'express-session';
+// Date components and dependencies:
+import DateFnsUtils from '@date-io/date-fns';
+import 'date-fns';
+import {
+  MuiPickersUtilsProvider,
+  KeyboardDatePicker,
+} from '@material-ui/pickers';
+// react-beautiful-dnd imports:
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+// React Moment and moment imports:
+import Moment from 'react-moment';
+import 'moment-timezone';
+import moment from 'moment';
+// My modified material components:
+import SimpleSnackbar from '../components/SimpleSnackBar';
 
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
     maxWidth: 840,
-    // flexGrow: 1,
   },
   fab: {
     margin: theme.spacing(2),
@@ -76,7 +75,6 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     margin: theme.spacing(4, 0, 2),
-    // color: theme.palette.primary.main,
   },
   subtitle: {
     margin: theme.spacing(-1, 0, 0),
@@ -101,7 +99,6 @@ const useStyles = makeStyles(theme => ({
   paper: {
     maxWidth: 640,
     margin: `${theme.spacing(1)}px auto`,
-    // margin: theme.spacing(2, 0),
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText,
   },
@@ -116,13 +113,9 @@ const useStyles = makeStyles(theme => ({
     marginTop: 60,
   },
   listItem: {
-    // margin: theme.spacing(1,0,0),
     maxHeight: '100%',
     width: '100%',
     backgroundColor: theme.palette.background.default,
-    // color: theme.palette.primary.contrastText,
-    // boxShadow: theme.shadows[10],
-    // borderRadius: 3,
     borderBottom: '1px solid #e1dfdc',
     paddingLeft: 0,
   },
@@ -156,6 +149,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Do = () => {
+  const classes = useStyles();
   const [load, setLoad] = useState(0);
   const [task, setTask] = useState({
     name: '',
@@ -170,63 +164,15 @@ const Do = () => {
   });
   const [allTasks, setAllTasks] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
-  const [selectedIndex, setSelectedIndex] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [dense, setDense] = useState(true);
   const [secondary, setSecondary] = useState(true);
-  const [openChunk, setOpenChunk] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [dateParameter, setDateParameter] = useState(new Date());
   const [sessionUserId, setSessionUserId] = useState('');
   const [openCal, setOpenCal] = useState(false);
-  // const [openEditTask, setOpenEditTask] = useState(false);
-  // const [filtered, setFiltered] = useState(false);
   const [checked, setChecked] = useState([0]);
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
-  
-
-  const handleOpenSnackBar = (snack) => {
-    setOpenSnack(true);
-    setSnack(snack); 
-  };
-
-  const handleCloseSnackBar = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setOpenSnack(false);
-  };
-
-  const handleToggle = (i) => () => {
-    const currentIndex = checked.indexOf(i);
-    const newChecked = [...checked];
-    if(currentIndex === -1){
-      newChecked.push(i);
-    } else {
-      newChecked.splice(currentIndex, 1);
-    }
-    setChecked(newChecked);
-  }
-
-  const handleOpenCal = (e, id) => {
-    onClickHandler(e, id);
-    setOpenCal(true);
-  };
-  const handleCloseCal = () => {
-    setOpenCal(false);
-  };
-  
-  const handleOpenEdit = (e, id) => {
-    onClickHandler(e, id);
-    setOpenEdit(true);
-  };
-  const handleCloseEdit = () => {
-    setOpenEdit(false);
-  };
-
-  const classes = useStyles();
 
   useEffect(() => {
     let one = 'http://localhost:8000/api/users/one';
@@ -272,37 +218,38 @@ const Do = () => {
           navigate('/landing');
         });
     }, [load]);
-
-    
-
-  const DATE_OPTIONS = {
-    weekday: 'short',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  
+  const handleOpenSnackBar = (snack) => {
+    setOpenSnack(true);
+    setSnack(snack); 
   };
 
-  const assignPriority = (arr) => {
-    // arr.sort((a, b) => a.priority - b.priority); 
-    for (let i=0; i<arr.length; i++){
-      arr[i].priority = i;
-      console.log(arr[i]);
+  const handleCloseSnackBar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
     }
-    axios.put('http://localhost:8000/api/bulk/' + sessionUserId, arr, {withCredentials: true})
-    .then(response => {
-      console.log(response.data.message);
-      console.log(response.data.results);
-    })
-    .catch(error => {
-      console.log(error);
-    });
-    console.log(arr); 
-    return arr;
-  }
+    setOpenSnack(false);
+  };
+
+  const handleOpenCal = (e, id) => {
+    onClickHandler(e, id);
+    setOpenCal(true);
+  };
+  const handleCloseCal = () => {
+    setOpenCal(false);
+  };
   
-  const filteredTasks = allTasks.filter(tasks => {
+  const handleOpenEdit = (e, id) => {
+    onClickHandler(e, id);
+    setOpenEdit(true);
+  };
+  const handleCloseEdit = () => {
+    setOpenEdit(false);
+  };
+  
+  // Filter, sort, reorder task functions:
+  const FilteredTasks = allTasks.filter(tasks => {
     let found = '';
-    let result = '';
     if (
       moment(moment(tasks.scheduledAt)).isSame(dateParameter, 'day') === true 
       && tasks.completed === false
@@ -312,24 +259,52 @@ const Do = () => {
     }
     return found;
   });
-  
-  // console.log(assignPriorities(filteredTasks));
-  
-  const sortedTasks = assignPriority(filteredTasks).sort((a, b) => a.priority - b.priority);
-  // console.log(sortedTasks);
 
-  const reorder = (filteredTasks, startIndex, endIndex) => {
-    const result = Array.from(filteredTasks);
+  
+  const reorder = (FilteredTasks, startIndex, endIndex) => {
+    const result = Array.from(FilteredTasks);
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
     console.log(result);
     return result;
   };
-
-  const removeFromDom = taskId => {
-    setAllTasks(allTasks.filter(task => task._id !== taskId));
+  
+  const onDragEnd = result => {
+    const { destination, source, draggableId } = result;
+    if (!result.destination) {
+      return;
+    }
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+        return;
+      }
+    const items = reorder(
+      FilteredTasks,
+      result.source.index,
+      result.destination.index
+    );
+    setAllTasks(items);
   };
-
+      
+  // Assign priority to tasks according to DOM state index and update priority property in db:
+  const assignPriority = (arr) => {
+    for (let i=0; i<arr.length; i++){
+      arr[i].priority = i;
+    }
+    axios.put('http://localhost:8000/api/bulk/' + sessionUserId, arr, {withCredentials: true})
+    .then(response => {
+    })
+    .catch(error => {
+      console.log(error);
+    });
+    return arr;
+  }
+    
+  const SortedTasks = assignPriority(FilteredTasks).sort((a, b) => a.priority - b.priority);
+  
+  // onChange functions:
   const onChangeHandler = e => {
     setTask({
       ...task,
@@ -338,6 +313,20 @@ const Do = () => {
     });
   };
 
+  const onChangeDate = (date, id) => {
+    setSelectedDate(date);
+    task.scheduledAt = date;
+  };
+
+  const handleDateParameter = date => {
+    setDateParameter(date);
+  };
+
+  const removeFromDom = taskId => {
+    setAllTasks(allTasks.filter(task => task._id !== taskId));
+  };
+
+  // Get and Patch axios db calls:
   const onClickHandler = (e, id) => {
     axios
       .get(`http://localhost:8000/api/tasks/${id}`, { withCredentials: true })
@@ -350,8 +339,6 @@ const Do = () => {
   };
 
   const onPatchEditNameHandler = (e, id) => {
-    // task.category = e.target.value;
-    // task.chunked = true;
     axios
       .patch('http://localhost:8000/api/tasks/' + id, task, {
         withCredentials: true,
@@ -365,6 +352,7 @@ const Do = () => {
       })
       .catch(err => console.log(err));
   };
+
   const onPatchUnScheduleHandler = (e, id, snack) => {
     task.scheduledAt = '';
     task.scheduled = false;
@@ -391,16 +379,10 @@ const Do = () => {
       })
       .then(res => {
         if (res.data.message === 'success'){
-          // removeFromDom(id);
           handleCloseEdit();
         }
       })
       .catch(err => console.log(err));
-  };
-
-  const onChangeDate = (date, id) => {
-    setSelectedDate(date);
-    task.scheduledAt = date;
   };
 
   const onPatchDateHandler = (e, id, snack) => {
@@ -420,54 +402,21 @@ const Do = () => {
       .catch(err => console.log(err));
   };
 
-  const onDragEnd = result => {
-    const { destination, source, draggableId } = result;
-    if (!result.destination) {
-      return;
-    }
-
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
-      return;
-    }
-
-    const items = reorder(
-      filteredTasks,
-      result.source.index,
-      result.destination.index
-    );
-    setAllTasks(items);
-  };
-
   const onCompleteHandler = (e,id,snack) => {
-    // handleToggle(i);
     axios.get(`http://localhost:8000/api/tasks/${id}`, {withCredentials: true})
-    .then(res => { 
+    .then(res => {
       let completedTask = {};
       completedTask = res.data.results;
       completedTask.completed = true;
       completedTask.completedAt = new Date();
-      console.log(completedTask);
-      console.log(typeof completedTask.completedAt);
       return axios.patch(`http://localhost:8000/api/tasks/${id}`, completedTask, {withCredentials: true})
       .then(res => {
         if (res.data.message === 'success'){
           removeFromDom(id);
           handleOpenSnackBar(snack);
-          
         }
       }).catch(err=> console.log(err));
     }).catch(err => console.log(err));
-  };
-
-  const handleDateParameter = date => {
-    // console.log(date);
-    // console.log(typeof date);
-    // console.log(date.toLocaleString('en-US', DATE_OPTIONS));
-    // console.log(moment.utc(date));
-    setDateParameter(date);
   };
 
   return (
@@ -481,8 +430,9 @@ const Do = () => {
       </Typography>
       <Typography
       className={classes.subtitle} 
-      variant='subtitle1'>
-        Please select a date:
+      variant='subtitle2'
+      >
+        Select a date:
       </Typography>
       </div>
       <MuiPickersUtilsProvider utils={DateFnsUtils}
@@ -491,14 +441,11 @@ const Do = () => {
         <CssBaseline />
         <Grid container justify='space-around'>
           <KeyboardDatePicker
-
             className={classes.primaryIconStyle}
             margin='normal'
             id='Selected a date...'
-            // label='Date picker dialog'
             format='MM/dd/yyyy'
             value={dateParameter}
-            // defaultValue={Moment}
             onChange={e => {
               handleDateParameter(e);
             }}
@@ -516,13 +463,12 @@ const Do = () => {
               rootRef={provided.innerRef}
               {...provided.droppableProps}
             >
-              {/* <div> */}
                 <List 
                 dense
                 secondary="true"
                 className={classes.list}
                 >
-                {sortedTasks.map((task, i) =>
+                {SortedTasks.map((task, i) =>
                   task.chunked && task.scheduled ? (
                   <Draggable
                     draggableId={task._id}
@@ -532,41 +478,30 @@ const Do = () => {
                     {provided => (
                       <ListItem
                       className={classes.listItem}
-                      // ContainerProps={{ ref: provided.innerRef }}
+                      button                      
                       id='Task'
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
                       innerRef={provided.innerRef}
                       key={task._id}
-                      // role={undefined}
-                      // onClick={handleToggle(i)}
                       >
-                    
                     <ListItemIcon
-                      // className={classes.primaryIconStyle}
                       onClick={e => onCompleteHandler(e,task._id,"Task Completed!")}
                       >
-                      {/* {allCategories.map((category, catIdx) => 
-                        task.category === category.name ? ( */}
                       <FormControlLabel
-                        // key={catIdx}
                         control={
                           <Checkbox
                             icon={<RadioButtonUncheckedRoundedIcon 
                               fontSize="small" 
-                              // style={{color:category.color}}
-                              />}
+                            />}
                             checkedIcon={<CheckCircleRoundedIcon 
                               fontSize="small"
-                              // style={{color:category.color}}
-                              />}
+                            />}
                             name="completed"
                           />
                         }
                         label=""
                       />
-                      {/* ):null
-                      )} */}
                     </ListItemIcon>
                     {allCategories.map((category, catIdx) => 
                       task.category === category.name ? (
@@ -578,7 +513,6 @@ const Do = () => {
                       primary={<Typography style={{fontSize:15}}>{task.name}</Typography>}
                       secondary={<Typography key={catIdx} style={{fontSize:12, color:category.color}}>{secondary ? task.category : null}</Typography>}
                     />
-
                     ) : null
                     )}
                     <ListItemText
@@ -614,12 +548,9 @@ const Do = () => {
                   </ListItem>
                     )}
                 </Draggable>
-                ) : (
-                  <div></div>
-                )
+                ) : (null)
               )}
             </List>
-          {/* </div> */}
           {provided.placeholder}
           </RootRef>
           )}
@@ -664,13 +595,9 @@ const Do = () => {
             onChange={e => {
               onChangeHandler(e);
             }}
-            // onClick={e => {
-            //   onClickHandler(e, task._id);
-            // }}
             onBlur={e => {
               onPatchEditNameHandler(e, task._id);
             }}
-            // placeholder={task.name}
             name='name'
             value={task.name}
           />
@@ -687,9 +614,6 @@ const Do = () => {
             <Select
               className={classes.textMain}
               value={task.category}
-              // onClick={e => {
-              //   onClickHandler(e, task._id);
-              // }}
               onChange={e => {
                 onPatchEditChunkHandler(e, task._id);
               }}
@@ -713,13 +637,12 @@ const Do = () => {
         <DialogActions>
           <Button 
             autoFocus 
-            onClick={handleCloseEdit}     
+            onClick={handleCloseEdit}
             color="primary"
           >
             Cancel
           </Button>
           <IconButton
-            // className={classes.icon}
             aria-label='update task'
             onClick={handleCloseEdit}
             color="primary"
@@ -753,7 +676,6 @@ const Do = () => {
             margin='normal'
             id='date-picker-dialog'
             format='MM/dd/yyyy'
-            // label='Select a date...'
             value={selectedDate}
             onClick={e => {
               onClickHandler(e, task._id);
@@ -766,12 +688,6 @@ const Do = () => {
             }}
           />
         </MuiPickersUtilsProvider>
-        {/* <IconButton edge='end' aria-label='delete'>
-          <DeleteComponent
-            taskId={task._id}
-            successCallback={() => removeFromDom(task._id)}
-          />
-        </IconButton> */}
         <DialogActions>
         <Button 
             autoFocus 
@@ -781,7 +697,6 @@ const Do = () => {
             Cancel
           </Button>
           <IconButton
-            // className={classes.icon}
             aria-label='add to calendar'
             onClick={e => {
               onPatchDateHandler(e, task._id, "Date Changed!");

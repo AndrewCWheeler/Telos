@@ -1,27 +1,21 @@
 import React, {useState} from 'react';
-import {navigate} from '@reach/router';
-import { Router } from '@reach/router';
-import { Container } from '@material-ui/core';
-import DumpAndChunk from './DumpAndChunk';
-// import CreateCategories from './CreateCategories';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Schedule from './Schedule';
-import Do from './Do';
-import Profile from './Profile';
+import { Router, navigate } from '@reach/router';
+// My components:
 import BottomNavComponent from '../components/BottomNavComponent';
-// import ChunkComponent from '../components/ChunkComponent';
-import PersistentDrawer from '../components/PersistentDrawer';
 import Category from './Category';
+import Do from './Do';
+import DumpAndChunk from './DumpAndChunk';
+import PersistentDrawer from '../components/PersistentDrawer';
+import Profile from './Profile';
+import Schedule from './Schedule';
 import Trajectory from './Trajectory';
-// import CategoryList from '../components/CategoryList';
-
-// import "assets/scss/material-kit-pro-react.scss?v=1.9.0";
-import "../assets/scss/material-kit-pro-react.scss";
 import Vision from './Vision';
-
+// Material-ui components / styles:
+import CssBaseline from '@material-ui/core/CssBaseline';
+import "../assets/scss/material-kit-pro-react.scss";
 
 const Main = (props) => {
-  const {theme, toggleDarkMode, useDarkMode} = props;
+  const { toggleDarkMode } = props;
   const [open, setOpen] = useState(false);
   const [navValue, setNavValue] = useState('dump');
   const navigatePage = (e, navValue) => {
@@ -43,10 +37,9 @@ const Main = (props) => {
       navigate('/vision');
     }
   };
-    const handleDrawerOpen = () => {
+  const handleDrawerOpen = () => {
     setOpen(true);
   };
-
   const handleDrawerClose = () => {
     setOpen(false);
   };
@@ -55,12 +48,12 @@ const Main = (props) => {
     <div className='center'>
       <CssBaseline />
       <Router>
+        <Vision path='/vision' />
+        <Category path='/category' />
         <DumpAndChunk path='/' />
         <Schedule path='/schedule' />
         <Do path='/do' />
         <Trajectory path='/trajectory' />
-        <Category path='/category' />
-        <Vision path='/vision' />
         <Profile path='/profile' />
       </Router>
       <BottomNavComponent

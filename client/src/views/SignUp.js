@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { Link, navigate } from '@reach/router';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+// Material-ui core components:
+import Button from '@material-ui/core/Button';
 import Container from '@material-ui/core/Container';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import Grid from '@material-ui/core/Grid';
+import { makeStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+// For seamless front-end validations that work with material-ui components:
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
-
 
 // function Copyright() {
 //   return (
@@ -55,7 +53,6 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     margin: theme.spacing(4, 4),
-    // color: theme.palette.primary.main,
   },
   link: {
     textDecoration: 'none',
@@ -70,19 +67,6 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-// const myTheme = createMuiTheme({
-//   overrides: {
-//     MuiInputLabel: { // Name of the component ⚛️ / style sheet
-//       root: { 
-//         color: 'white',// Name of the rule
-//         "&$focused": { // increase the specificity for the pseudo class
-//           color: 'white',
-//         }
-//       }
-//     }
-//   }
-// });
-
 export default function SignUp() {
   const classes = useStyles();
   const [user, setUser] = useState({
@@ -91,6 +75,7 @@ export default function SignUp() {
     email: '',
     password: '',
     confirmPassword: '',
+    vision: '',
   });
 
   const onChangeHandler = e => {
@@ -152,7 +137,6 @@ export default function SignUp() {
         <Typography component='h1' variant='h5'>
           Sign up
         </Typography>
-        {/* <ThemeProvider theme={myTheme}> */}
         <ValidatorForm 
           className={classes.form} 
           noValidate
@@ -190,7 +174,6 @@ export default function SignUp() {
                 onChange={onChangeHandler}
                 validators={['required', 'twoOrMore']}
                 errorMessages={['Last name is required.', 'Must be at least 2 characters.']}
-
               />
             </Grid>
             <Grid item xs={12}>
@@ -206,7 +189,6 @@ export default function SignUp() {
                 onChange={onChangeHandler}
                 validators={['required', 'isEmail']}
                 errorMessages={['Email is required.', 'Invalid email.']}
-
               />
             </Grid>
             <Grid item xs={12}>
@@ -223,7 +205,6 @@ export default function SignUp() {
                 onChange={onChangeHandler}
                 validators={['required', 'eightOrMore']}
                 errorMessages={['Password required.', 'Must be at least 8 characters.']}
-
               />
             </Grid>
             <Grid item xs={12}>
@@ -239,7 +220,6 @@ export default function SignUp() {
                 value={user.confirmPassword}
                 validators={['isPasswordMatch', 'required']}
                 errorMessages={['Email and password do not match.', 'This field is required.']}
-
               />
             </Grid>
           </Grid>
@@ -249,7 +229,6 @@ export default function SignUp() {
             variant='contained'
             color='primary'
             className={classes.submit}
-            // onClick={onSubmitHandler}
           >
             Sign Up
           </Button>
@@ -261,11 +240,7 @@ export default function SignUp() {
             </Grid>
           </Grid>
         </ValidatorForm>
-        {/* </ThemeProvider> */}
       </div>
-      {/* <Box mt={5} className={classes.bottom}>
-        <Copyright />
-      </Box> */}
     </Container>
   );
 }

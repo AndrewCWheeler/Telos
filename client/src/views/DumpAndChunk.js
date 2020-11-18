@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { navigate } from '@reach/router';
-import DumpComponent from '../components/DumpComponent';
+// My components and modified material-ui components:
 import AllDumpedList from '../components/AllDumpedList';
+import DumpComponent from '../components/DumpComponent';
+import SimpleSnackbar from '../components/SimpleSnackBar';
+// Material-ui core components:
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import SimpleSnackbar from '../components/SimpleSnackBar';
-
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -20,12 +17,10 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     margin: theme.spacing(4, 0, 2),
-    // color: theme.palette.primary.main,
   },
   subtitle: {
     color: theme.palette.primary.main,
   },
-
 }));
 
 const DumpAndChunk = (props) => {
@@ -34,7 +29,6 @@ const DumpAndChunk = (props) => {
   const [load, setLoad] = useState(0);
   const [allTasks, setAllTasks] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
-  // const [selectedCategoryIdx, setSelectedCategoryIdx] = useState('');
   const [selectedObject, setSelectedObject] = useState({});
   const [sessionUserId, setSessionUserId] = useState('');
   const [open, setOpen] = useState(false);
@@ -61,7 +55,6 @@ const DumpAndChunk = (props) => {
     if (reason === 'clickaway') {
       return;
     }
-
     setOpenSnack(false);
   };
 
@@ -125,7 +118,6 @@ const DumpAndChunk = (props) => {
       .then(res => {
         if (res.data.message === 'success') {
           setTask(res.data.results);
-          // setSelectedObject(res.data.results);
         }
       })
       .catch(err => console.log(err));
@@ -142,26 +134,15 @@ const DumpAndChunk = (props) => {
 
   const onChangeChunkHandler = (e) => {
     setSelectedObject(e.target.value);
-    console.log(selectedObject);
   };
-  console.log(selectedObject);
-  console.log(selectedObject.name);
-  console.log(selectedObject._id);
-
-  // const handleTaskChange = (selectedObject) => {
-
-  // }
 
   const onPatchHandler = (e, taskId, cat, snack) => {
-    console.log("Category name:", cat.name);
-    console.log("Category id:", cat._id);
     // Assign arguments to applicable targets:
     let catId = '';
     catId = cat._id;
     task.labelIdentity = cat._id;
     task.category = cat.name;
     task.chunked = true;
-
     // Split up axios calls to update both task component and category component:
     let one = `http://localhost:8000/api/tasks/${taskId}`
     const requestOne = axios.patch(one, task, { withCredentials: true });
@@ -178,27 +159,18 @@ const DumpAndChunk = (props) => {
     const requestTwo = axios.patch(two, task, { withCredentials: true});
     requestTwo
       .then(res => {
-        if (res.data.message === 'success'){
-          console.log("YOU ARE A SUCCESS TODAY!");
-        }
-      }).catch(err => console.log("Something went wrong, but you are still loved.", err));
+      }).catch(err => {});
     axios
       .all([requestOne, requestTwo])
       .then(
         axios.spread((...responses) => {
           const responseOne = responses[0];
           const responseTwo = responses[1];
-          console.log(responseOne, responseTwo);
+          // console.log(responseOne, responseTwo);
         })
       ).catch(errors => {
-        console.log(errors);
       });
   };
-
-  // const passCategoryIdx = (e, cat) => {
-  //   setSelectedCategoryIdx(cat);
-  // }
-  // console.log(selectedCategoryIdx);
 
   const onPatchEditNameHandler = (e, id) => {
     axios
@@ -220,16 +192,9 @@ const DumpAndChunk = (props) => {
     <div>
       <CssBaseline />
       <div style={{marginTop:'90px'}}>
-        {/* <Typography
-          variant='h2'
-          className={classes.title}
-        >
-          {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
-        </Typography> */}
         <Typography
           className={classes.title}
           variant='h5'
-          // className={classes.subtitle}
         >
           Dump & Chunk
         </Typography>
@@ -253,19 +218,17 @@ const DumpAndChunk = (props) => {
         removeFromDom={removeFromDom}
         selectedObject={selectedObject}
         setSelectedObject={setSelectedObject}
-        // selectedCategoryIdx={selectedCategoryIdx}
-        // setSelectedCategoryIdx={setSelectedCategoryIdx}
         onPatchHandler={onPatchHandler}
         onChangeHandler={onChangeHandler}
         onChangeChunkHandler={onChangeChunkHandler}
         onPatchEditNameHandler={onPatchEditNameHandler}
-        // passCategoryIdx={passCategoryIdx}
       />
       <SimpleSnackbar 
-      snack={snack}
-      openSnack={openSnack}
-      handleOpenSnackBar={handleOpenSnackBar}
-      handleCloseSnackBar={handleCloseSnackBar} />
+        snack={snack}
+        openSnack={openSnack}
+        handleOpenSnackBar={handleOpenSnackBar}
+        handleCloseSnackBar={handleCloseSnackBar} 
+      />
     </div>
   );
 };

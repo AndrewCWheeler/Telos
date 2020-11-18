@@ -1,21 +1,16 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { navigate } from '@reach/router';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
-import IconButton from '@material-ui/core/IconButton';
-import {
-  Container,
-  Grid,
-  // Paper,
-  TextField,
-  makeStyles,
-  Tooltip,
-  Fab,
-  // Accordion,
-  // AccordionSummary,
-  // AccordionDetails,
-} from '@material-ui/core';
+// Material-ui core components:
+import Container from '@material-ui/core/Container';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import Grid from '@material-ui/core/Grid';
+import IconButton from '@material-ui/core/IconButton';
+import { makeStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
+import Tooltip from '@material-ui/core/Tooltip';
+// Material-ui core icons:
+import AddCircleIcon from '@material-ui/icons/AddCircle';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -70,22 +65,17 @@ const DumpComponent = props => {
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      console.log('Enter Key Pressed!')
       onSubmitHandler(e);
     }
   }
   // Create Task 
   const onSubmitHandler = e => {
     e.preventDefault();
-    console.log('This is the task just before going to post...');
-    console.log(task);
     axios
       .post(`http://localhost:8000/api/tasks/${sessionUserId}`, task, {
         withCredentials: true,
       })
       .then(res => {
-        console.log(res.data.message);
-        console.log(res.data.results);
         setTask({
           name: '',
           category: '',
@@ -101,11 +91,9 @@ const DumpComponent = props => {
           count++;
           setLoad(count);
         }
-        console.log(load);
         navigate('/');
       })
       .catch(err => {
-        console.log(err);
       });
   };
 

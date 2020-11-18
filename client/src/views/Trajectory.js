@@ -2,21 +2,18 @@ import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import { navigate } from '@reach/router';
 import { Radar }  from 'react-chartjs-2';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import Moment from 'react-moment';
+import { makeStyles } from '@material-ui/core/styles';
+import Container from '@material-ui/core/Container';
 import 'moment-timezone';
 import moment from 'moment';
-// const randomColor = require('../lib/randomColor')
-
 
 const useStyles = makeStyles(theme => ({
   root: {
-    // width: '100%',
     height: '100%',
-    // maxWidth: 840,
+    maxWidth: 1020,
     marginTop: 90,
     marginBottom: 90,
-    // flexGrow: 1,
+    justifyContent: 'center',
     },
   chart: {
     color: theme.palette.text.primary,
@@ -28,12 +25,8 @@ const Trajectory = () => {
   const [allTasks, setAllTasks] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
   const [load, setLoad] = useState('');
-  const [weekDate, setWeekDate] = useState(new Date());
-  const [monthDate, setMonthDate] = useState(new Date());
 
   const classes = useStyles();
-
-  const textPrimary = classes.chart;
 
   useEffect(() => {
     let one = 'http://localhost:8000/api/users/one';
@@ -98,15 +91,10 @@ const Trajectory = () => {
     let weekAgo = moment().subtract(7, 'days').calendar();
     moment(now).toISOString();
     moment(weekAgo).toISOString();
-    console.log(now);
-    console.log(weekAgo);
-    console.log(now > weekAgo);
-
     for (let i = 0; i<category.length; i++){
       filteredLength.push(arr.filter(t => t.completed === true
         && t.category === category[i] 
         ).length);
-      console.log(filteredLength);
       filteredTasks.push(arr.filter(t => (t.completed === true && t.category === category[i]) 
       && (t.completedAt < now && t.completedAt > weekAgo)
       ));
@@ -115,7 +103,6 @@ const Trajectory = () => {
     return filteredLength;
   }
   const WeeklyCompleted = getWeekTasks(allTasks, myLabels);
-  console.log(WeeklyCompleted); 
 
   // Get 1 month of completed tasks, 'rolling' (1 month ago from now);
   const getMonthTasks = (arr, category) => {
@@ -125,27 +112,18 @@ const Trajectory = () => {
     let monthAgo = moment().subtract(1, 'months').calendar();
     moment(now).toISOString();
     moment(monthAgo).toISOString();
-    console.log(now);
-    console.log(monthAgo);
-    console.log(now > monthAgo);
-
     for (let i = 0; i<category.length; i++){
       filteredLength.push(arr.filter(t => t.completed === true
         && t.category === category[i] 
         ).length);
-      console.log(filteredLength);
       filteredTasks.push(arr.filter(t => (t.completed === true && t.category === category[i]) 
       && (t.completedAt < now && t.completedAt > monthAgo)
       ));
-      console.log(filteredTasks);
     }
     return filteredLength;
   }
 
   const MonthlyCompleted = getMonthTasks(allTasks, myLabels);
-  console.log(MonthlyCompleted);
-
-
   // Get 1 year of completed tasks, 'rolling' (1 year ago from now);
   const getYearTasks = (arr, category) => {
     let filteredLength = [];
@@ -154,27 +132,19 @@ const Trajectory = () => {
     let yearAgo = moment().subtract(1, 'years').calendar();
     moment(now).toISOString();
     moment(yearAgo).toISOString();
-    console.log(now);
-    console.log(yearAgo);
-    console.log(now > yearAgo);
-
     for (let i = 0; i<category.length; i++){
       filteredLength.push(arr.filter(t => t.completed === true
         && t.category === category[i] 
         ).length);
-      console.log(filteredLength);
       filteredTasks.push(arr.filter(t => (t.completed === true && t.category === category[i]) 
       && (t.completedAt < now && t.completedAt > yearAgo)
       ));
-      console.log(filteredTasks);
     }
     return filteredLength;
   }
-
   const YearlyCompleted = getYearTasks(allTasks, myLabels);
-  console.log(YearlyCompleted); 
-  
-const data = {
+
+  const data = {
     labels: myLabels,
     datasets: [
       {
@@ -200,7 +170,6 @@ const data = {
     legend: {
       position: 'top',
       labels: {
-        // fontColor: textPrimary,
         fontSize: 18,
       }
     },
@@ -225,7 +194,6 @@ const data = {
       },
       pointLabels: {
         fontSize: 15,
-        // fontColor: textPrimary,
       },
       ticks: {
         beginAtZero: true, 
@@ -235,18 +203,17 @@ const data = {
   }
   
   return (
-    <div className={classes.root}>
+    <Container className={classes.root}>
       <Radar
         className={classes.chart}
         data={data}
         options={options}
         width={39}
-        height={51}
+        height={45}
         style={{paddingTop: 20, paddingBottom: 20}}
       />
-    </div>
+    </Container>
   );
 }
-
 
 export default Trajectory;

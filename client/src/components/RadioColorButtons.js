@@ -1,14 +1,13 @@
 import React from 'react';
-import { withStyles, makeStyles, useTheme } from '@material-ui/core/styles';
-import { green, red } from '@material-ui/core/colors';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
+// Material-ui core components:
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
-import PaletteIcon from '@material-ui/icons/Palette';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 import { Typography } from '@material-ui/core';
-
+import { withStyles } from '@material-ui/core/styles';
+// Material-ui icons:
+import PaletteIcon from '@material-ui/icons/Palette';
 
 const PrimaryLight = withStyles(theme => ({
   root: {
@@ -130,9 +129,8 @@ const SuccessDark = withStyles(theme => ({
   checked: {},
 }))((props) => <Radio color="default" {...props} />);
 
-
 const RadioColorButtons = props => {
-  const { selectedColor, setSelectedColor, handleChangeColor } = props;
+  const { selectedColor, handleChangeColor } = props;
 
   return (
     <FormControl component="fieldset">

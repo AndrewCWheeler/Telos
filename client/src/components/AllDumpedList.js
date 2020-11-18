@@ -1,48 +1,36 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import PropTypes from 'prop-types';
-import { makeStyles } from '@material-ui/core/styles';
+// Material-ui core components:
+import Backdrop from '@material-ui/core/Backdrop';
+import Button from '@material-ui/core/Button';
+import Container from '@material-ui/core/Container';
+import CssBaseline from '@material-ui/core/CssBaseline';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import TextField from '@material-ui/core/TextField';
-import Backdrop from '@material-ui/core/Backdrop';
-import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is required for IE 11 support
+import FormControl from '@material-ui/core/FormControl';
+import Grid from '@material-ui/core/Grid';
+import IconButton from '@material-ui/core/IconButton';
+import InputLabel from '@material-ui/core/InputLabel';
 import List from '@material-ui/core/List';
-import LabelIcon from '@material-ui/icons/Label';
+import Link from '@material-ui/core/Link';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import IconButton from '@material-ui/core/IconButton';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Grid from '@material-ui/core/Grid';
-import Container from '@material-ui/core/Container';
-import Paper from '@material-ui/core/Paper';
-import FolderOpenIcon from '@material-ui/icons/FolderOpen';
-import Typography from '@material-ui/core/Typography';
-import DeleteComponent from './DeleteComponent';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import AddBoxIcon from '@material-ui/icons/AddBox';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import { shadows } from '@material-ui/system';
+import { makeStyles } from '@material-ui/core/styles';
 import MenuItem from '@material-ui/core/MenuItem';
-import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
-import Button from '@material-ui/core/Button';
+import Select from '@material-ui/core/Select';
+import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
-import Link from '@material-ui/core/Link';
-// import CategoryList from './CategoryList';
-
+import Typography from '@material-ui/core/Typography';
+// Material-ui icons:
+import LabelIcon from '@material-ui/icons/Label';
+import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
+// My components:
+import DeleteComponent from './DeleteComponent';
 
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
     maxWidth: 840,
-    // flexGrow: 1,
   },
   modal: {
     display: 'flex',
@@ -61,39 +49,21 @@ const useStyles = makeStyles(theme => ({
   },
   subtitle: {
     margin: theme.spacing(4, 1, 2),
-    // color: theme.palette.primary.main,
   },
   folderStyle: {
     fontSize:24,
-    // color: theme.palette.primary.main,
-  },
-  // text: {
-  //   color: theme.palette.primary.contrastText,
-  // },
-  textModal: {
-    // color: theme.palette.primary.main,
   },
   icon: {
     color: theme.palette.primary.main,
     margin: theme.spacing(0, 1, 0),
   },
-  deleteStyle: {
-    // color: theme.palette.secondary.main,
-  },
   list: {
     marginBottom: '90px',
   },
   listItem: {
-    // margin: theme.spacing(1,0,0),
     maxHeight: '100%',
     width: '100%',
     backgroundColor: theme.palette.background.default,
-    // '&:hover': {
-    //   backgroundColor: theme.palette.primary.dark,
-    // },
-    // color: theme.palette.primary.contrastText,
-    // boxShadow: theme.shadows[10],
-    // borderRadius: 3,
     borderBottom: '1px solid #e1dfdc',
     paddingLeft: 0,
   },
@@ -105,63 +75,30 @@ const useStyles = makeStyles(theme => ({
 
 const AllDumpedList = props => {
   const {
-    // selectedCategoryIdx,
-    // setSelectedCategoryIdx,
-    // passCategoryIdx,
     task, 
-    setTask,
     open,
     handleOpen,
     handleClose,
     allTasks,
     allCategories,
-    setAllTasks,
-    onClickHandler,
     onChangeChunkHandler,
     removeFromDom,
     onPatchHandler,
     selectedObject,
-    setSelectedObject,
     onChangeHandler,
     onPatchEditNameHandler,
 
   } = props;
   const classes = useStyles();
-  const [dense, setDense] = useState(true);
   const [secondary, setSecondary] = useState(true);
 
   return (
     <Container className={classes.root}>
       <CssBaseline />
-      {/* <Grid container direction='row' justify='center'>
-        <FormGroup row>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={dense}
-                onChange={event => setDense(event.target.checked)}
-              />
-            }
-            label='Enable dense'
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={secondary}
-                onChange={event => setSecondary(event.target.checked)}
-              />
-            }
-            label='Enable secondary text'
-          />
-        </FormGroup>
-      </Grid> */}
       <Grid container spacing={1}>
         <Grid item xs={12}>
-          {/* <Typography variant='h6' className={classes.title}>
-            Select Chunk Category, then Add to Confirm...
-          </Typography> */}
           <div>
-            <List dense secondary className={classes.list}>
+            <List dense secondary="true" className={classes.list}>
               {allTasks.map((task, i) =>
                 task.chunked ? (
                   ''
@@ -176,7 +113,6 @@ const AllDumpedList = props => {
                       <IconButton type='button' onClick={e => handleOpen(e, task._id)}>
                         <LabelIcon
                         className={classes.folderStyle}
-                        // edge="start" 
                         disableRipple
                         />
                       </IconButton>
@@ -243,9 +179,6 @@ const AllDumpedList = props => {
           onChange={e => {
             onChangeHandler(e);
           }}
-          // onClick={e => {
-            //   onClickHandler(e, task._id);
-            // }}
             onBlur={e => {
               onPatchEditNameHandler(e, task._id);
             }}
@@ -258,14 +191,11 @@ const AllDumpedList = props => {
             className={classes.formControl}
             >
             <InputLabel
-              // className={classes.textModal}
               id='category'
               >
               Chunk...
             </InputLabel>
             <Select
-              // native
-              // className={classes.textModal}
               value={selectedObject}
               onChange={e => {
                 onChangeChunkHandler(e);
@@ -281,7 +211,6 @@ const AllDumpedList = props => {
                   value={category}
                   placeholder={category.name}
                   style={{color:category.color}}
-                  // onChange={e => {passCategoryIdx(e, category.name)}}
                 >
                     <LabelIcon
                       style={{fontSize:18,marginRight:12}}
@@ -314,5 +243,4 @@ const AllDumpedList = props => {
     </Container>
   );
 };
-
 export default AllDumpedList;

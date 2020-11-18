@@ -1,29 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { navigate } from '@reach/router';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
-import IconButton from '@material-ui/core/IconButton';
-import {
-  Container,
-  Grid,
-  // Paper,
-  TextField,
-  makeStyles,
-  Tooltip,
-  Fab,
-  Typography,
-  // Accordion,
-  // AccordionSummary,
-  // AccordionDetails,
-} from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import Container from '@material-ui/core/Container';
+import Grid from '@material-ui/core/Grid';
+import IconButton from '@material-ui/core/IconButton';
+import { makeStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
+import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
+
+import SaveIcon from '@material-ui/icons/Save';
+
 import SimpleSnackbar from '../components/SimpleSnackBar';
 
 const useStyles = makeStyles(theme => ({
-  root: {
+root: {
     width: '100%',
     maxWidth: 840,
-      // flexGrow: 1,
     '& .MuiTextField-root': {
       margin: theme.spacing(1),
       width: '48ch',
@@ -46,7 +40,6 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     margin: theme.spacing(4, 0, 2),
-    // color: theme.palette.primary.main,
   },
   link: {
     textDecoration: 'none',
@@ -57,16 +50,13 @@ const useStyles = makeStyles(theme => ({
     "&:hover": {
       color: theme.palette.info.main,
       textDecoration: 'none',
-      
     },
-    
   },
 }));
 
 const Vision = props => {
   const { navigatePage } = props;
   const classes = useStyles();
-  const [load, setLoad] = useState('');
   const [sessionUser, setSessionUser] = useState('');
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
@@ -75,20 +65,17 @@ const Vision = props => {
     setOpenSnack(true);
     setSnack(snack); 
   };
-
   const handleCloseSnackBar = (event, reason) => {
     if (reason === 'clickaway') {
       return;
     }
     setOpenSnack(false);
   };
-
   useEffect(() => {
     axios.get('http://localhost:8000/api/users/one', {withCredentials: true})
     .then(res => {
       if (res.data.message === 'success'){
         setSessionUser(res.data.results);
-        // setVision(res.data.results.vision);
       }
     }).catch(err => {
       console.log(err);
@@ -109,11 +96,8 @@ const Vision = props => {
       onSubmitHandler(e);
     }
   }
-  // Update User with Vision
   const onSubmitHandler = (e, snack) => {
     e.preventDefault();
-    console.log('This is the vision just before going to patch...');
-    console.log(sessionUser);
     axios
       .patch('http://localhost:8000/api/users/one', sessionUser, {
         withCredentials: true,
@@ -146,7 +130,7 @@ const Vision = props => {
           <Grid item>
             <TextField
               rows={4}
-              defaultValue="Default Value"
+              placeholder="I am..."
               id='vision'
               label='Vision here...'
               multiline
@@ -158,7 +142,6 @@ const Vision = props => {
               }}
               onKeyPress={handleKeyDown}
               name='vision'
-              // value={sessionUser.vision}
             />
           </Grid>
         </Grid>
@@ -171,7 +154,7 @@ const Vision = props => {
                   onSubmitHandler(e, "Vision updated!");
                 }}
                 >
-                <AddCircleIcon fontSize='large' />
+                <SaveIcon fontSize='large' />
               </IconButton>
             </Tooltip>
           </Grid>
@@ -187,10 +170,11 @@ const Vision = props => {
         </Grid>
       </Grid>
       <SimpleSnackbar 
-      snack={snack}
-      openSnack={openSnack}
-      handleOpenSnackBar={handleOpenSnackBar}
-      handleCloseSnackBar={handleCloseSnackBar} />
+        snack={snack}
+        openSnack={openSnack}
+        handleOpenSnackBar={handleOpenSnackBar}
+        handleCloseSnackBar={handleCloseSnackBar}
+      />
     </Container>
   );
 };

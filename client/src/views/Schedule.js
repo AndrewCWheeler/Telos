@@ -1,77 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import Undo from '@material-ui/icons/Undo';
-import PropTypes from 'prop-types';
 import axios from 'axios';
 import { navigate } from '@reach/router';
-import { makeStyles } from '@material-ui/core/styles';
-import { withStyles } from '@material-ui/core/styles';
-import Modal from '@material-ui/core/Modal';
+// Material-ui core components:
 import Backdrop from '@material-ui/core/Backdrop';
-import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is required for IE 11 support
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-
+import Button from '@material-ui/core/Button';
+import Container from '@material-ui/core/Container';
+import CssBaseline from '@material-ui/core/CssBaseline';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
-import TextField from '@material-ui/core/TextField';
-
-import IconButton from '@material-ui/core/IconButton';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Grid from '@material-ui/core/Grid';
-import Container from '@material-ui/core/Container';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
-import DeleteComponent from '../components/DeleteComponent';
-// import FolderIcon from '@material-ui/icons/Folder';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-// import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import IconButton from '@material-ui/core/IconButton';
+import InputLabel from '@material-ui/core/InputLabel';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import { makeStyles } from '@material-ui/core/styles';
+import MenuItem from '@material-ui/core/MenuItem';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import RootRef from '@material-ui/core/RootRef';
 import Select from '@material-ui/core/Select';
-// import { createMuiTheme } from '@material-ui/core/styles';
-// import AddBoxIcon from '@material-ui/icons/AddBox';
-import CssBaseline from '@material-ui/core/CssBaseline';
-// import DatePicker from 'react-datepicker';
-// import 'react-datepicker/dist/react-datepicker.css';
-import CachedIcon from '@material-ui/icons/Cached';
-// import DateRangeIcon from '@material-ui/icons/DateRange';
-// import DatePickComponent from './DatePickComponent';
+import TextField from '@material-ui/core/TextField';
+import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
+// Material-ui icons:
+import EditIcon from '@material-ui/icons/Edit';
+import EventIcon from '@material-ui/icons/Event';
 import LabelIcon from '@material-ui/icons/Label';
 import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
-import { shadows } from '@material-ui/system';
-import FolderOpenIcon from '@material-ui/icons/FolderOpen';
-import EventIcon from '@material-ui/icons/Event';
-import EditIcon from '@material-ui/icons/Edit';
-import UpdateIcon from '@material-ui/icons/Update';
-import Button from '@material-ui/core/Button';
-import Meditate from '../images/Meditate.svg';
-
-import 'date-fns';
+import Undo from '@material-ui/icons/Undo';
+// react-beautiful-dnd
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-
+// Date time material components:
+import 'date-fns';
 import DateFnsUtils from '@date-io/date-fns';
 import {
   MuiPickersUtilsProvider,
-  // KeyboardTimePicker,
   KeyboardDatePicker,
-  DatePicker,
 } from '@material-ui/pickers';
-import { RootRef, FormLabel, Tooltip, ListItemSecondaryAction, ListItemIcon } from '@material-ui/core';
+// React Moment and moment imports:
 import Moment from 'react-moment';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup, { useRadioGroup } from '@material-ui/core/RadioGroup';
+import 'moment-timezone';
+import moment from 'moment';
+// My components and modified material components:
 import SimpleSnackbar from '../components/SimpleSnackBar';
 
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
     maxWidth: 840,
-    // flexGrow: 1,
   },
   modal: {
     display: 'flex',
@@ -83,17 +63,10 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     margin: theme.spacing(4, 0, 2),
-    // color: theme.palette.primary.main,
   },
-  // textMain: {
-  //   margin: theme.spacing(2),
-  // },
-  // text: {
-  //   color: theme.palette.primary.contrastText,
-  // },
   subtitle: {
-    margin: theme.spacing(1, 0, 0),
-    // color: theme.palette.text.secondary,
+    margin: theme.spacing(-1, 0, 0),
+    color: theme.palette.primary.main,
   },
   select: {
     color: theme.palette.primary.main,
@@ -103,13 +76,9 @@ const useStyles = makeStyles(theme => ({
     marginBottom: '90px',
   },
   listItem: {
-    // margin: theme.spacing(1,0,0),
     maxHeight: '100%',
     width: '100%',
     backgroundColor: theme.palette.background.default,
-    // color: theme.palette.primary.contrastText,
-    // boxShadow: theme.shadows[10],
-    // borderRadius: 3,
     borderBottom: '1px solid #e1dfdc',
     paddingLeft: 0,
   },
@@ -120,7 +89,6 @@ const useStyles = makeStyles(theme => ({
   radioStyle: {
     justifyContent: 'center',
     fontSize:15,
-    // margin: theme.spacing(1),
   },
   secondaryIconStyle: {
     fontSize:24,
@@ -148,7 +116,9 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const Schedule = props => {
+const Schedule = () => {
+  const classes = useStyles();
+  // STATES
   const [load, setLoad] = useState(0);
   const [task, setTask] = useState({
     name: '',
@@ -165,59 +135,42 @@ const Schedule = props => {
   const [allCategories, setAllCategories] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [dense, setDense] = useState(true);
   const [secondary, setSecondary] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [sessionUserId, setSessionUserId] = useState('');
   const [openCal, setOpenCal] = useState(false);
-  const [openEditTask, setOpenEditTask] = useState(false);
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
-  const [show, setShow] = useState(true);
-  
+  const [openEdit, setOpenEdit] = useState(false);
+  // Erase this later:
 
+  // DIALOG AND SNACK HANDLERS
   const handleOpenSnackBar = (snack) => {
     setOpenSnack(true);
     setSnack(snack); 
   };
-
   const handleCloseSnackBar = (event, reason) => {
     if (reason === 'clickaway') {
       return;
-    }
-
+    } 
     setOpenSnack(false);
   };
-  
   const handleOpenCal = (e, id) => {
-    // let now = moment();
     onClickHandler(e, id);
     setOpenCal(true);
-    // setSelectedDate(now);
   };
-
   const handleCloseCal = () => {
     setOpenCal(false);
   };
-  // const handleEditTask = () => {
-  //   setOpenEditTask(true);
-  // };
-  // const handleCloseEditTask = () => {
-  //   setOpenEditTask(false);
-  // };
-  const [openEdit, setOpenEdit] = useState(false);
-
   const handleOpenEdit = (e, id) => {
     onClickHandler(e, id);
     setOpenEdit(true);
   };
-
   const handleCloseEdit = () => {
     setOpenEdit(false);
   };
 
-  const classes = useStyles();
-
+  // INITIALIZE CALL FOR LOGGED USER AND DATA
   useEffect(() => {
     let one = 'http://localhost:8000/api/users/one';
     const requestOne = axios.get(one, { withCredentials: true });
@@ -231,35 +184,155 @@ const Schedule = props => {
     const requestTwo = axios.get(two, { withCredentials: true });
     requestTwo
       .then(response => {
-        setAllTasks(response.data.results);
+        if (response.data.message = 'success'){
+          let orderedTasks = response.data.results;
+          orderedTasks.sort((a,b) => a.priority - b.priority)
+          setAllTasks(orderedTasks);
+        }
       })
       .catch(error => {
       });
-      let three = 'http://localhost:8000/api/categories/user';
-      const requestThree = axios.get(three, {withCredentials: true });
-      requestThree
-        .then(response => {
-          setAllCategories(response.data.results);
-        }).catch(error => {
-          console.log(error);
+    let three = 'http://localhost:8000/api/categories/user';
+    const requestThree = axios.get(three, {withCredentials: true });
+    requestThree
+      .then(response => {
+        setAllCategories(response.data.results);
+      })
+      .catch(error => {
+        console.log(error);
+      })
+    axios
+      .all([requestOne, requestTwo, requestThree])
+      .then(
+        axios.spread((...responses) => {
+          const responseOne = responses[0];
+          const responseTwo = responses[1];
+          const responseThree = responses[2];
+          console.log(responseOne, responseTwo, responseThree);
         })
-      axios
-        .all([requestOne, requestTwo, requestThree])
-        .then(
-          axios.spread((...responses) => {
-            const responseOne = responses[0];
-            const responseTwo = responses[1];
-            const responseThree = responses[2];
-            console.log(responseOne, responseTwo, responseThree);
-          })
-        )
-        .catch(errors => {
-          navigate('/landing');
-        });
-    }, [load]);
+      )
+      .catch(errors => {
+        navigate('/landing');
+      });
+  }, [load]);
 
-    console.log(allCategories);
 
+  // FILTER, SORT, TASK REORDER FUNCTIONS
+
+  // This filter returns a number (arr.length) of tasks that have not yet been scheduled within each category:
+  const unscheduledTasks = (arr, category) => {
+    let filtered = '';
+    filtered = arr.filter(t => t.scheduled !== true && t.category === category);
+    if (filtered.length > 0){
+      return filtered.length;
+    } else return null;
+  }
+
+  const FilteredTasks = allTasks.filter(tasks => {
+    let found = '';
+    if (tasks.chunked && !tasks.scheduled){
+      found = tasks;
+      console.log("These are the filtered Tasks:")
+      console.log(found);
+    }
+    return found;
+  });
+  
+  const reorder = (FilteredTasks, startIndex, endIndex) => {
+    const result = Array.from(FilteredTasks);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    console.log(result);
+    return result;
+  };
+  // Schedule Component version:
+  // const reorder = (allTasks, startIndex, endIndex) => {
+  //   const result = Array.from(allTasks);
+  //   const [removed] = result.splice(startIndex, 1);
+  //   result.splice(endIndex, 0, removed);
+  //   return result;
+  // };
+    
+  const onDragEnd = result => {
+    const { destination, source, draggableId } = result;
+    if (!result.destination) {
+      return;
+    }
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+        return;
+      }
+    const items = reorder(
+      FilteredTasks,
+      result.source.index,
+      result.destination.index
+    );
+    setAllTasks(items);
+  };
+
+  // The schedule version of onDragEnd *** difference is which tasks are being re-ordered, whether all or filtered:
+
+  // const onDragEnd = result => {
+  //   const { destination, source, draggableId } = result;
+  //   if (!result.destination) {
+  //     return;
+  //   }
+  //   if (
+  //     destination.droppableId === source.droppableId &&
+  //     destination.index === source.index
+  //   ) {
+  //     return;
+  //   }
+  //   const items = reorder(
+  //     allTasks,
+  //     result.source.index,
+  //     result.destination.index
+  //   );
+  //   setAllTasks(items);
+  // };
+        
+  // Assign priority to tasks according to DOM state index and update priority property in db:
+  const assignPriority = (arr) => {
+    for (let i=0; i<arr.length; i++){
+      arr[i].priority = i;
+    }
+    axios.put('http://localhost:8000/api/bulk/' + sessionUserId, arr, {withCredentials: true})
+    .then(response => {
+    })
+    .catch(error => {
+      console.log(error);
+    });
+    return arr;
+  }
+
+  const SortedTasks = assignPriority(FilteredTasks).sort((a, b) => a.priority - b.priority);
+  // END FILTERED, SORTED, RE-ORDERED
+
+  // onCHANGE HANDLERS
+  const onChangeHandler = e => {
+    setTask({
+      ...task,
+      owner: sessionUserId,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const onChangeDate = (date, id) => {
+    setSelectedDate(date);
+    task.scheduledAt = date;
+  }; 
+
+  const removeFromDom = taskId => {
+    setAllTasks(allTasks.filter(task => task._id !== taskId));
+  };
+
+  const onSelectHandler = e => {
+    setSelectedCategory(e.target.value);
+  };
+
+  // GET and PATCH axios calls:
   const onClickHandler = (e, id) => {
     axios
       .get(`http://localhost:8000/api/tasks/${id}`, { withCredentials: true })
@@ -272,83 +345,7 @@ const Schedule = props => {
       .catch(err => console.log(err));
   };
 
-  const reorder = (allTasks, startIndex, endIndex) => {
-    const result = Array.from(allTasks);
-    const [removed] = result.splice(startIndex, 1);
-    result.splice(endIndex, 0, removed);
-    return result;
-  };
-
-  // const getCategoryId = (allCategories) => {
-  //   let categoryId = [];
-  //   let categoryLengths = [];
-  //   for (let i = 0; i<allCategories.length; i++){
-  //     categoryId.push(allCategories[i]._id);
-  //     categoryLengths.push(allCategories[i].tasks.length);
-  //   }
-  //   return (categoryId, categoryLengths);
-  // }
-  // console.log(getCategoryId(allCategories));
-
-  const getCategory = (id) => {
-    axios.get('http://localhost:8000/api/categories/' + id, {withCredentials: true})
-    .then(res => {
-      if(res.data.message === 'success'){
-        console.log(res.data.results);
-      }
-    }).catch(err => console.log(err));
-  }
-
-  const getCategoryTaskCounts = (allCategories) => {
-    let categoryIds = [];
-    let categoryList = [];
-    for (let i = 0; i<allCategories.length; i++){
-      categoryIds.push(allCategories[i]._id);
-      categoryList = getCategory(allCategories[i]._id);
-    }
-    return (categoryIds, categoryList);
-  }
-  // console.log(getCategoryTaskCounts(allCategories));
-
-  const unscheduledTasks = (arr, category) => {
-    let filtered = '';
-    // let count = 0;
-    filtered = arr.filter(t => t.scheduled !== true && t.category === category);
-    console.log(filtered);
-    if (filtered.length > 0){
-      return filtered.length;
-    } else return null; 
-  }
-  console.log(unscheduledTasks(allTasks));
-
-
-
-  // const getTaskCounts = (allCategories) => {
-  //   const tasks = [];
-  //   for (let i = 0; i<allCategories.length; i++){
-  //     tasks.push(allCategories[i].tasks);
-  //     console.log(tasks);
-  //   }
-  //   return tasks;
-  // }
-  // console.log(getTaskCounts(allCategories));
-
-  const onChangeHandler = e => {
-    setTask({
-      ...task,
-      owner: sessionUserId,
-      [e.target.name]: e.target.value,
-    });
-    console.log(e.target.value);
-  };
-
-  const removeFromDom = taskId => {
-    setAllTasks(allTasks.filter(task => task._id !== taskId));
-  };
-
   const onPatchEditNameHandler = (e, id) => {
-    // task.category = e.target.value;
-    // task.chunked = true;
     axios
       .patch('http://localhost:8000/api/tasks/' + id, task, {
         withCredentials: true,
@@ -375,12 +372,6 @@ const Schedule = props => {
           removeFromDom(id);
           handleCloseEdit();
         }
-        // let count = load;
-        // if (count >= 0) {
-        //   count++;
-        //   setLoad(count);
-        // }
-        // console.log(load);
       })
       .catch(err => console.log(err));
   };
@@ -398,31 +389,11 @@ const Schedule = props => {
           removeFromDom(id);
           handleCloseEdit();
         }
-        // let count = load;
-        // if (count >= 0) {
-        //   count++;
-        //   setLoad(count);
-        // }
-        // console.log(load);
       })
       .catch(err => console.log(err));
   };
 
-  const onSelectHandler = e => {
-    console.log(e.target.value);
-    setSelectedCategory(e.target.value);
-  };
-
-  const onChangeDate = (date, id) => {
-    console.log(task);
-    setSelectedDate(date);
-    console.log(date);
-    console.log(typeof date);
-    task.scheduledAt = date;
-  }; 
-
   const onPatchDateHandler = (e, id) => {
-    // setSelectedDate(date);
     task.scheduledAt = selectedDate;
     task.scheduled = true;
     axios
@@ -436,55 +407,14 @@ const Schedule = props => {
           handleCloseCal();
           handleOpenSnackBar("Task scheduled!");
         };
-        // let count = load;
-        // if (count >= 0) {
-        //   count++;
-        //   setLoad(count);
-        // }
-        // console.log(load);
       })
       .catch(err => console.log(err));
   };
-
-  const onDragEnd = result => {
-    const { destination, source, draggableId } = result;
-    if (!result.destination) {
-      return;
-    }
-
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
-      return;
-    }
-
-    const items = reorder(
-      allTasks,
-      result.source.index,
-      result.destination.index
-    );
-    setAllTasks(items);
-  };
-
-  const hideMeditate = (x) => {
-    setShow(x);
-  }
-  // const toUpperCaseFilter = d => {
-  //   return d.toUpperCase();
-  // };
 
   return (
     <Container className={classes.root}>
       <CssBaseline />
       <div style={{marginTop:'90px'}}>
-      {/* <Typography
-        variant='h2'
-        // component='h2'
-        className={classes.title}
-      >
-        {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
-      </Typography> */}
       <Typography
       className={classes.title} 
       variant='h5'>
@@ -492,16 +422,12 @@ const Schedule = props => {
       </Typography>
       <Typography
       className={classes.subtitle} 
-      variant='subtitle1'>
+      variant='subtitle2'
+      >
         Select a category:
       </Typography>
       </div>
-      {/* <DatePicker selected={date} onChange={onDateChange} /> */}
-      
-      {/* <Grid container spacing={1}>
-        <Grid item xs={12}> */}
         <FormControl component="fieldset" className={classes.formControl}>
-          {/* <FormLabel component="legend">Category:</FormLabel> */}
           <RadioGroup 
             row aria-label="category" 
             name="category" 
@@ -519,8 +445,6 @@ const Schedule = props => {
                 <Typography style={{fontSize:15}}>
                   {category.name}<br></br>
                   {unscheduledTasks(allTasks, category.name)}
-                  {/* {category.tasks.length !== 0 ? category.tasks.length : (null)} */}
-                  
                 </Typography>
               }
               labelPlacement="bottom"
@@ -529,51 +453,6 @@ const Schedule = props => {
             )}
           </RadioGroup>
         </FormControl>
-          {/* <FormControl variant='standard' className={classes.formControl}>
-            <InputLabel id="select-category">Category</InputLabel>
-            <Select
-              labelId="select-category"
-              className={classes.textMain}
-              // value
-              onChange={e => {
-                onSelectHandler(e);
-              }}
-              label='Chunk...'
-              name='category'
-              value={selectedCategory}
-            >
-              <MenuItem aria-label='None' value=''><em>None</em></MenuItem>
-              {allCategories.map((category, catIdx) => 
-                <MenuItem key={catIdx} value={category.name}
-                style={{color:category.color}}
-              >
-                  {category.name}
-                </MenuItem>
-              )}
-            </Select>
-          </FormControl> */}
-          {/* <Grid container direction='row' justify='center' style={{marginTop:25}}>
-            <FormGroup row>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={dense}
-                    onChange={event => setDense(event.target.checked)}
-                  />
-                }
-                label='Enable dense'
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={secondary}
-                    onChange={event => setSecondary(event.target.checked)}
-                  />
-                }
-                label='Enable secondary text'
-              />
-            </FormGroup>
-          </Grid> */}
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId='droppable'>
               {provided => (
@@ -581,13 +460,13 @@ const Schedule = props => {
                   rootRef={provided.innerRef}
                   {...provided.droppableProps}
                 >
-                  <div>
-                    <List dense secondary="true"
-                    className={classes.list}>
-                      {allTasks.map((task, i) =>
-                        selectedCategory === task.category &&
-                        task.chunked &&
-                        !task.scheduled ? (
+                    <List 
+                    dense 
+                    secondary="true"
+                    className={classes.list}
+                    >
+                      {SortedTasks.map((task, i) =>
+                        task.category === selectedCategory ? (
                           <Draggable
                             draggableId={task._id}
                             index={i}
@@ -643,21 +522,15 @@ const Schedule = props => {
                               </ListItem>
                             )}
                           </Draggable>
-                        ) : (
-                          <div></div>
-                        )
+                        ) : (null)
                       )}
                     </List>
-                  </div>
                   {provided.placeholder}
                 </RootRef>
               )}
             </Droppable>
           </DragDropContext>
-        {/* </Grid>
-      </Grid> */}
-
-      {/* Edit Task Dialog  */}
+      {/* Edit Task Dialog */}
       <Dialog
         aria-labelledby='modal-edit-select'
         aria-describedby='choose-edit-category'
@@ -697,9 +570,7 @@ const Schedule = props => {
             onChange={e => {
               onChangeHandler(e);
             }}
-            // onClick={e => {
-            //   onClickHandler(e, task._id);
-            // }}
+
             onBlur={e => {
               onPatchEditNameHandler(e, task._id);
             }}
@@ -712,18 +583,12 @@ const Schedule = props => {
             className={classes.formControl}
           >
             <InputLabel
-              // className={classes.textMain}
               htmlFor='category'
             >
               Chunk...
             </InputLabel>
             <Select
-              // native
-              // className={classes.textMain}
               value={task.category}
-              // onClick={e => {
-              //   onClickHandler(e, task._id);
-              // }}
               onChange={e => {
                 onPatchEditChunkHandler(e, task._id);
               }}
@@ -753,7 +618,6 @@ const Schedule = props => {
           Cancel
         </Button>
           <IconButton
-            // className={classes.icon}
             aria-label='update task'
             onClick={handleCloseEdit}
             color="primary"
@@ -763,7 +627,7 @@ const Schedule = props => {
         </DialogActions>
       </Dialog>
 
-      {/* Second Dialog */}
+      {/* Date Assign Dialog */}
       <Dialog open={openCal} onClose={handleCloseCal}>
         <DialogContent
           className={classes.dialogStyle}
@@ -778,7 +642,6 @@ const Schedule = props => {
         </DialogContent>
         <MuiPickersUtilsProvider color="primary" utils={DateFnsUtils}>
           <CssBaseline />
-          {/* <Grid container justify='space-around'> */}
           <KeyboardDatePicker
             key={task.scheduledAt}
             margin='normal'
@@ -788,7 +651,6 @@ const Schedule = props => {
             margin='normal'
             id='date-picker-dialog'
             format='MM/dd/yyyy'
-            // label='Select a date...'
             value={selectedDate}
             onClick={e => {
               onClickHandler(e, task._id);
@@ -800,7 +662,6 @@ const Schedule = props => {
               'aria-label': 'change date',
             }}
           />
-          {/* </Grid> */}
         </MuiPickersUtilsProvider>
         <DialogActions>
           <Button
@@ -811,7 +672,6 @@ const Schedule = props => {
             Cancel
           </Button>
           <IconButton
-            // className={classes.icon}
             aria-label='add to calendar'
             onClick={e => {
               onPatchDateHandler(e, task._id);
@@ -823,10 +683,11 @@ const Schedule = props => {
         </DialogActions>
       </Dialog>
       <SimpleSnackbar 
-      snack={snack}
-      openSnack={openSnack}
-      handleOpenSnackBar={handleOpenSnackBar}
-      handleCloseSnackBar={handleCloseSnackBar} />
+        snack={snack}
+        openSnack={openSnack}
+        handleOpenSnackBar={handleOpenSnackBar}
+        handleCloseSnackBar={handleCloseSnackBar} 
+      />
     </Container>
   );
 };

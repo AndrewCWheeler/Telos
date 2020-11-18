@@ -1,30 +1,17 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Link, navigate } from '@reach/router';
+// Material-ui core components:
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import { Link, navigate } from '@reach/router';
-import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+// My modified material-ui component
 import SimpleSnackbar from '../components/SimpleSnackBar';
-
-// function Copyright() {
-//   return (
-//     <Typography variant='body2' color='textSecondary' align='center'>
-//       {'Copyright © '}
-//       <Link color='inherit' to='https://material-ui.com/'>
-//         Telos.com
-//       </Link>{' '}
-//       {new Date().getFullYear()}
-//       {'.'}
-//     </Typography>
-//   );
-// }
+// For seamless front-end validations compatible with material-ui components:
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -58,7 +45,6 @@ const useStyles = makeStyles(theme => ({
   form: {
     width: '100%', // Fix IE 11 issue.
     marginTop: theme.spacing(1),
-
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
@@ -68,7 +54,6 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     margin: theme.spacing(4, 0, 8),
-    // color: theme.palette.primary.main,
   },
   subtitle: {
     color: theme.palette.secondary.main,
@@ -115,24 +100,6 @@ const SignInSide = () => {
       [e.target.name]: e.target.value,
     });
   };
-
-  // const validator = e => {
-  //   let value = (e.target.value);
-  //   let valid = Boolean;
-  //   const validator = /^([\w-\.]+@([\w-]+\.)+[\w-]+)?$/;
-  //   if(e.target.name === 'email'){
-  //       let valid = validator.test(value);
-  //       console.log(valid);
-  //       if(!valid){
-  //         setEmailError(true);
-  //         setEmailHelperText("Invalid Email");
-  //       }
-  //       else if (valid){
-  //         setEmailError(false);
-  //         setEmailHelperText("");
-  //       }
-  //   }
-  // }
 
   const onSubmitHandler = e => {
     e.preventDefault();
@@ -186,9 +153,6 @@ const SignInSide = () => {
               onChange={e => {
                 onChangeHandler(e);
               }}
-              // onBlur={e => {
-              //   validator(e);
-              // }}
             />
             <TextValidator
               variant='outlined'
@@ -223,17 +187,15 @@ const SignInSide = () => {
                 </Link>
               </Grid>
             </Grid>
-            {/* <Box mt={5}>
-              <Copyright />
-            </Box> */}
           </ValidatorForm>
         </div>
       </Grid>
       <SimpleSnackbar 
-      snack={snack}
-      openSnack={openSnack}
-      handleOpenSnackBar={handleOpenSnackBar}
-      handleCloseSnackBar={handleCloseSnackBar} />
+        snack={snack}
+        openSnack={openSnack}
+        handleOpenSnackBar={handleOpenSnackBar}
+        handleCloseSnackBar={handleCloseSnackBar} 
+      />
     </Grid>
   );
 };

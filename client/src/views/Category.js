@@ -1,49 +1,30 @@
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
+import { navigate } from '@reach/router';
+// Material-ui core components:
 import Backdrop from '@material-ui/core/Backdrop';
-import ColorizeIcon from '@material-ui/icons/Colorize';
+import Button from '@material-ui/core/Button';
+import CssBaseline from '@material-ui/core/CssBaseline';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-
-import EditIcon from '@material-ui/icons/Edit';
-import FolderOpenIcon from '@material-ui/icons/FolderOpen';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import DeleteCategoryComponent from '../components/DeleteCategoryComponent';
-
-import LabelIcon from '@material-ui/icons/Label';
-import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
+import Grid from '@material-ui/core/Grid';
+import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-
-import { navigate } from '@reach/router';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
-import IconButton from '@material-ui/core/IconButton';
 import { makeStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Tooltip from '@material-ui/core/Tooltip';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-
-import PaletteIcon from '@material-ui/icons/Palette';
-import Paper from '@material-ui/core/Paper';
-import Container from '@material-ui/core/Container';
-import Button from '@material-ui/core/Button';
-import SaveIcon from '@material-ui/icons/Save';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import SimpleSnackbar from '../components/SimpleSnackBar';
-import InputLabel from '@material-ui/core/InputLabel';
-
-import { green } from '@material-ui/core/colors';
-import Radio from '@material-ui/core/Radio';
+import TextField from '@material-ui/core/TextField';
+import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
+// My components:
+import DeleteCategoryComponent from '../components/DeleteCategoryComponent';
 import RadioColorButtons from '../components/RadioColorButtons';
-
+// Material-ui icons:
+import AddCircleIcon from '@material-ui/icons/AddCircle';
+import LabelIcon from '@material-ui/icons/Label';
+import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -70,7 +51,6 @@ const useStyles = makeStyles(theme => ({
   },
   neutralIconStyle: {
     fontSize:24,
-    // color: theme.palette.text.secondary,
   },
   paper: {
     maxWidth: 840,
@@ -79,27 +59,18 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     marginTop: theme.spacing(4),
-    // color: theme.palette.primary.main,
   },
   list: {
     marginBottom: '90px',
   },
   listItem: {
-    // margin: theme.spacing(1,0,0),
     maxHeight: '100%',
     width: '100%',
     backgroundColor: theme.palette.background.default,
-    // '&:hover': {
-    //   backgroundColor: theme.palette.primary.dark,
-    // },
-    // color: theme.palette.primary.contrastText,
-    // boxShadow: theme.shadows[10],
-    // borderRadius: 3,
     borderBottom: '1px solid #e1dfdc',
     paddingLeft: 0,
   },
   formControl: {
-    // margin: theme.spacing(1),
     maxWidth: 300,
   },
 }));
@@ -143,7 +114,6 @@ const Category = props => {
     if (reason === 'clickaway') {
       return;
     }
-
     setOpenSnack(false);
   };
 
@@ -175,7 +145,6 @@ const Category = props => {
   };
 
   const onSubmitHandler = (e, snack) => {
-    // e.preventDefault();
     console.log('This is the category just before going to post...');
     console.log(category);
     axios
@@ -252,7 +221,6 @@ const Category = props => {
   };
 
   const onPatchHandler = (e, id, snack) => {
-    // category.name = e.target.value;
     axios
       .patch('http://localhost:8000/api/categories/' + id, category, {
         withCredentials: true,
@@ -260,7 +228,6 @@ const Category = props => {
       .then(res => {
         if (res.data.message = 'success'){
           handleOpenSnackBar(snack);
-          // removeFromDom(id);
           handleCloseEdit();
         }
         let count = load;
@@ -278,13 +245,6 @@ const Category = props => {
     <div>
       <CssBaseline />
       <div style={{marginTop:'90px'}}>
-        {/* <Typography
-          variant='h2'
-          // component='h2'
-          className={classes.title}
-          >
-          {'\u03C4\u03AD\u03BB\u03BF\u03C2'}
-        </Typography> */}
         <Typography
         className={classes.title}
         variant='h5'>
@@ -330,9 +290,6 @@ const Category = props => {
         </form>
         <Grid container spacing={1}>
           <Grid item xs={12}>
-            {/* <Typography variant='h6' className={classes.title}>
-              Select Chunk Category, then Add to Confirm...
-            </Typography> */}
             <div>
               <List dense secondary className={classes.list}>
                 {allCategories.map((category, i) =>
@@ -390,15 +347,6 @@ const Category = props => {
         <DialogContent
           className={classes.dialogStyle}
         >
-          {/* <Tooltip title="Unchunk" placement="top">
-            <IconButton 
-            className={classes.undo}
-            role='button'
-            onClick={e => {onPatchUnChunkHandler(e, category._id)}}
-            >
-              <Undo />
-            </IconButton>
-          </Tooltip> */}
           <Typography 
             variant='h5' 
             className={classes.title}
@@ -416,12 +364,6 @@ const Category = props => {
             onChange={e => {
               onChangeHandler(e);
             }}
-            // onClick={e => {
-            //   onClickHandler(e, category._id);
-            // }}
-            // onBlur={e => {
-            //   onPatchEditNameHandler(e, category._id);
-            // }}
             placeholder={category.name}
             name='name'
             value={category.name}
@@ -445,7 +387,6 @@ const Category = props => {
           <IconButton
             onClick={e => {onPatchHandler(e, category._id, "Category Updated!")}}
             aria-label='update category'
-            // onClick={handleCloseEdit}
             color="primary"
           >
             <LibraryAddIcon />

@@ -9,7 +9,6 @@ import { makeStyles } from "@material-ui/core/styles";
 // core components
 import GridContainer from "../../../components/Grid/GridContainer.js";
 import GridItem from "../../../components/Grid/GridItem.js";
-import CustomInput from "../../../components/CustomInput/CustomInput.js";
 import Button from "../../../components/CustomButtons/Button.js";
 
 import workStyle from "../../../assets/jss/material-kit-pro-react/views/landingPageSections/workStyle.js";
@@ -81,7 +80,6 @@ const options = {
     },
     pointLabels: {
       fontSize: 15,
-      // fontColor: textPrimary,
     },
     ticks: {
       beginAtZero: true, 
@@ -114,7 +112,7 @@ export default function SectionWork() {
           <Button
             onClick={e => {navigate('/signup')}}
             color="primary"
-            large
+            large="true"
             round
             >
               Create Free Account
