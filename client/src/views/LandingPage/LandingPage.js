@@ -61,7 +61,7 @@ export default function LandingPage({ ...rest }) {
                 Task Manager
               </Typography>
               <h4>
-                An intuitive task manager that helps you clear your mind and fulfill your uniquely designed purpose.
+                An intuitive task manager designed to help you clear your mind and fulfill your unique purpose.
               </h4>
               <br />
               {/* <Button

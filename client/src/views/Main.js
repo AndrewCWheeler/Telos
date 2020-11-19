@@ -48,7 +48,9 @@ const Main = (props) => {
     <div className='center'>
       <CssBaseline />
       <Router>
-        <Vision path='/vision' />
+        <Vision 
+          navigatePage={navigatePage}
+          path='/vision' />
         <Category path='/category' />
         <DumpAndChunk path='/' />
         <Schedule path='/schedule' />

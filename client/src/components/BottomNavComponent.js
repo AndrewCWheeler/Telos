@@ -20,9 +20,9 @@ const useStyles = makeStyles(theme => ({
     position: 'fixed',
     bottom: 0,
     color: theme.palette.text.primary,
-    '&$focused':{
-      color: theme.palette.text.secondary,
-    }
+    // '&$focused':{
+    //   color: theme.palette.text.secondary,
+    // }
   }
 }));
 

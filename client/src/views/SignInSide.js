@@ -80,7 +80,6 @@ const SignInSide = () => {
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
   
-
   const handleOpenSnackBar = (snack) => {
     setOpenSnack(true);
     setSnack(snack); 
@@ -90,7 +89,6 @@ const SignInSide = () => {
     if (reason === 'clickaway') {
       return;
     }
-
     setOpenSnack(false);
   };
 
@@ -107,14 +105,14 @@ const SignInSide = () => {
       .post('http://localhost:8000/api/login', userLogin, {
         withCredentials: true,
       })
-      .then(response => {
-        setUserLogin({
-          email: '',
-          password: '',
-        });
-        navigate('/');
+      .then(() => {
+          setUserLogin({
+            email: '',
+            password: '',
+          });
+          navigate('/');
       })
-      .catch(err => {console.log(err);
+      .catch(() => {
         handleOpenSnackBar("Email and password do not match!");
       });
     navigate('/signin');
@@ -149,7 +147,6 @@ const SignInSide = () => {
               name='email'
               value={userLogin.email}
               autoComplete='email'
-              autoFocus
               onChange={e => {
                 onChangeHandler(e);
               }}
@@ -182,7 +179,7 @@ const SignInSide = () => {
             </Button>
             <Grid container justify='center' style={{marginTop:54}}>
               <Grid item>
-                <Link className={classes.link} to='/' variant='body2'>
+                <Link className={classes.link} to='/signup' variant='body2'>
                   {"Don't have an account? Sign Up"}
                 </Link>
               </Grid>

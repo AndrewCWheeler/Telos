@@ -93,14 +93,10 @@ export default function SignUp() {
       })
       .then(res => {
         if (res.data.message === 'success') {
-          console.log('User successfully added:');
-          console.log(user);
         }
         navigate('/');
       })
-      .catch(err => {
-        console.log('User was not successfully added:' + err.toString());
-      });
+      .catch();
   };
 
   ValidatorForm.addValidationRule('isPasswordMatch', (value) => {

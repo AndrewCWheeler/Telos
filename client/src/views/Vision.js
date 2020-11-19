@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { navigate } from '@reach/router';
+import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
-import IconButton from '@material-ui/core/IconButton';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -15,7 +15,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import SimpleSnackbar from '../components/SimpleSnackBar';
 
 const useStyles = makeStyles(theme => ({
-root: {
+  root: {
     width: '100%',
     maxWidth: 840,
     '& .MuiTextField-root': {
@@ -23,6 +23,9 @@ root: {
       width: '48ch',
       color: theme.palette.text.primary,
     },
+  },
+  myBorder: {
+    borderTop: `1px solid ${theme.palette.text.secondary}`,
   },
   fab: {
     margin: theme.spacing(2),
@@ -55,11 +58,12 @@ root: {
 }));
 
 const Vision = props => {
-  const { navigatePage } = props;
   const classes = useStyles();
+  const { navigatePage } = props;
   const [sessionUser, setSessionUser] = useState('');
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
+  const [vision, setVision] = useState('');
   
   const handleOpenSnackBar = (snack) => {
     setOpenSnack(true);
@@ -72,42 +76,34 @@ const Vision = props => {
     setOpenSnack(false);
   };
   useEffect(() => {
+    let isMounted = true;
     axios.get('http://localhost:8000/api/users/one', {withCredentials: true})
     .then(res => {
-      if (res.data.message === 'success'){
+      if (res.data.message === 'success' && isMounted){
         setSessionUser(res.data.results);
+        setVision('');
       }
-    }).catch(err => {
-      console.log(err);
-      navigate('/landing')
-    })
+    }).catch(()=>{navigate('/landing')});
+    return () => { isMounted = false };
   }, []);
-
-  const onChangeHandler = e => {
-    setSessionUser({
-      ...sessionUser,
-      [e.target.name]: e.target.value,
-    });
-  };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      console.log('Enter Key Pressed!')
       onSubmitHandler(e);
     }
   }
   const onSubmitHandler = (e, snack) => {
     e.preventDefault();
+    sessionUser.vision = vision;
     axios
       .patch('http://localhost:8000/api/users/one', sessionUser, {
         withCredentials: true,
       })
       .then(res => {
         if(res.data.message === 'success'){
-          console.log(res.data.results);
-        }}).catch(err => {
-        console.log(err);
-      });
+          handleOpenSnackBar(snack);
+          setVision('');
+        }}).catch();
   };
 
   return (
@@ -122,13 +118,14 @@ const Vision = props => {
       <Typography
         variant="body1"
       >
-        Aristotle famously said, "We are what we repeatedly do." What if the reverse were also true? "We do what we repeatedly tell ourselves we are." In other words, we act out of who we perceive ourselves to be. Before you begin creating task lists, take a moment to create your own personal vision statement. Then let this vision influence the <a className={classes.link} onmouseover='' style={{cursor: 'pointer'}} onClick={e => {navigatePage(e, 'category')}}>categories</a> you create.
+        Aristotle famously said, "We are what we repeatedly do." What if the reverse were also true? "We do what we repeatedly tell ourselves we are." In other words, we act out of who we perceive ourselves to be. Before you begin creating task lists, take a moment to create your own personal vision statement. Then let this vision influence the <Button className={classes.link} onClick={e => {navigatePage(e, 'category')}}>categories</Button> you create.
       </Typography>
       </div>
       <form className={classes.root} noValidate autoComplete='off'>
         <Grid className={classes.dump} container direction='row' justify='center' alignItems='center'>
           <Grid item>
             <TextField
+              style={{marginTop: 30}}
               rows={4}
               placeholder="I am..."
               id='vision'
@@ -138,32 +135,58 @@ const Vision = props => {
               size='medium'
               variant='outlined'
               onChange={e => {
-                onChangeHandler(e);
+                setVision(e.target.value);
               }}
               onKeyPress={handleKeyDown}
               name='vision'
+              value={vision}
             />
           </Grid>
         </Grid>
         <Grid className={classes.dump} container direction='row' justify='center' alignItems='center'>
           <Grid item>
             <Tooltip title="Add" placement="right">
-              <IconButton
+              <Button
+                onClick={e => {
+                  onSubmitHandler(e, "Vision updated!");
+                }}
+                variant="contained"
+                color="primary"
+                size="small"
+                className={classes.button}
+                startIcon={<SaveIcon />}
+              >
+                Save
+              </Button>
+              {/* <IconButton
                 className={classes.fab}
                 onClick={e => {
                   onSubmitHandler(e, "Vision updated!");
                 }}
                 >
                 <SaveIcon fontSize='large' />
-              </IconButton>
+              </IconButton> */}
             </Tooltip>
           </Grid>
         </Grid>
       </form>
-      <Grid container justify="center">
+      <Grid container justify="center">    
+        </Grid>
+          <Typography 
+            variant='h4'
+            style={{marginTop:60, marginBottom:9}}
+
+          >
+            My Vision
+          </Typography>
         <Grid item>
+        <Grid 
+          item
+          className={classes.myBorder}
+        >
           <Typography 
             variant='h5'
+            style={{marginTop: 30}}
           >
             {sessionUser.vision}
           </Typography>

@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import axios from 'axios';
 import { navigate } from '@reach/router';
 import clsx from 'clsx';
@@ -19,6 +19,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { red } from '@material-ui/core/colors';
+import RootRef from '@material-ui/core/RootRef';
 import Snackbar from '@material-ui/core/Snackbar';
 import Slide from '@material-ui/core/Slide';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -181,6 +182,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function HideOnScroll(props) {
+  
   const { children, window } = props;
   const trigger = useScrollTrigger({ target: window ? window() : undefined });
 
@@ -192,6 +194,7 @@ function HideOnScroll(props) {
 }
 
 const PersistentDrawer = (props) => {
+  const domRef = useRef();
   const classes = useStyles();
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -239,15 +242,17 @@ const PersistentDrawer = (props) => {
   };
 
   useEffect(() => {
+    let isMounted = true;
     axios.get('http://localhost:8000/api/users/one', {withCredentials: true})
       .then(res => {
-        if (res.data.message === 'success'){
+        if (res.data.message === 'success' && isMounted){
           setSessionUserId(res.data.results._id);
           setSessionUserFirstName(res.data.results.firstName);
           setFirstInitial(res.data.results.firstName.charAt());
         }
       })
-      .catch(err => console.log(err));
+      .catch();
+      return ()=> { isMounted = false };
   }, []);
 
   const logoutUser = (e, snack) => {
@@ -259,7 +264,7 @@ const PersistentDrawer = (props) => {
         }
         navigate('/landing');
       })
-      .catch(err => console.log(err));
+      .catch();
   };
 
   const menuId = 'primary-search-account-menu';
@@ -273,7 +278,8 @@ const PersistentDrawer = (props) => {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleProfileMenuNavClose}>
+      <MenuItem 
+      onClick={handleProfileMenuNavClose}>
           Profile
       </MenuItem>
       <MenuItem>
@@ -300,7 +306,8 @@ const PersistentDrawer = (props) => {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      <MenuItem onClick={handleProfileMenuOpen}>
+      <MenuItem 
+      onClick={handleProfileMenuOpen}>
         <IconButton
           aria-label="account of current user"
           aria-controls="primary-search-account-menu"
@@ -427,6 +434,7 @@ const PersistentDrawer = (props) => {
   
 
   return (
+    <RootRef rootRef={domRef}>
     <div className={classes.root}>
       <CssBaseline />
       <div className={classes.grow}>
@@ -441,7 +449,6 @@ const PersistentDrawer = (props) => {
       >
         <Toolbar>
           <IconButton
-            // color="primary"
             aria-label="open drawer"
             onClick={handleDrawerOpen}
             edge="start"
@@ -500,12 +507,13 @@ const PersistentDrawer = (props) => {
         <Divider />
       </Drawer>
       <Snackbar 
-      snack={snack}
-      openSnack={openSnack}
-      handleOpenSnackBar={handleOpenSnackBar}
-      handleCloseSnackBar={handleCloseSnackBar}
+        snack={snack}
+        openSnack={openSnack}
+        handleOpenSnackBar={handleOpenSnackBar}
+        handleCloseSnackBar={handleCloseSnackBar}
       />
     </div>
+    </RootRef>
   );
 }
 

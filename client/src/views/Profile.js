@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { navigate } from '@reach/router';
+import { Link, navigate } from '@reach/router';
 // Material-ui core components / styles:
 import Avatar from '@material-ui/core/Avatar';
+import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
+import CardActions from '@material-ui/core/CardActions';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import Container from '@material-ui/core/Container';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -18,9 +25,9 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 // Material-ui icons:
 import CheckIcon from '@material-ui/icons/Check';
+import DeleteIcon from '@material-ui/icons/Delete';
 import UndoIcon from '@material-ui/icons/Undo';
 // My components:
-import DeleteComponent from '../components/DeleteComponent';
 import SimpleSnackbar from '../components/SimpleSnackBar';
 // Material-ui pro-react components:
 import GridContainer from '../components/Grid/GridContainer';
@@ -100,6 +107,17 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.primary.main,
     backgroundColor: theme.palette.primary.main,
   },
+  link: {
+    textDecoration: 'none',
+    color: theme.palette.text.primary,
+    "&:active": {
+      color: theme.palette.secondary.dark,
+    },
+    "&:hover": {
+      color: theme.palette.info.main,
+      textDecoration: 'none',
+    }
+  },
   list: {
     marginBottom: 90,
     marginTop: 30,
@@ -141,16 +159,24 @@ const useStyles = makeStyles(theme => ({
   success: {
     color: theme.palette.success.main,
   },
+  cardActionStyle: {
+    marginTop: 30,
+    float: 'right',
+  },
+  error: {
+    color: theme.palette.error.main,
+  },
 }));
 
 const Profile = () => {
   const classes = useStyles();
-  const [load, setLoad] = useState(0);
   const [sessionUser, setSessionUser] = useState({});
   const [allTasks, setAllTasks] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
-  const [secondary, setSecondary] = useState(true);
+  // const [secondary, setSecondary] = useState(true);
   const [firstInitial, setFirstInitial] = useState('');
+  const [openDeleteUser, setOpenDeleteUser] = useState(false);
+  const [openDeleteTask, setOpenDeleteTask] = useState(false);
   const [task, setTask] = useState({
     name: '',
     category: '',
@@ -165,12 +191,48 @@ const Profile = () => {
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
   
+  useEffect(() => {
+    let isMounted = true;
+    let one = 'http://localhost:8000/api/users/one';
+    const requestOne = axios.get(one, { withCredentials: true });
+    requestOne
+      .then(response => {
+        if (isMounted) {
+          setSessionUser(response.data.results);
+          setFirstInitial(response.data.results.firstName.charAt());
+        }
+      })
+      .catch();
+    let two = 'http://localhost:8000/api/tasks/user';
+    const requestTwo = axios.get(two, { withCredentials: true });
+    requestTwo
+      .then(response => {
+        if (isMounted) setAllTasks(response.data.results);
+      })
+      .catch();
+    let three = 'http://localhost:8000/api/categories/user';
+    const requestThree = axios.get(three, {withCredentials: true });
+    requestThree
+      .then(response => {
+        if (isMounted) setAllCategories(response.data.results);
+      }).catch();
+    axios
+      .all([requestOne, requestTwo, requestThree])
+      .then(
+        axios.spread((...responses) => {
+          const responseOne = responses[0];
+          const responseTwo = responses[1];
+          const responseThree = responses[2];;
+        })
+      )
+      .catch(() => {navigate('/landing')});
+      return () => { isMounted = false };
+  }, []);
 
   const handleOpenSnackBar = (snack) => {
     setOpenSnack(true);
     setSnack(snack);
   };
-
   const handleCloseSnackBar = (event, reason) => {
     if (reason === 'clickaway') {
       return;
@@ -178,52 +240,37 @@ const Profile = () => {
     setOpenSnack(false);
   };
 
+  const handleOpenDeleteUser = (e, id) => {
+    setOpenDeleteUser(true);
+  };
+
+  const handleCloseDeleteUser = () => {
+    setOpenDeleteUser(false);
+  };
+
+  const handleOpenDeleteTask = (e, id) => {
+    onClickHandler(e, id);
+    setOpenDeleteTask(true);
+  };
+  const handleCloseDeleteTask = () => {
+    setOpenDeleteTask(false);
+  };
+
   const removeFromDom = taskId => {
     setAllTasks(allTasks.filter(task => task._id !== taskId));
   };
 
-  useEffect(() => {
-    let one = 'http://localhost:8000/api/users/one';
-    const requestOne = axios.get(one, { withCredentials: true });
-    requestOne
-      .then(response => {
-        setSessionUser(response.data.results);
-        setFirstInitial(response.data.results.firstName.charAt());
-      })
-      .catch(error => {
-        console.log(error);
-      });
-    let two = 'http://localhost:8000/api/tasks/user';
-    const requestTwo = axios.get(two, { withCredentials: true });
-    requestTwo
-      .then(response => {
-        setAllTasks(response.data.results);
-      })
-      .catch(error => {
-        console.log(error);
-      });
-    let three = 'http://localhost:8000/api/categories/user';
-    const requestThree = axios.get(three, {withCredentials: true });
-    requestThree
-      .then(response => {
-        setAllCategories(response.data.results);
-      }).catch(error => {
-        console.log(error);
-      });
+
+  const onClickHandler = (e, id) => {
     axios
-      .all([requestOne, requestTwo, requestThree])
-      .then(
-        axios.spread((...responses) => {
-          const responseOne = responses[0];
-          const responseTwo = responses[1];
-          const responseThree = responses[2];
-          console.log(responseOne, responseTwo, responseThree);
-        })
-      )
-      .catch(errors => {
-        navigate('/landing');
-      });
-  }, [load]);
+      .get(`http://localhost:8000/api/tasks/${id}`, { withCredentials: true })
+      .then(res => {
+        if (res.data.message === 'success') {
+          setTask(res.data.results);
+        }
+      })
+      .catch();
+  };
 
   const handleUndoComplete = (e,id,snack) => {
     axios.get(`http://localhost:8000/api/tasks/${id}`, {withCredentials: true})
@@ -237,8 +284,22 @@ const Profile = () => {
           removeFromDom(id);
           handleOpenSnackBar(snack);
         }
-      }).catch(err=> console.log(err));
-    }).catch(err => console.log(err));
+      }).catch();
+    }).catch();
+  };
+
+  const deleteTask = (e,id, snack) => {
+    axios
+      .delete(`http://localhost:8000/api/tasks/${id}`,
+        {withCredentials: true,
+      })
+      .then(res => {
+        if(res.data.message==='success'){
+        handleCloseDeleteTask(snack);
+        removeFromDom(id);
+        handleOpenSnackBar(snack);
+      }
+      }).catch();
   };
 
   const deleteUser = (e, id) => {
@@ -246,16 +307,17 @@ const Profile = () => {
       .delete('http://localhost:8000/api/users/' + id, {
         withCredentials: true,
       })
-      .then(response => {
-        if (response.data.message === 'success') {
-          let count = load;
-          if (count >= 0) {
-            count++;
-            setLoad(count);
-          }
-        }
-      })
-      .catch(err => console.log(err));
+      .then(res => {
+        if (res.data.message === 'success') {
+          return axios.get('http://localhost:8000/api/users/logout', { withCredentials: true })
+            .then(res => {
+              if (res.data.message === 'success') {
+                navigate('/landing');
+              }
+            })
+            .catch();
+        };
+      }).catch();
   };
 
   return (
@@ -281,23 +343,28 @@ const Profile = () => {
               image={landingBackground}
             />
             <CardContent>
-              <Typography variant="body1" color="textPrimary" component="p">
-                My Vision:
+              <Typography variant="subtitle1">
+                <Link to="/vision" textDecoration="none" className={classes.link}>
+                  My Vision
+                </Link>
               </Typography>
-              <Typography variant="body2" color="textSecondary" component="p">
-                {sessionUser.vision} I am a child of the living God. Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste accusantium esse dolores eos corrupti recusandae, magnam, incidunt asperiores inventore impedit laboriosam eaque optio perferendis molestias nihil ipsum voluptatem adipisci cupiditate!
+              <Typography variant="body2" component="p">
+                {sessionUser.vision}
               </Typography>
             </CardContent>
+            <CardActions
+              className={classes.cardActionStyle}
+            >
+              <Button
+                className={classes.error}
+                onClick={handleOpenDeleteUser}
+              >
+                Delete Account
+              </Button>
+            </CardActions>
           </Card>
         </GridItem>
       </GridContainer>
-      {/* <Button
-        onClick={(e, id) => {
-          deleteUser(e, sessionUser._id);
-        }}
-      >
-        Delete
-      </Button> */}
       <div style={{marginTop: 30}}>
       <Typography variant='h5'>
         Completed Tasks
@@ -308,8 +375,8 @@ const Profile = () => {
           (
             <ListItem
               className={classes.listItem}
-              key={i}
-              disableRipple
+              key={task._id}
+              index={i}
               button
             >
               <Tooltip title="Task completed!" placement="left">
@@ -317,19 +384,18 @@ const Profile = () => {
                 >
                   <CheckIcon
                   className={classes.success}
-                  disableRipple
                   />
                 </IconButton>
               </Tooltip>
               {allCategories.map((category, catIdx) => 
                 task.category === category.name ? (
                   <ListItemText
+                    key={catIdx}
                     disableTypography
                     className={classes.text}
-                    textOverflow='ellipsis'
                     overflow='hidden'
                     primary={<Typography style={{fontSize:15, textDecoration: 'line-through'}}>{task.name}</Typography>}
-                    secondary={<Typography key={catIdx} style={{fontSize:12, color:category.color}}>{secondary ? task.category : null}</Typography>}
+                    secondary={<Typography style={{fontSize:12, color:category.color}}>{task.category}</Typography>}
                   />
                 ) : null
               )}  <ListItemText >
@@ -350,17 +416,19 @@ const Profile = () => {
                   className={classes.secondaryIconStyle} 
                   edge='end' 
                   aria-label='undo completed'
-                  onClick={e => {handleUndoComplete(e, task._id, "Task marked imcomplete.")}}
+                  onClick={e => {handleUndoComplete(e, task._id, "Task marked incomplete.")}}
                 >
                   <UndoIcon></UndoIcon> 
                 </IconButton>
               </Tooltip>
               <Tooltip title="Delete Task" placement="right">
-                <IconButton className={classes.deleteStyle} edge='end' aria-label='delete'>
-                  <DeleteComponent
-                    taskId={task._id}
-                    successCallback={() => removeFromDom(task._id)}
-                  />
+                <IconButton 
+                  className={classes.deleteStyle} 
+                  edge='end' 
+                  aria-label='delete'
+                  onClick={e => {handleOpenDeleteTask(e, task._id)}}
+                >
+                  <DeleteIcon />
                 </IconButton>
               </Tooltip>
             </ListItem>
@@ -368,6 +436,54 @@ const Profile = () => {
         )}
       </List>
       </div>
+      {/* DELETE USER Dialog */}
+      <Dialog
+        open={openDeleteTask}
+        onClose={handleCloseDeleteTask}
+        aria-labelledby="alert-delete-task"
+        aria-describedby="alert-are-you-sure?"
+      >
+        <DialogTitle id="DeleteTaskTitle">{"Delete Task?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="DeleteTaskAlert">
+            This action cannot be undone. Your task will be removed from its category, calendar, and trajectory stats. Are you sure you want to delete this task?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteTask} color="primary">
+            Cancel
+          </Button>
+          <Button
+            className={classes.error} 
+            onClick={e => {deleteTask(e, task._id, "Task deleted successfully.")}}>
+            Delete Task
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={openDeleteUser}
+        onClose={handleCloseDeleteUser}
+        aria-labelledby="alert-delete-user"
+        aria-describedby="alert-are-you-sure?"
+      >
+        <DialogTitle id="DeleteUserTitle">{"Delete Account?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="DeleteUserAlert">
+            This action cannot be undone. All of your data will be permanently removed. Are you sure you want to delete your account?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteUser} color="primary">
+            Cancel
+          </Button>
+          <Button 
+            className={classes.error}
+            onClick={e => {deleteUser(e, sessionUser._id)}}
+          >
+            Delete Account
+          </Button>
+        </DialogActions>
+      </Dialog>
       <SimpleSnackbar 
         snack={snack}
         openSnack={openSnack}

@@ -8,6 +8,8 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/core/List';
@@ -19,10 +21,11 @@ import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 // My components:
-import DeleteCategoryComponent from '../components/DeleteCategoryComponent';
+// import DeleteCategoryComponent from '../components/DeleteCategoryComponent';
 import RadioColorButtons from '../components/RadioColorButtons';
 // Material-ui icons:
 import AddCircleIcon from '@material-ui/icons/AddCircle';
+import DeleteIcon from '@material-ui/icons/Delete';
 import LabelIcon from '@material-ui/icons/Label';
 import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 
@@ -73,9 +76,12 @@ const useStyles = makeStyles(theme => ({
   formControl: {
     maxWidth: 300,
   },
+  error: {
+    color: theme.palette.error.main,
+  },
 }));
 
-const Category = props => {
+const Category = () => {
   const classes = useStyles();
   const [sessionUserId, setSessionUserId] = useState('');
   const [category, setCategory] = useState({
@@ -84,22 +90,22 @@ const Category = props => {
   });
   const [allCategories, setAllCategories] = useState([]);
   const [load, setLoad] = useState(0);
-  const [open, setOpen] = useState(false);
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
   const [openEdit, setOpenEdit] = useState(false);
   const [selectedColor, setSelectedColor] = useState('');
+  const [openDeleteCategory, setOpenDeleteCategory] = useState(false);
+
 
   const handleChangeColor = (e) => {
     setSelectedColor(e.target.value);
-    onChangeHandler(e);
+    // onChangeHandler(e);
   };
 
   const handleOpenEdit = (e, id) => {
     onClickHandler(e, id);
     setOpenEdit(true);
   };
-  console.log(category);
 
   const handleCloseEdit = () => {
     setOpenEdit(false);
@@ -117,12 +123,12 @@ const Category = props => {
     setOpenSnack(false);
   };
 
-  const handleOpen = (e, id) => {
+  const handleOpenDeleteCategory = (e, id) => {
     onClickHandler(e, id);
-    setOpen(true);
+    setOpenDeleteCategory(true);
   };
-  const handleClose = () => {
-    setOpen(false);
+  const handleCloseDeleteCategory = () => {
+    setOpenDeleteCategory(false);
   };
 
   const onChangeHandler = e => {
@@ -131,30 +137,22 @@ const Category = props => {
       owner: sessionUserId,
       [e.target.name]: e.target.value,
     });
-    console.log("Category inside onChangeHandler: ")
-    console.log(category);
   };
-  console.log("Category outside onChangeHandler: ")
-  console.log(category);
 
   const handleKeyDown = (e, snack) => {
     if (e.key === 'Enter') {
-      console.log('Enter Key Pressed!')
       onSubmitHandler(e, snack);
     }
   };
 
   const onSubmitHandler = (e, snack) => {
-    console.log('This is the category just before going to post...');
-    console.log(category);
+    e.preventDefault();
     axios
       .post(`http://localhost:8000/api/categories/${sessionUserId}`, category, {
         withCredentials: true,
       })
       .then(res => {
         handleOpenSnackBar(snack);
-        console.log(res.data.message);
-        console.log(res.data.results);
         setCategory({
           name: '',
           color: '',
@@ -164,45 +162,39 @@ const Category = props => {
           count++;
           setLoad(count);
         }
-        console.log(load);
         navigate('/category');
       })
-      .catch(err => {
-        console.log(err);
-      });
+      .catch();
   };
   
   useEffect(() => {
+    let isMounted = true;
     let one = 'http://localhost:8000/api/users/one';
     const requestOne = axios.get(one, { withCredentials: true });
     requestOne
       .then(response => {
-        setSessionUserId(response.data.results._id);
+        if (isMounted) setSessionUserId(response.data.results._id);
       })
-      .catch(error => {
-        console.log(error);
-      });
+      .catch();
     let two = 'http://localhost:8000/api/categories/user';
     const requestTwo = axios.get(two, { withCredentials: true });
     requestTwo
       .then(response => {
-        setAllCategories(response.data.results);
+        if (isMounted) setAllCategories(response.data.results);
       })
-      .catch(error => {
-        console.log(error);
-      });
+      .catch();
     axios
       .all([requestOne, requestTwo])
       .then(
         axios.spread((...responses) => {
           const responseOne = responses[0];
           const responseTwo = responses[1];
-          console.log(responseOne, responseTwo);
         })
       )
-      .catch(errors => {
+      .catch(() => {
         navigate('/landing');
       });
+      return () => { isMounted = false };
   }, [load]);
 
   const removeFromDom = categoryId => {
@@ -217,16 +209,17 @@ const Category = props => {
           setCategory(res.data.results);
         }
       })
-      .catch(err => console.log(err));
+      .catch();
   };
 
-  const onPatchHandler = (e, id, snack) => {
+  const onPutHandler = (e, id, snack) => {
+    category.color = selectedColor;
     axios
-      .patch('http://localhost:8000/api/categories/' + id, category, {
+      .patch('http://localhost:8000/api/categories/color/' + id, category, {
         withCredentials: true,
       })
       .then(res => {
-        if (res.data.message = 'success'){
+        if (res.data.message === 'success'){
           handleOpenSnackBar(snack);
           handleCloseEdit();
         }
@@ -235,10 +228,21 @@ const Category = props => {
           count++;
           setLoad(count);
         }
-        console.log(load);
         navigate('/category');
       })
-      .catch(err => console.log(err));
+      .catch();
+  };
+
+  const deleteCategory = (e, id, snack) => {
+    axios
+      .delete(`http://localhost:8000/api/categories/${id}`, {
+        withCredentials: true,
+      })
+      .then(res => {
+        removeFromDom(id);
+        handleCloseDeleteCategory();
+        handleOpenSnackBar(snack);
+      }).catch();
   };
 
   return (
@@ -291,7 +295,7 @@ const Category = props => {
         <Grid container spacing={1}>
           <Grid item xs={12}>
             <div>
-              <List dense secondary className={classes.list}>
+              <List dense secondary="true" className={classes.list}>
                 {allCategories.map((category, i) =>
                     <ListItem
                       className={classes.listItem}
@@ -318,11 +322,8 @@ const Category = props => {
                         primary={<Typography style={{fontSize:15, color: category.color, marginLeft: 9}}>{category.name}</Typography>}
                       />
                       <Tooltip title="Delete Category?" placement="right">
-                        <IconButton edge='end' aria-label='delete'>
-                          <DeleteCategoryComponent
-                            categoryId={category._id}
-                            successCallback={() => removeFromDom(category._id)}
-                          />
+                        <IconButton edge='end' aria-label='delete' onClick={e => {handleOpenDeleteCategory(e, category._id)}}>
+                          <DeleteIcon />
                         </IconButton>
                       </Tooltip>
                     </ListItem>
@@ -350,7 +351,7 @@ const Category = props => {
           <Typography 
             variant='h5' 
             className={classes.title}
-            style={{color:selectedColor}}  
+            style={{color:selectedColor}}
           >
             {category.name}
           </Typography>
@@ -372,7 +373,7 @@ const Category = props => {
             <RadioColorButtons
               selectedColor={selectedColor}
               setSelectedColor={setSelectedColor}
-              handleChangeColor={e => {handleChangeColor(e)}}
+              handleChangeColor={handleChangeColor}
             />
         </div>
         </DialogContent>
@@ -385,7 +386,7 @@ const Category = props => {
           Cancel
         </Button>
           <IconButton
-            onClick={e => {onPatchHandler(e, category._id, "Category Updated!")}}
+            onClick={e => {onPutHandler(e, category._id, "Category Updated!")}}
             aria-label='update category'
             color="primary"
           >
@@ -393,11 +394,35 @@ const Category = props => {
           </IconButton>
         </DialogActions>
       </Dialog>
+      {/* DELETE CATEGORY Dialog */}
+      <Dialog
+        open={openDeleteCategory}
+        onClose={handleCloseDeleteCategory}
+        aria-labelledby="alert-delete-category"
+        aria-describedby="alert-are-you-sure?"
+      >
+        <DialogTitle id="DeleteCategoryTitle">{"Delete Category?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="DeleteCategoryAlert">
+            Once your category is removed, all tasks linked to it will be suspended in the ether. To see these tasks again, simply re-create the category. 
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteCategory} color="primary">
+            Cancel
+          </Button>
+          <Button
+            className={classes.error} 
+            onClick={e => {deleteCategory(e, category._id, "Category successfully deleted.")}}>
+            Delete Category
+          </Button>
+        </DialogActions>
+      </Dialog>
       <SimpleSnackbar 
-      snack={snack}
-      openSnack={openSnack}
-      handleOpenSnackBar={handleOpenSnackBar}
-      handleCloseSnackBar={handleCloseSnackBar} 
+        snack={snack}
+        openSnack={openSnack}
+        handleOpenSnackBar={handleOpenSnackBar}
+        handleCloseSnackBar={handleCloseSnackBar} 
       />
     </div>
   );

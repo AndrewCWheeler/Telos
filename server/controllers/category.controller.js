@@ -1,6 +1,5 @@
 const { Category } = require('../models/category.model');
 const { User } = require('../models/user.model');
-const { Task } = require('../models/task.model');
 
 module.exports = {
 
@@ -33,10 +32,20 @@ module.exports = {
       .catch(err => res.json({ message: 'error', results: err }));
   },
 
-  //Update methods --> app.put or app.patch
+  // Update / edit methods --> app.put or app.patch
+  updateCategory: (req, res) => {
+    Category.findByIdAndUpdate({ _id: req.params.id }, req.body, {
+      runValidators: true,
+      new: true,
+      useFindAndModify: false,
+    })
+    // .then(category=> { return })
+      .then(category => res.json({ message: 'success', results: category }))
+      .catch(err => res.json({ message: 'error', results: err }));
+  },
+
   editCategory: (req, res) => {
-    Category.findByIdAndUpdate(
-      { _id: req.params.id }, 
+    Category.findByIdAndUpdate({ _id: req.params.id }, 
       { $push: { tasks: req.body}}, {
       runValidators: true,
       new: true,
@@ -48,7 +57,7 @@ module.exports = {
 
   //Delete methods --> app.delete
   deleteCategory: (req, res) => {
-    Category.findByIdDelete({ _id: req.params.id })
+    Category.findByIdAndDelete({ _id: req.params.id })
       .then(category => res.json({ message: 'success', results: category }))
       .catch(err => res.json({ message: 'error', results: err }));
   },

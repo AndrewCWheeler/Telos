@@ -12,7 +12,8 @@ const DeleteCategoryComponent = props => {
       })
       .then(res => {
         successCallback();
-      });
+      })
+      .catch();
   };
   return (
     <DeleteIcon

@@ -23,7 +23,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const DumpAndChunk = (props) => {
+const DumpAndChunk = () => {
   const classes = useStyles();
 
   const [load, setLoad] = useState(0);
@@ -67,32 +67,28 @@ const DumpAndChunk = (props) => {
   };
 
   useEffect(() => {
+    let isMounted = true;
     let one = 'http://localhost:8000/api/users/one';
     const requestOne = axios.get(one, { withCredentials: true });
     requestOne
       .then(response => {
-        setSessionUserId(response.data.results._id);
+        if (isMounted) setSessionUserId(response.data.results._id);
       })
-      .catch(error => {
-        console.log(error);
-      });
+      .catch();
     let two = 'http://localhost:8000/api/tasks/user';
     const requestTwo = axios.get(two, { withCredentials: true });
     requestTwo
       .then(response => {
-        setAllTasks(response.data.results);
+        if (isMounted) setAllTasks(response.data.results);
       })
-      .catch(error => {
-        console.log(error);
-      });
+      .catch();
     let three = 'http://localhost:8000/api/categories/user';
     const requestThree = axios.get(three, {withCredentials: true });
     requestThree
       .then(response => {
-        setAllCategories(response.data.results);
-      }).catch(error => {
-        console.log(error);
+        if (isMounted) setAllCategories(response.data.results);
       })
+      .catch();
     axios
       .all([requestOne, requestTwo, requestThree])
       .then(
@@ -100,12 +96,12 @@ const DumpAndChunk = (props) => {
           const responseOne = responses[0];
           const responseTwo = responses[1];
           const responseThree = responses[2];
-          console.log(responseOne, responseTwo, responseThree);
         })
       )
       .catch(errors => {
         navigate('/landing');
       });
+      return () => { isMounted = false }
   }, [load]);
 
   const removeFromDom = taskId => {
@@ -120,7 +116,7 @@ const DumpAndChunk = (props) => {
           setTask(res.data.results);
         }
       })
-      .catch(err => console.log(err));
+      .catch();
   };
 
   const onChangeHandler = e => {
@@ -154,22 +150,20 @@ const DumpAndChunk = (props) => {
           handleClose();
         }
       })
-      .catch(err => console.log(err));
+      .catch();
     let two = `http://localhost:8000/api/categories/${catId}`;
     const requestTwo = axios.patch(two, task, { withCredentials: true});
     requestTwo
       .then(res => {
-      }).catch(err => {});
+      }).catch();
     axios
       .all([requestOne, requestTwo])
       .then(
         axios.spread((...responses) => {
           const responseOne = responses[0];
           const responseTwo = responses[1];
-          // console.log(responseOne, responseTwo);
         })
-      ).catch(errors => {
-      });
+      ).catch();
   };
 
   const onPatchEditNameHandler = (e, id) => {
@@ -178,14 +172,13 @@ const DumpAndChunk = (props) => {
         withCredentials: true,
       })
       .then(res => {
-        console.log(res.data.results);
         let count = load;
         if (count >= 0) {
           count++;
           setLoad(count);
         }
       })
-      .catch(err => console.log(err));
+      .catch();
   };
 
   return (

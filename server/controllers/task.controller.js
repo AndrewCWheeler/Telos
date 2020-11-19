@@ -1,4 +1,3 @@
-const { Category } = require('../models/category.model');
 const { Task } = require('../models/task.model');
 const { User } = require('../models/user.model');
 

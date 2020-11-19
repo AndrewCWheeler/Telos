@@ -2,12 +2,19 @@ import React from 'react';
 // Material-ui core components:
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
+import { makeStyles } from '@material-ui/core/styles';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import { Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 // Material-ui icons:
 import PaletteIcon from '@material-ui/icons/Palette';
+
+const useStyles = makeStyles(theme=>({
+  TextPrimary: {
+    color: theme.palette.text.primary,
+  }
+}));
 
 const PrimaryLight = withStyles(theme => ({
   root: {
@@ -130,7 +137,8 @@ const SuccessDark = withStyles(theme => ({
 }))((props) => <Radio color="default" {...props} />);
 
 const RadioColorButtons = props => {
-  const { selectedColor, handleChangeColor } = props;
+  const classes = useStyles();
+  const { selectedColor, setSelectedColor, handleChangeColor } = props;
 
   return (
     <FormControl component="fieldset">
@@ -139,8 +147,8 @@ const RadioColorButtons = props => {
           style={{color: selectedColor}}
         />
         <Typography
-          style={{color: selectedColor}}
-          variant='h6'
+          className={classes.TextPrimary}
+          variant='subtitle1'
         >
           Choose Category Color:
         </Typography>

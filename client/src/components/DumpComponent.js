@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import { navigate } from '@reach/router';
 // Material-ui core components:
@@ -41,6 +41,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const DumpComponent = props => {
+  const domRef = useRef();
   const classes = useStyles();
   const { load, setLoad, sessionUserId } = props;
   const [task, setTask] = useState({
@@ -93,8 +94,7 @@ const DumpComponent = props => {
         }
         navigate('/');
       })
-      .catch(err => {
-      });
+      .catch();
   };
 
   return (
@@ -121,7 +121,7 @@ const DumpComponent = props => {
         </Grid>
         <Grid className={classes.dump} container direction='row' justify='center' alignItems='center'>
           <Grid item>
-            <Tooltip title="Add" placement="right">
+            <Tooltip ref={domRef} title="Add" placement="right">
               <IconButton
                 className={classes.fab}
                 onClick={e => {
@@ -131,6 +131,7 @@ const DumpComponent = props => {
                 <AddCircleIcon fontSize='large' />
               </IconButton>
             </Tooltip>
+          
           </Grid>
         </Grid>
       </form>

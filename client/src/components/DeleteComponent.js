@@ -12,7 +12,7 @@ const DeleteComponent = props => {
       })
       .then(res => {
         successCallback();
-      });
+      }).catch();
   };
   return (
     <DeleteIcon

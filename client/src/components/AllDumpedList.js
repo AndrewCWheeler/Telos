@@ -133,7 +133,7 @@ const AllDumpedList = props => {
                         </Typography>
                       </Link>
                       }
-                      secondary={<Typography style={{fontSize:12}}>{secondary ? task.category : null}</Typography>}
+                      secondary={<Typography style={{fontSize:12}}>{task.category}</Typography>}
                     />
                     <Tooltip title="Delete Task" placement="right">
                       <IconButton className={classes.deleteStyle} edge='end' aria-label='delete'>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { navigate } from '@reach/router';
 // Material-ui core components:
@@ -22,7 +22,6 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import { makeStyles } from '@material-ui/core/styles';
 import MenuItem from '@material-ui/core/MenuItem';
-import RootRef from '@material-ui/core/RootRef';
 import Tooltip from '@material-ui/core/Tooltip';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
@@ -164,46 +163,40 @@ const Do = () => {
   });
   const [allTasks, setAllTasks] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
-  const [secondary, setSecondary] = useState(true);
   const [openEdit, setOpenEdit] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [dateParameter, setDateParameter] = useState(new Date());
   const [sessionUserId, setSessionUserId] = useState('');
   const [openCal, setOpenCal] = useState(false);
-  const [checked, setChecked] = useState([0]);
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
 
   useEffect(() => {
+    let isMounted = true;
     let one = 'http://localhost:8000/api/users/one';
     const requestOne = axios.get(one, { withCredentials: true });
     requestOne
       .then(response => {
-        setSessionUserId(response.data.results._id);
+        if (isMounted) setSessionUserId(response.data.results._id);
       })
-      .catch(error => {
-      });
+      .catch();
     let two = 'http://localhost:8000/api/tasks/user';
     const requestTwo = axios.get(two, { withCredentials: true });
     requestTwo
       .then(response => {
-        if (response.data.message = 'success'){
+        if (response.data.message === 'success' && isMounted){
           let orderedTasks = response.data.results;
           orderedTasks.sort((a,b) => a.priority - b.priority)
           setAllTasks(orderedTasks);
         }
       })
-      .catch(error => {
-        console.log(error);
-      });
+      .catch();
       let three = 'http://localhost:8000/api/categories/user';
       const requestThree = axios.get(three, {withCredentials: true });
       requestThree
         .then(response => {
-          setAllCategories(response.data.results);
-        }).catch(error => {
-          console.log(error);
-        })
+          if (isMounted) setAllCategories(response.data.results);
+        }).catch();
       axios
         .all([requestOne, requestTwo, requestThree])
         .then(
@@ -211,14 +204,71 @@ const Do = () => {
             const responseOne = responses[0];
             const responseTwo = responses[1];
             const responseThree = responses[2];
-            console.log(responseOne, responseTwo, responseThree);
           })
         )
-        .catch(errors => {
-          navigate('/landing');
-        });
+        .catch(()=>navigate('/landing'));
+        return () => { isMounted = false }
     }, [load]);
   
+  // Filter, sort, reorder task functions:
+  const FilteredTasks = allTasks.filter(tasks => {
+    let found = '';
+    if (
+      moment(moment(tasks.scheduledAt)).isSame(dateParameter, 'day') === true 
+      && tasks.completed === false
+      ) {
+      found = tasks;
+    }
+    return found;
+  });
+
+  const reorder = (FilteredTasks, startIndex, endIndex) => {
+    const result = Array.from(FilteredTasks);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    return result;
+  };
+  
+  const onDragEnd = result => {
+    const { destination, source, draggableId } = result;
+    if (!result.destination) {
+      return;
+    }
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+        return;
+      }
+    const items = reorder(
+      FilteredTasks,
+      result.source.index,
+      result.destination.index
+    );
+    setAllTasks(items);
+  };
+      
+  // Assign priority to tasks according to DOM state index and update priority property in db:
+  const assignPriority = (arr) => {
+    if(load === 0){
+      return arr;
+    }
+    else {
+    for (let i=0; i<arr.length; i++){
+      arr[i].priority = i;
+    }
+    axios.put('http://localhost:8000/api/bulk/' + sessionUserId, arr, {withCredentials: true})
+    .then(response => {
+    })
+    .catch();
+    return arr;
+  }
+  }
+    
+  const SortedTasks = assignPriority(FilteredTasks).sort((a, b) => a.priority - b.priority);
+  
+  // Dialog and Snack Handlers:
+
   const handleOpenSnackBar = (snack) => {
     setOpenSnack(true);
     setSnack(snack); 
@@ -246,64 +296,7 @@ const Do = () => {
   const handleCloseEdit = () => {
     setOpenEdit(false);
   };
-  
-  // Filter, sort, reorder task functions:
-  const FilteredTasks = allTasks.filter(tasks => {
-    let found = '';
-    if (
-      moment(moment(tasks.scheduledAt)).isSame(dateParameter, 'day') === true 
-      && tasks.completed === false
-      ) {
-      found = tasks;
-      console.log(found);
-    }
-    return found;
-  });
 
-  
-  const reorder = (FilteredTasks, startIndex, endIndex) => {
-    const result = Array.from(FilteredTasks);
-    const [removed] = result.splice(startIndex, 1);
-    result.splice(endIndex, 0, removed);
-    console.log(result);
-    return result;
-  };
-  
-  const onDragEnd = result => {
-    const { destination, source, draggableId } = result;
-    if (!result.destination) {
-      return;
-    }
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
-        return;
-      }
-    const items = reorder(
-      FilteredTasks,
-      result.source.index,
-      result.destination.index
-    );
-    setAllTasks(items);
-  };
-      
-  // Assign priority to tasks according to DOM state index and update priority property in db:
-  const assignPriority = (arr) => {
-    for (let i=0; i<arr.length; i++){
-      arr[i].priority = i;
-    }
-    axios.put('http://localhost:8000/api/bulk/' + sessionUserId, arr, {withCredentials: true})
-    .then(response => {
-    })
-    .catch(error => {
-      console.log(error);
-    });
-    return arr;
-  }
-    
-  const SortedTasks = assignPriority(FilteredTasks).sort((a, b) => a.priority - b.priority);
-  
   // onChange functions:
   const onChangeHandler = e => {
     setTask({
@@ -320,6 +313,7 @@ const Do = () => {
 
   const handleDateParameter = date => {
     setDateParameter(date);
+    setLoad(1);
   };
 
   const removeFromDom = taskId => {
@@ -335,7 +329,7 @@ const Do = () => {
           setTask(res.data.results);
         }
       })
-      .catch(err => console.log(err));
+      .catch();
   };
 
   const onPatchEditNameHandler = (e, id) => {
@@ -350,7 +344,7 @@ const Do = () => {
           setLoad(count);
         }
       })
-      .catch(err => console.log(err));
+      .catch();
   };
 
   const onPatchUnScheduleHandler = (e, id, snack) => {
@@ -367,7 +361,7 @@ const Do = () => {
           handleOpenSnackBar(snack);
         }
       })
-      .catch(err => console.log(err));
+      .catch();
   };
 
   const onPatchEditChunkHandler = (e, id) => {
@@ -382,7 +376,7 @@ const Do = () => {
           handleCloseEdit();
         }
       })
-      .catch(err => console.log(err));
+      .catch();
   };
 
   const onPatchDateHandler = (e, id, snack) => {
@@ -393,13 +387,13 @@ const Do = () => {
         withCredentials: true,
       })
       .then(res => {
-        if(res.data.message = 'success') {
+        if(res.data.message === 'success') {
           removeFromDom(id);
           handleCloseCal();
           handleOpenSnackBar(snack);
         };
       })
-      .catch(err => console.log(err));
+      .catch();
   };
 
   const onCompleteHandler = (e,id,snack) => {
@@ -415,8 +409,8 @@ const Do = () => {
           removeFromDom(id);
           handleOpenSnackBar(snack);
         }
-      }).catch(err=> console.log(err));
-    }).catch(err => console.log(err));
+      }).catch();
+    }).catch();
   };
 
   return (
@@ -435,8 +429,10 @@ const Do = () => {
         Select a date:
       </Typography>
       </div>
-      <MuiPickersUtilsProvider utils={DateFnsUtils}
+      <MuiPickersUtilsProvider 
+        utils={DateFnsUtils}
         style={{width:160}}
+        
       >
         <CssBaseline />
         <Grid container justify='space-around'>
@@ -457,106 +453,105 @@ const Do = () => {
       </MuiPickersUtilsProvider>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId='droppable'>
+        <Droppable 
+        droppableId='droppable'
+        >
           {provided => (
-            <RootRef
-              rootRef={provided.innerRef}
-              {...provided.droppableProps}
+            <List
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            dense
+            secondary="true"
+            className={classes.list}
             >
-                <List 
-                dense
-                secondary="true"
-                className={classes.list}
+            {SortedTasks.map((task, i) =>
+              task.chunked && task.scheduled ? (
+              <Draggable
+                draggableId={task._id}
+                index={i}
+                key={task._id}
+              >
+              {provided => (
+                <ListItem
+                  className={classes.listItem}
+                  button
+                  ref={provided.innerRef}
+                  id='DoTask'
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
+                  key={task._id}
+                  index={i}
                 >
-                {SortedTasks.map((task, i) =>
-                  task.chunked && task.scheduled ? (
-                  <Draggable
-                    draggableId={task._id}
-                    index={i}
-                    key={task._id}
+                  <ListItemIcon
+                  onClick={e => onCompleteHandler(e,task._id,"Task Completed!")}
                   >
-                    {provided => (
-                      <ListItem
-                      className={classes.listItem}
-                      button                      
-                      id='Task'
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      innerRef={provided.innerRef}
-                      key={task._id}
-                      >
-                    <ListItemIcon
-                      onClick={e => onCompleteHandler(e,task._id,"Task Completed!")}
-                      >
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            icon={<RadioButtonUncheckedRoundedIcon 
-                              fontSize="small" 
-                            />}
-                            checkedIcon={<CheckCircleRoundedIcon 
-                              fontSize="small"
-                            />}
-                            name="completed"
-                          />
-                        }
-                        label=""
-                      />
-                    </ListItemIcon>
-                    {allCategories.map((category, catIdx) => 
-                      task.category === category.name ? (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          icon={<RadioButtonUncheckedRoundedIcon 
+                            fontSize="small" 
+                          />}
+                          checkedIcon={<CheckCircleRoundedIcon 
+                            fontSize="small"
+                          />}
+                          name="completed"
+                        />
+                      }
+                      label=""
+                    />
+                  </ListItemIcon>
+                  {allCategories.map((category, catIdx) => 
+                    task.category === category.name ? (
                     <ListItemText
+                      key={catIdx}
                       disableTypography
                       className={classes.text}
-                      textOverflow='ellipsis'
                       overflow='hidden'
                       primary={<Typography style={{fontSize:15}}>{task.name}</Typography>}
-                      secondary={<Typography key={catIdx} style={{fontSize:12, color:category.color}}>{secondary ? task.category : null}</Typography>}
+                      secondary={<Typography style={{fontSize:12, color:category.color}}>{task.category}</Typography>}
                     />
                     ) : null
-                    )}
-                    <ListItemText
-                      primary={
-                      <Tooltip title="Change Date" placement="right">
-                        <Button
-                          onClick={e => {handleOpenCal(e, task._id)}}
-                          className={classes.itemWhite}
-                          >
-                          <div>
-                            <Moment format='dddd' style={{fontSize: '15px', textTransform: 'capitalize', float: 'left'}}>
-                              {task.scheduledAt}
-                            </Moment>
-                          </div>
-                        </Button>
-                      </Tooltip>
-                      }
-                    />
-                    <div>
-                      <Tooltip title="Edit Task" placement="right">
-                        <IconButton 
-                        edge="end" 
-                        aria-label="edit-task"
-                        type='button'
-                        onClick={e => handleOpenEdit(e, task._id)} 
+                  )}
+                  <ListItemText
+                    primary={
+                    <Tooltip title="Change Date" placement="right">
+                      <Button
+                        onClick={e => {handleOpenCal(e, task._id)}}
+                        className={classes.itemWhite}
                         >
-                          <EditIcon 
-                          className={classes.neutralIconStyle}
-                          />
-                        </IconButton>
-                      </Tooltip>
-                    </div>
-                  </ListItem>
-                    )}
-                </Draggable>
-                ) : (null)
+                        <div>
+                          <Moment format='dddd' style={{fontSize: '15px', textTransform: 'capitalize', float: 'left'}}>
+                            {task.scheduledAt}
+                          </Moment>
+                        </div>
+                      </Button>
+                    </Tooltip>
+                    }
+                  />
+                  <div>
+                    <Tooltip title="Edit Task" placement="right">
+                      <IconButton 
+                      edge="end" 
+                      aria-label="edit-task"
+                      type='button'
+                      onClick={e => handleOpenEdit(e, task._id)} 
+                      >
+                        <EditIcon 
+                        className={classes.neutralIconStyle}
+                        />
+                      </IconButton>
+                    </Tooltip>
+                  </div>
+                </ListItem>
               )}
-            </List>
+            </Draggable>
+            ) : (null)
+          )}
           {provided.placeholder}
-          </RootRef>
+          </List>
           )}
         </Droppable>
       </DragDropContext>
-
       {/* Edit Task Dialog */}
       <Dialog
         aria-labelledby='modal-edit-select'
@@ -673,7 +668,6 @@ const Do = () => {
             InputAdornmentProps={{
               position: 'start',
             }}
-            margin='normal'
             id='date-picker-dialog'
             format='MM/dd/yyyy'
             value={selectedDate}
@@ -707,10 +701,11 @@ const Do = () => {
         </DialogActions>
       </Dialog>
       <SimpleSnackbar 
-      snack={snack}
-      openSnack={openSnack}
-      handleOpenSnackBar={handleOpenSnackBar}
-      handleCloseSnackBar={handleCloseSnackBar} />
+        snack={snack}
+        openSnack={openSnack}
+        handleOpenSnackBar={handleOpenSnackBar}
+        handleCloseSnackBar={handleCloseSnackBar} 
+      />
     </Container>
   );
 };

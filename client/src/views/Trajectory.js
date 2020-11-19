@@ -29,32 +29,28 @@ const Trajectory = () => {
   const classes = useStyles();
 
   useEffect(() => {
+    let isMounted = true;
     let one = 'http://localhost:8000/api/users/one';
     const requestOne = axios.get(one, { withCredentials: true });
     requestOne
       .then(response => {
-        setSessionUserId(response.data.results._id);
+        if (isMounted) setSessionUserId(response.data.results._id);
       })
-      .catch(error => {
-        console.log(error);
-      });
+      .catch();
     let two = 'http://localhost:8000/api/tasks/user';
     const requestTwo = axios.get(two, { withCredentials: true });
     requestTwo
       .then(response => {
-        setAllTasks(response.data.results);
+        if (isMounted) setAllTasks(response.data.results);
       })
-      .catch(error => {
-        console.log(error);
-      });
+      .catch();
     let three = 'http://localhost:8000/api/categories/user';
     const requestThree = axios.get(three, {withCredentials: true });
     requestThree
       .then(response => {
-        setAllCategories(response.data.results);
-      }).catch(error => {
-        console.log(error);
+        if (isMounted) setAllCategories(response.data.results);
       })
+      .catch();
     axios
       .all([requestOne, requestTwo, requestThree])
       .then(
@@ -62,12 +58,10 @@ const Trajectory = () => {
           const responseOne = responses[0];
           const responseTwo = responses[1];
           const responseThree = responses[2];
-          console.log(responseOne, responseTwo, responseThree);
         })
       )
-      .catch(errors => {
-        navigate('/landing');
-      });
+      .catch(()=>navigate('/landing'));
+      return () => { isMounted = false }
   }, [load]);
 
   const getCategoryNames = (arr) => {
@@ -76,9 +70,7 @@ const Trajectory = () => {
       names.push(arr[i].name.toString());
     }
     const namesArray = (Object.values(names));
-    console.log(typeof namesArray);
     const isArr = Object.prototype.toString.call(namesArray) == '[object Array]';
-    console.log(isArr);
     return namesArray;
   }
   const myLabels = getCategoryNames(allCategories);
@@ -98,7 +90,6 @@ const Trajectory = () => {
       filteredTasks.push(arr.filter(t => (t.completed === true && t.category === category[i]) 
       && (t.completedAt < now && t.completedAt > weekAgo)
       ));
-      console.log(filteredTasks);
     }
     return filteredLength;
   }

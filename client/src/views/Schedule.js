@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { navigate } from '@reach/router';
 // Material-ui core components:
@@ -21,7 +21,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import MenuItem from '@material-ui/core/MenuItem';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
-import RootRef from '@material-ui/core/RootRef';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -41,10 +40,8 @@ import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker,
 } from '@material-ui/pickers';
-// React Moment and moment imports:
-import Moment from 'react-moment';
+// Moment imports:
 import 'moment-timezone';
-import moment from 'moment';
 // My components and modified material components:
 import SimpleSnackbar from '../components/SimpleSnackBar';
 
@@ -118,6 +115,7 @@ const useStyles = makeStyles(theme => ({
 
 const Schedule = () => {
   const classes = useStyles();
+  const domRef = useRef();
   // STATES
   const [load, setLoad] = useState(0);
   const [task, setTask] = useState({
@@ -135,14 +133,54 @@ const Schedule = () => {
   const [allCategories, setAllCategories] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [secondary, setSecondary] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [sessionUserId, setSessionUserId] = useState('');
   const [openCal, setOpenCal] = useState(false);
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
   const [openEdit, setOpenEdit] = useState(false);
-  // Erase this later:
+
+  useEffect(() => {
+    let isMounted = true;
+    let one = 'http://localhost:8000/api/users/one';
+    const requestOne = axios.get(one, { withCredentials: true });
+    requestOne
+      .then(response => {
+        if (isMounted) setSessionUserId(response.data.results._id);
+      })
+      .catch();
+    let two = 'http://localhost:8000/api/tasks/user';
+    const requestTwo = axios.get(two, { withCredentials: true });
+    requestTwo
+      .then(response => {
+        if (response.data.message === 'success' && isMounted){
+          let orderedTasks = response.data.results;
+          orderedTasks.sort((a,b) => a.priority - b.priority)
+          setAllTasks(orderedTasks);
+        }
+      })
+      .catch();
+    let three = 'http://localhost:8000/api/categories/user';
+    const requestThree = axios.get(three, {withCredentials: true });
+    requestThree
+      .then(response => {
+        if (isMounted) setAllCategories(response.data.results);
+      })
+      .catch();
+    axios
+      .all([requestOne, requestTwo, requestThree])
+      .then(
+        axios.spread((...responses) => {
+          const responseOne = responses[0];
+          const responseTwo = responses[1];
+          const responseThree = responses[2];
+        })
+      )
+      .catch(errors => {
+        navigate('/landing');
+      });
+      return () => { isMounted = false }
+  }, [load]);
 
   // DIALOG AND SNACK HANDLERS
   const handleOpenSnackBar = (snack) => {
@@ -170,53 +208,6 @@ const Schedule = () => {
     setOpenEdit(false);
   };
 
-  // INITIALIZE CALL FOR LOGGED USER AND DATA
-  useEffect(() => {
-    let one = 'http://localhost:8000/api/users/one';
-    const requestOne = axios.get(one, { withCredentials: true });
-    requestOne
-      .then(response => {
-        setSessionUserId(response.data.results._id);
-      })
-      .catch(error => {
-      });
-    let two = 'http://localhost:8000/api/tasks/user';
-    const requestTwo = axios.get(two, { withCredentials: true });
-    requestTwo
-      .then(response => {
-        if (response.data.message = 'success'){
-          let orderedTasks = response.data.results;
-          orderedTasks.sort((a,b) => a.priority - b.priority)
-          setAllTasks(orderedTasks);
-        }
-      })
-      .catch(error => {
-      });
-    let three = 'http://localhost:8000/api/categories/user';
-    const requestThree = axios.get(three, {withCredentials: true });
-    requestThree
-      .then(response => {
-        setAllCategories(response.data.results);
-      })
-      .catch(error => {
-        console.log(error);
-      })
-    axios
-      .all([requestOne, requestTwo, requestThree])
-      .then(
-        axios.spread((...responses) => {
-          const responseOne = responses[0];
-          const responseTwo = responses[1];
-          const responseThree = responses[2];
-          console.log(responseOne, responseTwo, responseThree);
-        })
-      )
-      .catch(errors => {
-        navigate('/landing');
-      });
-  }, [load]);
-
-
   // FILTER, SORT, TASK REORDER FUNCTIONS
 
   // This filter returns a number (arr.length) of tasks that have not yet been scheduled within each category:
@@ -232,8 +223,6 @@ const Schedule = () => {
     let found = '';
     if (tasks.chunked && !tasks.scheduled){
       found = tasks;
-      console.log("These are the filtered Tasks:")
-      console.log(found);
     }
     return found;
   });
@@ -242,16 +231,8 @@ const Schedule = () => {
     const result = Array.from(FilteredTasks);
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
-    console.log(result);
     return result;
   };
-  // Schedule Component version:
-  // const reorder = (allTasks, startIndex, endIndex) => {
-  //   const result = Array.from(allTasks);
-  //   const [removed] = result.splice(startIndex, 1);
-  //   result.splice(endIndex, 0, removed);
-  //   return result;
-  // };
     
   const onDragEnd = result => {
     const { destination, source, draggableId } = result;
@@ -271,44 +252,23 @@ const Schedule = () => {
     );
     setAllTasks(items);
   };
-
-  // The schedule version of onDragEnd *** difference is which tasks are being re-ordered, whether all or filtered:
-
-  // const onDragEnd = result => {
-  //   const { destination, source, draggableId } = result;
-  //   if (!result.destination) {
-  //     return;
-  //   }
-  //   if (
-  //     destination.droppableId === source.droppableId &&
-  //     destination.index === source.index
-  //   ) {
-  //     return;
-  //   }
-  //   const items = reorder(
-  //     allTasks,
-  //     result.source.index,
-  //     result.destination.index
-  //   );
-  //   setAllTasks(items);
-  // };
-        
   // Assign priority to tasks according to DOM state index and update priority property in db:
   const assignPriority = (arr) => {
+    if(load === 0){
+      return arr;
+    }
+    else {
     for (let i=0; i<arr.length; i++){
       arr[i].priority = i;
     }
     axios.put('http://localhost:8000/api/bulk/' + sessionUserId, arr, {withCredentials: true})
     .then(response => {
     })
-    .catch(error => {
-      console.log(error);
-    });
+    .catch();
     return arr;
   }
-
+  }
   const SortedTasks = assignPriority(FilteredTasks).sort((a, b) => a.priority - b.priority);
-  // END FILTERED, SORTED, RE-ORDERED
 
   // onCHANGE HANDLERS
   const onChangeHandler = e => {
@@ -322,7 +282,7 @@ const Schedule = () => {
   const onChangeDate = (date, id) => {
     setSelectedDate(date);
     task.scheduledAt = date;
-  }; 
+  };
 
   const removeFromDom = taskId => {
     setAllTasks(allTasks.filter(task => task._id !== taskId));
@@ -330,6 +290,7 @@ const Schedule = () => {
 
   const onSelectHandler = e => {
     setSelectedCategory(e.target.value);
+    setLoad(1);
   };
 
   // GET and PATCH axios calls:
@@ -342,7 +303,7 @@ const Schedule = () => {
           setSelectedIndex(res.data.results);
         }
       })
-      .catch(err => console.log(err));
+      .catch();
   };
 
   const onPatchEditNameHandler = (e, id) => {
@@ -357,7 +318,7 @@ const Schedule = () => {
           setLoad(count);
         }
       })
-      .catch(err => console.log(err));
+      .catch();
   };
 
   const onPatchEditChunkHandler = (e, id) => {
@@ -373,7 +334,7 @@ const Schedule = () => {
           handleCloseEdit();
         }
       })
-      .catch(err => console.log(err));
+      .catch();
   };
 
   const onPatchUnChunkHandler = (e, id) => {
@@ -385,12 +346,11 @@ const Schedule = () => {
       })
       .then(res => {
         if (res.data.message === 'success') {
-          console.log(res.data.results);
           removeFromDom(id);
           handleCloseEdit();
         }
       })
-      .catch(err => console.log(err));
+      .catch();
   };
 
   const onPatchDateHandler = (e, id) => {
@@ -401,14 +361,13 @@ const Schedule = () => {
         withCredentials: true,
       })
       .then(res => {
-        if(res.data.message = 'success') {
-          console.log(res.data.results);
+        if(res.data.message === 'success') {
           removeFromDom(id);
           handleCloseCal();
           handleOpenSnackBar("Task scheduled!");
         };
       })
-      .catch(err => console.log(err));
+      .catch();
   };
 
   return (
@@ -454,79 +413,82 @@ const Schedule = () => {
           </RadioGroup>
         </FormControl>
           <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId='droppable'>
+            <Droppable 
+            droppableId='droppable'
+            >
               {provided => (
-                <RootRef
-                  rootRef={provided.innerRef}
-                  {...provided.droppableProps}
+                <List
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                dense 
+                secondary="true"
+                className={classes.list}
                 >
-                    <List 
-                    dense 
-                    secondary="true"
-                    className={classes.list}
-                    >
-                      {SortedTasks.map((task, i) =>
-                        task.category === selectedCategory ? (
-                          <Draggable
-                            draggableId={task._id}
-                            index={i}
+                  {SortedTasks.map((task, i) =>
+                    task.category === selectedCategory ? (
+                      <Draggable
+                        draggableId={task._id}
+                        index={i}
+                        key={task._id}
+                      >
+                        {provided => (
+                          <ListItem
+                            className={classes.listItem}
+                            button
+                            ref={provided.innerRef}
+                            id='ScheduleTask'
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
                             key={task._id}
+                            index={i}
                           >
-                            {provided => (
-                              <ListItem
-                                className={classes.listItem}
-                                button
-                                ContainerProps={{ ref: provided.innerRef }}
-                                id='Task'
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                innerRef={provided.innerRef}
-                                key={i}
-                              >
-                                <Tooltip title="Open Calendar" placement="left">
-                                    <IconButton
-                                      // edge='start'
-                                      type='button'
-                                      onClick={e => {handleOpenCal(e, task._id)}}
-                                    >
-                                      <EventIcon className={classes.neutralIconStyle} />
-                                    </IconButton>
-                                </Tooltip>
-                                {allCategories.map((category, catIdx) => 
-                                  task.category === category.name ?
-                                  (
-                                <ListItemText
-                                disableTypography
-                                textoverflow='ellipsis'
-                                overflow='hidden'
-                                primary={<Typography style={{fontSize:15}}>{task.name}</Typography>}
-                                secondary={<Typography key={catIdx} style={{fontSize:12, color:category.color}}>{secondary ? task.category : null}</Typography>}
-                                />
-                                ) : null
-                                )}
-                                <div>
-                                <Tooltip title="Edit Task" placement="right">
-                                  <IconButton
-                                    type='button'
-                                    edge='end'
-                                    onClick={e => {
-                                      handleOpenEdit(e, task._id);
-                                    }}
-                                  >
-                                    <EditIcon 
-                                    className={classes.neutralIconStyle}
-                                    />
-                                  </IconButton>
-                                </Tooltip>
-                                </div>
-                              </ListItem>
+                            <Tooltip 
+                              ref={domRef}
+                              title="Open Calendar" 
+                              placement="left">
+                                <IconButton
+                                  // edge='start'
+                                  type='button'
+                                  onClick={e => {handleOpenCal(e, task._id)}}
+                                >
+                                  <EventIcon className={classes.neutralIconStyle} />
+                                </IconButton>
+                            </Tooltip>
+                            {allCategories.map((category, catIdx) => 
+                              task.category === category.name ?
+                              (
+                            <ListItemText
+                            key={catIdx}
+                            disableTypography
+                            textoverflow='ellipsis'
+                            overflow='hidden'
+                            primary={<Typography style={{fontSize:15}}>{task.name}</Typography>}
+                            secondary={<Typography style={{fontSize:12, color:category.color}}>{task.category}</Typography>}
+                            />
+                            ) : null
                             )}
-                          </Draggable>
-                        ) : (null)
-                      )}
-                    </List>
+                            <div>
+                            <Tooltip title="Edit Task" placement="right">
+                              <IconButton
+                                type='button'
+                                edge='end'
+                                onClick={e => {
+                                  handleOpenEdit(e, task._id);
+                                }}
+                              >
+                                <EditIcon 
+                                className={classes.neutralIconStyle}
+                                />
+                              </IconButton>
+                            </Tooltip>
+                            </div>
+                          </ListItem>
+                        )}
+                      </Draggable>
+                    ) : (null)
+                  )}
                   {provided.placeholder}
-                </RootRef>
+                </List>
               )}
             </Droppable>
           </DragDropContext>
@@ -648,7 +610,6 @@ const Schedule = () => {
             InputAdornmentProps={{
               position: 'start',
             }}
-            margin='normal'
             id='date-picker-dialog'
             format='MM/dd/yyyy'
             value={selectedDate}
