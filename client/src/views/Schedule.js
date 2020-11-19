@@ -4,7 +4,6 @@ import { navigate } from '@reach/router';
 // Material-ui core components:
 import Backdrop from '@material-ui/core/Backdrop';
 import Button from '@material-ui/core/Button';
-import Container from '@material-ui/core/Container';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -12,6 +11,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import InputLabel from '@material-ui/core/InputLabel';
 import List from '@material-ui/core/List';
@@ -85,7 +85,10 @@ const useStyles = makeStyles(theme => ({
   },
   radioStyle: {
     justifyContent: 'center',
-    fontSize:15,
+    fontSize:18,
+  },
+  textPrimary: {
+    color: theme.palette.text.primary,
   },
   secondaryIconStyle: {
     fontSize:24,
@@ -371,7 +374,7 @@ const Schedule = () => {
   };
 
   return (
-    <Container className={classes.root}>
+    <div>
       <CssBaseline />
       <div style={{marginTop:'90px'}}>
       <Typography
@@ -380,119 +383,124 @@ const Schedule = () => {
         Schedule
       </Typography>
       <Typography
-      className={classes.subtitle} 
+      className={classes.subtitle}
       variant='subtitle2'
       >
         Select a category:
       </Typography>
       </div>
-        <FormControl component="fieldset" className={classes.formControl}>
-          <RadioGroup 
-            row aria-label="category" 
-            name="category" 
-            value={selectedCategory} 
-            onChange={e => {
-                onSelectHandler(e);
-              }}
-            className={classes.radioStyle}
-            defaultValue=''>
-              {allCategories.map((category, catIdx)=>
-              <FormControlLabel
-              key={catIdx}
-              value={category.name}
-              label={
-                <Typography style={{fontSize:15}}>
-                  {category.name}<br></br>
-                  {unscheduledTasks(allTasks, category.name)}
-                </Typography>
-              }
-              labelPlacement="bottom"
-              control={<Radio style={{color:category.color, fontSize:15}}/>}
-            />
-            )}
-          </RadioGroup>
-        </FormControl>
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable 
-            droppableId='droppable'
-            >
-              {provided => (
-                <List
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                dense 
-                secondary="true"
-                className={classes.list}
-                >
-                  {SortedTasks.map((task, i) =>
-                    task.category === selectedCategory ? (
-                      <Draggable
-                        draggableId={task._id}
-                        index={i}
-                        key={task._id}
-                      >
-                        {provided => (
-                          <ListItem
-                            className={classes.listItem}
-                            button
-                            ref={provided.innerRef}
-                            id='ScheduleTask'
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            key={task._id}
-                            index={i}
-                          >
-                            <Tooltip 
-                              ref={domRef}
-                              title="Open Calendar" 
-                              placement="left">
-                                <IconButton
-                                  // edge='start'
-                                  type='button'
-                                  onClick={e => {handleOpenCal(e, task._id)}}
-                                >
-                                  <EventIcon className={classes.neutralIconStyle} />
-                                </IconButton>
-                            </Tooltip>
-                            {allCategories.map((category, catIdx) => 
-                              task.category === category.name ?
-                              (
-                            <ListItemText
-                            key={catIdx}
-                            disableTypography
-                            textoverflow='ellipsis'
-                            overflow='hidden'
-                            primary={<Typography style={{fontSize:15}}>{task.name}</Typography>}
-                            secondary={<Typography style={{fontSize:12, color:category.color}}>{task.category}</Typography>}
-                            />
-                            ) : null
-                            )}
-                            <div>
-                            <Tooltip title="Edit Task" placement="right">
-                              <IconButton
-                                type='button'
-                                edge='end'
-                                onClick={e => {
-                                  handleOpenEdit(e, task._id);
-                                }}
-                              >
-                                <EditIcon 
-                                className={classes.neutralIconStyle}
-                                />
-                              </IconButton>
-                            </Tooltip>
-                            </div>
-                          </ListItem>
-                        )}
-                      </Draggable>
-                    ) : (null)
-                  )}
-                  {provided.placeholder}
-                </List>
+      <Grid container direction='row' justify='center' alignItems='center'>
+        <Grid item xs={12} className={classes.root}>
+          <FormControl component="fieldset" className={classes.formControl}>
+            <RadioGroup 
+              row aria-label="category" 
+              name="category" 
+              value={selectedCategory} 
+              onChange={e => {
+                  onSelectHandler(e);
+                }}
+              className={classes.radioStyle}
+              defaultValue=''>
+                {allCategories.map((category, catIdx)=>
+                <FormControlLabel
+                  key={catIdx}
+                  className={classes.textPrimary}
+                  value={category.name}
+                  label={
+                    <Typography style={{fontSize:15}}>
+                      {category.name}<br></br>
+                      {unscheduledTasks(allTasks, category.name)}
+                    </Typography>
+                }
+                labelPlacement="bottom"
+                control={<Radio style={{color:category.color, fontSize:15}}/>}
+              />
               )}
-            </Droppable>
-          </DragDropContext>
-      {/* Edit Task Dialog */}
+            </RadioGroup>
+          </FormControl>
+            <DragDropContext onDragEnd={onDragEnd}>
+              <Droppable 
+              droppableId='droppable'
+              >
+                {provided => (
+                  <List
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  dense 
+                  secondary="true"
+                  className={classes.list}
+                  >
+                    {SortedTasks.map((task, i) =>
+                      task.category === selectedCategory ? (
+                        <Draggable
+                          draggableId={task._id}
+                          index={i}
+                          key={task._id}
+                        >
+                          {provided => (
+                            <ListItem
+                              className={classes.listItem}
+                              button
+                              ref={provided.innerRef}
+                              id='ScheduleTask'
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              key={task._id}
+                              index={i}
+                            >
+                              <Tooltip 
+                                ref={domRef}
+                                title="Open Calendar" 
+                                placement="left">
+                                  <IconButton
+                                    // edge='start'
+                                    type='button'
+                                    onClick={e => {handleOpenCal(e, task._id)}}
+                                  >
+                                    <EventIcon className={classes.neutralIconStyle} />
+                                  </IconButton>
+                              </Tooltip>
+                              {allCategories.map((category, catIdx) => 
+                                task.category === category.name ?
+                                (
+                              <ListItemText
+                              key={catIdx}
+                              disableTypography
+                              textoverflow='ellipsis'
+                              overflow='hidden'
+                              primary={<Typography style={{fontSize:15}}>{task.name}</Typography>}
+                              secondary={<Typography style={{fontSize:12, color:category.color}}>{task.category}</Typography>}
+                              />
+                              ) : null
+                              )}
+                              <div>
+                              <Tooltip title="Edit Task" placement="right">
+                                <IconButton
+                                  type='button'
+                                  edge='end'
+                                  onClick={e => {
+                                    handleOpenEdit(e, task._id);
+                                  }}
+                                >
+                                  <EditIcon 
+                                  className={classes.neutralIconStyle}
+                                  />
+                                </IconButton>
+                              </Tooltip>
+                              </div>
+                            </ListItem>
+                          )}
+                        </Draggable>
+                      ) : (null)
+                    )}
+                    {provided.placeholder}
+                  </List>
+                )}
+              </Droppable>
+            </DragDropContext>
+        {/* Edit Task Dialog */}
+        </Grid>
+      </Grid>
       <Dialog
         aria-labelledby='modal-edit-select'
         aria-describedby='choose-edit-category'
@@ -649,7 +657,7 @@ const Schedule = () => {
         handleOpenSnackBar={handleOpenSnackBar}
         handleCloseSnackBar={handleCloseSnackBar} 
       />
-    </Container>
+    </div>
   );
 };
 

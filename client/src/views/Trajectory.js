@@ -4,6 +4,7 @@ import { navigate } from '@reach/router';
 import { Radar }  from 'react-chartjs-2';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import Typography from '@material-ui/core/Typography'
 import 'moment-timezone';
 import moment from 'moment';
 
@@ -17,6 +18,9 @@ const useStyles = makeStyles(theme => ({
     },
   chart: {
     color: theme.palette.text.primary,
+  },
+  title: {
+    margin: theme.spacing(4, 0, 2),
   },
 }));
 
@@ -70,7 +74,6 @@ const Trajectory = () => {
       names.push(arr[i].name.toString());
     }
     const namesArray = (Object.values(names));
-    const isArr = Object.prototype.toString.call(namesArray) == '[object Array]';
     return namesArray;
   }
   const myLabels = getCategoryNames(allCategories);
@@ -145,7 +148,7 @@ const Trajectory = () => {
         data: WeeklyCompleted
       }, {
         label: 'Rolling Monthly',
-        hidden: true,
+        hidden: false,
         data: MonthlyCompleted
       }, {
         label: "Rolling Yearly",
@@ -165,7 +168,7 @@ const Trajectory = () => {
       }
     },
     title: {
-      display: true,
+      display: false,
       text: 'Trajectory',
       fontSize: 24,
     },
@@ -195,12 +198,17 @@ const Trajectory = () => {
   
   return (
     <Container className={classes.root}>
+      <Typography 
+        variant='h5'
+        className={classes.title}>
+        Trajectory
+      </Typography>
       <Radar
         className={classes.chart}
         data={data}
         options={options}
         width={39}
-        height={45}
+        height={48}
         style={{paddingTop: 20, paddingBottom: 20}}
       />
     </Container>

@@ -14,9 +14,9 @@ import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
-    maxWidth: 752,
+    maxWidth: 840,
     justifyContent: 'center',
-    fontSize: 10,
+    // fontSize: 10,
     position: 'fixed',
     bottom: 0,
     color: theme.palette.text.primary,
@@ -37,7 +37,6 @@ const BottomNavComponent = (props) => {
         onChange={navigatePage}
         className={classes.root}
         position='fixed'
-        showLabels
         >
         <BottomNavigationAction
           label={<Typography 
@@ -45,9 +44,7 @@ const BottomNavComponent = (props) => {
             Dump/Chunk
           </Typography>}
           value='dump'
-          icon={<AddIcon 
-            style={{fontSize:24}}
-          />}
+          icon={<AddIcon />}
         />
         <BottomNavigationAction
           label={<Typography 
@@ -55,9 +52,7 @@ const BottomNavComponent = (props) => {
             Schedule
           </Typography>}
           value='schedule'
-          icon={<CalendarTodayIcon 
-            style={{fontSize:24}}
-          />}
+          icon={<CalendarTodayIcon />}
         />
         <BottomNavigationAction
           label={<Typography 
@@ -65,9 +60,7 @@ const BottomNavComponent = (props) => {
             Do
           </Typography>}
           value='do'
-          icon={<CheckCircleIcon
-            style={{fontSize:24}}
-          />}
+          icon={<CheckCircleIcon />}
         />
         <BottomNavigationAction
           label={<Typography 
@@ -75,9 +68,7 @@ const BottomNavComponent = (props) => {
             Trajectory
           </Typography>}
           value='trajectory'
-          icon={<TrackChangesIcon 
-          style={{fontSize:24}}
-          />}
+          icon={<TrackChangesIcon />}
         />
       </BottomNavigation>
     </Grid>

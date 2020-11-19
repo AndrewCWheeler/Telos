@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import { navigate } from '@reach/router';
 // Material-ui core components:
-import Container from '@material-ui/core/Container';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
@@ -16,7 +15,8 @@ const useStyles = makeStyles(theme => ({
   root: {
     '& .MuiTextField-root': {
       margin: theme.spacing(1),
-      width: '30ch',
+      width: '36ch',
+      maxWidth: '100%',
       color: theme.palette.text.primary,
     },
   },
@@ -37,6 +37,9 @@ const useStyles = makeStyles(theme => ({
   title: {
     margin: theme.spacing(4, 0, 2),
     color: theme.palette.primary.main,
+  },
+  extraLarge: {
+    fontSize: 32,
   },
 }));
 
@@ -98,7 +101,7 @@ const DumpComponent = props => {
   };
 
   return (
-    <Container className={classes.layout}>
+    <div className={classes.layout}>
       <CssBaseline />
       <form className={classes.root} noValidate autoComplete='off'>
         <Grid className={classes.dump} container direction='row' justify='center' alignItems='center'>
@@ -108,7 +111,6 @@ const DumpComponent = props => {
               label='Dump...'
               multiline
               rowsMax={2}
-              size='medium'
               variant='outlined'
               onChange={e => {
                 onChangeHandler(e);
@@ -127,15 +129,16 @@ const DumpComponent = props => {
                 onClick={e => {
                   onSubmitHandler(e);
                 }}
+
                 >
-                <AddCircleIcon fontSize='large' />
+                <AddCircleIcon style={{fontSize: 60}}/>
               </IconButton>
             </Tooltip>
           
           </Grid>
         </Grid>
       </form>
-    </Container>
+    </div>
   );
 };
 

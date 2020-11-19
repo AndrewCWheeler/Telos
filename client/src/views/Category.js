@@ -33,7 +33,7 @@ const useStyles = makeStyles(theme => ({
   root: {
     '& .MuiTextField-root': {
       margin: theme.spacing(1),
-      width: '30ch',
+      width: '36ch',
       color: theme.palette.text.primary,
     },
     width: '100%',
@@ -146,7 +146,7 @@ const Category = () => {
   };
 
   const onSubmitHandler = (e, snack) => {
-    e.preventDefault();
+    // e.preventDefault();
     axios
       .post(`http://localhost:8000/api/categories/${sessionUserId}`, category, {
         withCredentials: true,
@@ -259,7 +259,7 @@ const Category = () => {
       className={classes.paper}
       >
         <form className={classes.root} noValidate autoComplete='off'>
-          <Grid className={classes.dump} container direction='row' justify='center' alignItems='center'>
+          <Grid container direction='row' justify='center' alignItems='center'>
             <Grid item>
               <TextField
                 id='category'
@@ -277,7 +277,7 @@ const Category = () => {
               />
             </Grid>
           </Grid>
-          <Grid className={classes.dump} container direction='row' justify='center' alignItems='center'>
+          <Grid container direction='row' justify='center' alignItems='center'>
             <Grid item>
               <Tooltip title="Add" placement="right">
                 <IconButton
@@ -300,8 +300,7 @@ const Category = () => {
                     <ListItem
                       className={classes.listItem}
                       key={i}
-                      disableRipple
-                      button
+                      button="true"
                     >
                       <Tooltip title="Edit" placement="left">
                       <IconButton

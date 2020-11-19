@@ -43,6 +43,11 @@ const useStyles = makeStyles(theme => ({
   demo: {
     backgroundColor: theme.palette.background.paper,
   },
+  paper: {
+    maxWidth: 840,
+    margin: `${theme.spacing(1)}px auto`,
+    padding: theme.spacing(3, 0),
+  },
   title: {
     margin: theme.spacing(4, 0, 2),
     color: theme.palette.primary.main,
@@ -90,85 +95,80 @@ const AllDumpedList = props => {
 
   } = props;
   const classes = useStyles();
-  const [secondary, setSecondary] = useState(true);
 
   return (
-    <Container className={classes.root}>
-      <CssBaseline />
-      <Grid container spacing={1}>
-        <Grid item xs={12}>
-          <div>
-            <List dense secondary="true" className={classes.list}>
-              {allTasks.map((task, i) =>
-                task.chunked ? (
-                  ''
-                ) : (
-                  <ListItem
-                    className={classes.listItem}
-                    key={i}
-                    disableRipple
-                    button
-                  >
-                    <Tooltip title="Chunk task" placement="left">
-                      <IconButton type='button' onClick={e => handleOpen(e, task._id)}>
-                        <LabelIcon
-                        className={classes.folderStyle}
-                        disableRipple
-                        />
-                      </IconButton>
-                    </Tooltip>
-                    <ListItemText
-                      disableTypography
-                      primary={
-                      <Link
-                        button
-                        onClick={e => handleOpen(e, task._id)}
-                        style={{textDecoration:'none'}}
-                      >
-                        <Typography
-                          style={{fontSize:15}}
-                          color="textPrimary"
-                          >
-                          {task.name}
-                        </Typography>
-                      </Link>
-                      }
-                      secondary={<Typography style={{fontSize:12}}>{task.category}</Typography>}
+    <div>
+    <CssBaseline />
+    <Grid container direction='row' justify='center' alignItems='center'>
+      <Grid className={classes.root} item xs={12}>
+        <List dense secondary="true" className={classes.list}>
+          {allTasks.map((task, i) =>
+            task.chunked ? (
+              ''
+            ) : (
+              <ListItem
+                className={classes.listItem}
+                key={i}
+                button="true"
+              >
+                <Tooltip title="Chunk task" placement="left">
+                  <IconButton type='button' onClick={e => handleOpen(e, task._id)}>
+                    <LabelIcon
+                    className={classes.folderStyle}
                     />
-                    <Tooltip title="Delete Task" placement="right">
-                      <IconButton className={classes.deleteStyle} edge='end' aria-label='delete'>
-                        <DeleteComponent
-                          taskId={task._id}
-                          successCallback={() => removeFromDom(task._id)}
-                        />
-                      </IconButton>
-                    </Tooltip>
-                  </ListItem>
-                )
-              )}
-            </List>
-          </div>
-        </Grid>
+                  </IconButton>
+                </Tooltip>
+                <ListItemText
+                  disableTypography
+                  primary={
+                  <Link
+                    button="true"
+                    onClick={e => handleOpen(e, task._id)}
+                    style={{textDecoration:'none'}}
+                  >
+                    <Typography
+                      style={{fontSize:15}}
+                      color="textPrimary"
+                      >
+                      {task.name}
+                    </Typography>
+                  </Link>
+                  }
+                  secondary={<Typography style={{fontSize:12}}>{task.category}</Typography>}
+                />
+                <Tooltip title="Delete Task" placement="right">
+                  <IconButton className={classes.deleteStyle} edge='end' aria-label='delete'>
+                    <DeleteComponent
+                      taskId={task._id}
+                      successCallback={() => removeFromDom(task._id)}
+                    />
+                  </IconButton>
+                </Tooltip>
+              </ListItem>
+            )
+          )}
+        </List>
       </Grid>
-      <Dialog
-        aria-labelledby='spring-modal-title'
-        aria-describedby='spring-modal-description'
-        className={classes.modal}
-        open={open}
-        onClose={handleClose}
-        closeAfterTransition
-        BackdropComponent={Backdrop}
-        BackdropProps={{
-          timeout: 500,
-        }}
-        >
-        <DialogContent className={classes.dialogStyle}>
-          <Typography className={classes.title}>
-            <h2>
-              {task.name}
-            </h2>
-          </Typography>
-          <TextField
+    </Grid>
+    <Dialog
+      aria-labelledby='spring-modal-title'
+      aria-describedby='spring-modal-description'
+      className={classes.modal}
+      open={open}
+      onClose={handleClose}
+      closeAfterTransition
+      BackdropComponent={Backdrop}
+      BackdropProps={{
+        timeout: 500,
+      }}
+    >
+      <DialogContent className={classes.dialogStyle}>
+        <Typography className={classes.title}>
+          <h2>
+            {task.name}
+          </h2>
+        </Typography>
+        <TextField
           inputProps={{ autoFocus: true }}
           id='dump'
           label='Edit task here...'
@@ -179,68 +179,68 @@ const AllDumpedList = props => {
           onChange={e => {
             onChangeHandler(e);
           }}
-            onBlur={e => {
-              onPatchEditNameHandler(e, task._id);
+          onBlur={e => {
+            onPatchEditNameHandler(e, task._id);
+          }}
+          placeholder={task.name}
+          name='name'
+          value={task.name}
+          />
+        <FormControl
+          variant='standard'
+          className={classes.formControl}
+          >
+          <InputLabel
+            id='category'
+            >
+            Chunk...
+          </InputLabel>
+          <Select
+            value={selectedObject}
+            onChange={e => {
+              onChangeChunkHandler(e);
             }}
-            placeholder={task.name}
-            name='name'
-            value={task.name}
-            />
-          <FormControl
-            variant='standard'
-            className={classes.formControl}
+            labelId='category'
+            label='Chunk...'
+            name='categoryObject'
             >
-            <InputLabel
-              id='category'
+            <MenuItem aria-label='None' value=''><em>None</em></MenuItem>
+            {allCategories.map((category, catIdx) => 
+              <MenuItem
+                key={catIdx}
+                value={category}
+                placeholder={category.name}
+                style={{color:category.color}}
               >
-              Chunk...
-            </InputLabel>
-            <Select
-              value={selectedObject}
-              onChange={e => {
-                onChangeChunkHandler(e);
-              }}
-              labelId='category'
-              label='Chunk...'
-              name='categoryObject'
-              >
-              <MenuItem aria-label='None' value=''><em>None</em></MenuItem>
-              {allCategories.map((category, catIdx) => 
-                <MenuItem
-                  key={catIdx}
-                  value={category}
-                  placeholder={category.name}
-                  style={{color:category.color}}
-                >
-                    <LabelIcon
-                      style={{fontSize:18,marginRight:12}}
-                    />
-                    {category.name}
-                </MenuItem>
-              )}
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            autoFocus
-            onClick={handleClose}
-            color="primary"
-            >
-            Cancel
-          </Button>
-          <IconButton
-            className={classes.icon}
-            aria-label='update task'
-            onClick={e => {
-              onPatchHandler(e, task._id, selectedObject, 'Task Chunked!');
-            }}
-            >
-            <LibraryAddIcon />
-          </IconButton>
-        </DialogActions>
-      </Dialog>
-    </Container>
+                  <LabelIcon
+                    style={{fontSize:18,marginRight:12}}
+                  />
+                  {category.name}
+              </MenuItem>
+            )}
+          </Select>
+        </FormControl>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          autoFocus
+          onClick={handleClose}
+          color="primary"
+          >
+          Cancel
+        </Button>
+        <IconButton
+          className={classes.icon}
+          aria-label='update task'
+          onClick={e => {
+            onPatchHandler(e, task._id, selectedObject, 'Task Chunked!');
+          }}
+          >
+          <LibraryAddIcon />
+        </IconButton>
+      </DialogActions>
+    </Dialog>
+    </div>
   );
 };
 export default AllDumpedList;

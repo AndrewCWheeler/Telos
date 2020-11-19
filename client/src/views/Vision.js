@@ -20,7 +20,7 @@ const useStyles = makeStyles(theme => ({
     maxWidth: 840,
     '& .MuiTextField-root': {
       margin: theme.spacing(1),
-      width: '48ch',
+      width: '39ch',
       color: theme.palette.text.primary,
     },
   },
@@ -35,11 +35,6 @@ const useStyles = makeStyles(theme => ({
     flexGrow: 1,
     overflow: 'hidden',
     padding: theme.spacing(0, 3),
-  },
-  paper: {
-    maxWidth: 500,
-    margin: `${theme.spacing(2)}px auto`,
-    padding: theme.spacing(3, 0),
   },
   title: {
     margin: theme.spacing(4, 0, 2),
@@ -112,16 +107,16 @@ const Vision = props => {
       <div style={{marginTop:'90px'}}>
       <Typography 
       className={classes.title}
-      variant='h3'>
+      variant='h5'>
         Vision
       </Typography>
       <Typography
-        variant="body1"
+        variant="body2"
       >
-        Aristotle famously said, "We are what we repeatedly do." What if the reverse were also true? "We do what we repeatedly tell ourselves we are." In other words, we act out of who we perceive ourselves to be. Before you begin creating task lists, take a moment to create your own personal vision statement. Then let this vision influence the <Button className={classes.link} onClick={e => {navigatePage(e, 'category')}}>categories</Button> you create.
+        Aristotle famously said, "We are what we repeatedly do." What if the reverse were also true? "We do what we repeatedly tell ourselves we are." In other words, we act out of who we perceive ourselves to be. Before you begin creating task lists, take a moment to create your own personal vision statement. Then let this vision influence the <Button role='link' className={classes.link} onClick={e => {navigatePage(e, 'category')}}>categories</Button> you create.
       </Typography>
       </div>
-      <form className={classes.root} noValidate autoComplete='off'>
+      <form noValidate autoComplete='off'>
         <Grid className={classes.dump} container direction='row' justify='center' alignItems='center'>
           <Grid item>
             <TextField
@@ -152,20 +147,11 @@ const Vision = props => {
                 }}
                 variant="contained"
                 color="primary"
-                size="small"
                 className={classes.button}
                 startIcon={<SaveIcon />}
               >
                 Save
               </Button>
-              {/* <IconButton
-                className={classes.fab}
-                onClick={e => {
-                  onSubmitHandler(e, "Vision updated!");
-                }}
-                >
-                <SaveIcon fontSize='large' />
-              </IconButton> */}
             </Tooltip>
           </Grid>
         </Grid>
@@ -173,9 +159,8 @@ const Vision = props => {
       <Grid container justify="center">    
         </Grid>
           <Typography 
-            variant='h4'
+            variant='h3'
             style={{marginTop:60, marginBottom:9}}
-
           >
             My Vision
           </Typography>
@@ -185,8 +170,8 @@ const Vision = props => {
           className={classes.myBorder}
         >
           <Typography 
-            variant='h5'
-            style={{marginTop: 30}}
+            variant='body1'
+            style={{marginTop: 30, marginBottom: 300}}
           >
             {sessionUser.vision}
           </Typography>

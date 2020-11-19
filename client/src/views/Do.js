@@ -95,17 +95,16 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.primary.main,
     backgroundColor: theme.palette.primary.main,
   },
-  paper: {
-    maxWidth: 640,
-    margin: `${theme.spacing(1)}px auto`,
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-  },
-  paper2: {
-    backgroundColor: theme.palette.primary.main,
-    border: `2px solid ${theme.palette.primary.contrastText}`,
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
+  link: {
+    textDecoration: 'none',
+    color: theme.palette.text.primary,
+    "&:active": {
+      color: theme.palette.secondary.dark,
+    },
+    "&:hover": {
+      color: theme.palette.info.main,
+      textDecoration: 'none',
+    }
   },
   list: {
     marginBottom: 90,
@@ -117,6 +116,9 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.background.default,
     borderBottom: '1px solid #e1dfdc',
     paddingLeft: 0,
+  },
+  primaryColor: {
+    color: theme.palette.primary.main,
   },
   primaryIconStyle: {
     fontSize:24,
@@ -414,144 +416,148 @@ const Do = () => {
   };
 
   return (
-    <Container className={classes.root}>
+    <div>
       <CssBaseline />
       <div style={{marginTop:'90px'}}>
-      <Typography 
-      className={classes.title}
-      variant='h5'>
-        Do
-      </Typography>
-      <Typography
-      className={classes.subtitle} 
-      variant='subtitle2'
-      >
-        Select a date:
-      </Typography>
-      </div>
-      <MuiPickersUtilsProvider 
-        utils={DateFnsUtils}
-        style={{width:160}}
-        
-      >
-        <CssBaseline />
-        <Grid container justify='space-around'>
-          <KeyboardDatePicker
-            className={classes.primaryIconStyle}
-            margin='normal'
-            id='Selected a date...'
-            format='MM/dd/yyyy'
-            value={dateParameter}
-            onChange={e => {
-              handleDateParameter(e);
-            }}
-            KeyboardButtonProps={{
-              'aria-label': 'change date',
-            }}
-          />
-        </Grid>
-      </MuiPickersUtilsProvider>
-
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable 
-        droppableId='droppable'
+        <Typography 
+          className={classes.title}
+          variant='h5'>
+          Do
+        </Typography>
+        <Typography
+          className={classes.subtitle} 
+          variant='subtitle2'
         >
-          {provided => (
-            <List
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            dense
-            secondary="true"
-            className={classes.list}
+          Select a date:
+        </Typography>
+      </div>
+      <Grid container direction='row' justify='center' alignItems='center'>
+        <Grid item xs={12} className={classes.root}>
+          <MuiPickersUtilsProvider 
+            utils={DateFnsUtils}
+            style={{width:160}} 
+          >
+            <CssBaseline />
+            <Grid container justify='space-around'>
+              <KeyboardDatePicker
+                className={classes.primaryIconStyle}
+                margin='normal'
+                id='Selected a date...'
+                format='MM/dd/yyyy'
+                value={dateParameter}
+                onChange={e => {
+                  handleDateParameter(e);
+                }}
+                KeyboardButtonProps={{
+                  'aria-label': 'change date',
+                }}
+              />
+            </Grid>
+          </MuiPickersUtilsProvider>
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable 
+            droppableId='droppable'
             >
-            {SortedTasks.map((task, i) =>
-              task.chunked && task.scheduled ? (
-              <Draggable
-                draggableId={task._id}
-                index={i}
-                key={task._id}
-              >
               {provided => (
-                <ListItem
-                  className={classes.listItem}
-                  button
-                  ref={provided.innerRef}
-                  id='DoTask'
-                  {...provided.draggableProps}
-                  {...provided.dragHandleProps}
-                  key={task._id}
-                  index={i}
+                <List
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                dense
+                secondary="true"
+                className={classes.list}
                 >
-                  <ListItemIcon
-                  onClick={e => onCompleteHandler(e,task._id,"Task Completed!")}
+                {SortedTasks.map((task, i) =>
+                  task.chunked && task.scheduled ? (
+                  <Draggable
+                    draggableId={task._id}
+                    index={i}
+                    key={task._id}
                   >
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          icon={<RadioButtonUncheckedRoundedIcon 
-                            fontSize="small" 
-                          />}
-                          checkedIcon={<CheckCircleRoundedIcon 
-                            fontSize="small"
-                          />}
-                          name="completed"
-                        />
-                      }
-                      label=""
-                    />
-                  </ListItemIcon>
-                  {allCategories.map((category, catIdx) => 
-                    task.category === category.name ? (
-                    <ListItemText
-                      key={catIdx}
-                      disableTypography
-                      className={classes.text}
-                      overflow='hidden'
-                      primary={<Typography style={{fontSize:15}}>{task.name}</Typography>}
-                      secondary={<Typography style={{fontSize:12, color:category.color}}>{task.category}</Typography>}
-                    />
-                    ) : null
-                  )}
-                  <ListItemText
-                    primary={
-                    <Tooltip title="Change Date" placement="right">
-                      <Button
-                        onClick={e => {handleOpenCal(e, task._id)}}
-                        className={classes.itemWhite}
-                        >
-                        <div>
-                          <Moment format='dddd' style={{fontSize: '15px', textTransform: 'capitalize', float: 'left'}}>
-                            {task.scheduledAt}
-                          </Moment>
-                        </div>
-                      </Button>
-                    </Tooltip>
-                    }
-                  />
-                  <div>
-                    <Tooltip title="Edit Task" placement="right">
-                      <IconButton 
-                      edge="end" 
-                      aria-label="edit-task"
-                      type='button'
-                      onClick={e => handleOpenEdit(e, task._id)} 
+                  {provided => (
+                    <ListItem
+                      className={classes.listItem}
+                      button
+                      ref={provided.innerRef}
+                      id='DoTask'
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      key={task._id}
+                      index={i}
+                    >
+                      <ListItemIcon
+                      style={{marginLeft: 12}}
+                      onClick={e => onCompleteHandler(e,task._id,"Task Completed!")}
                       >
-                        <EditIcon 
-                        className={classes.neutralIconStyle}
+                        
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              icon={<RadioButtonUncheckedRoundedIcon 
+                                // fontSize="small" 
+                              />}
+                              checkedIcon={<CheckCircleRoundedIcon 
+                                // fontSize="small"
+                              />}
+                              name="completed"
+                            />
+                          }
+                          label=""
                         />
-                      </IconButton>
-                    </Tooltip>
-                  </div>
-                </ListItem>
+                      </ListItemIcon>
+                      {allCategories.map((category, catIdx) => 
+                        task.category === category.name ? (
+                        <ListItemText
+                          key={catIdx}
+                          disableTypography
+                          className={classes.text}
+                          overflow='hidden'
+                          primary={<Typography style={{fontSize:15}}>{task.name}</Typography>}
+                          secondary={<Typography style={{fontSize:12, color:category.color}}>{task.category}</Typography>}
+                        />
+                        ) : null
+                      )}
+                      <ListItemText
+                        primary={
+                        <Tooltip title="Change Date" placement="right">
+                          <Button
+                            onClick={e => {handleOpenCal(e, task._id)}}
+                            className={classes.link}
+                            >
+                            <div>
+                              <Moment format='dddd' style={{fontSize: '15px', textTransform: 'capitalize', float: 'left'}}>
+                                {task.scheduledAt}
+                              </Moment>
+                            </div>
+                          </Button>
+                        </Tooltip>
+                        }
+                      />
+                      <div>
+                        <Tooltip title="Edit Task" placement="right">
+                          <IconButton 
+                          edge="end" 
+                          aria-label="edit-task"
+                          type='button'
+                          onClick={e => handleOpenEdit(e, task._id)} 
+                          >
+                            <EditIcon 
+                            className={classes.neutralIconStyle}
+                            />
+                          </IconButton>
+                        </Tooltip>
+                      </div>
+                    </ListItem>
+                  )}
+                </Draggable>
+                ) : (null)
               )}
-            </Draggable>
-            ) : (null)
-          )}
-          {provided.placeholder}
-          </List>
-          )}
-        </Droppable>
-      </DragDropContext>
+              {provided.placeholder}
+              </List>
+              )}
+            </Droppable>
+          </DragDropContext>
+        </Grid>
+      </Grid>
       {/* Edit Task Dialog */}
       <Dialog
         aria-labelledby='modal-edit-select'
@@ -706,7 +712,7 @@ const Do = () => {
         handleOpenSnackBar={handleOpenSnackBar}
         handleCloseSnackBar={handleCloseSnackBar} 
       />
-    </Container>
+    </div>
   );
 };
 
