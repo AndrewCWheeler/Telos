@@ -1,7 +1,4 @@
 /*eslint-disable*/ import React from "react";
-// nodejs library to set properties for components
-import PropTypes from "prop-types";
-import { navigate } from '@reach/router';
 // nodejs library that concatenates classes
 import classNames from "classnames";
 // @material-ui/core components
@@ -41,13 +38,8 @@ export default function LandingPage({ ...rest }) {
     <div>
       <Header
         color="transparent"
-        // brand="Material Kit PRO React"
         links={<HeaderLinks dropdownHoverColor="info" />}
         fixed
-        // changeColorOnScroll={{
-        //   height: 10,
-        //   color: "transparent",
-        // }}
         {...rest}
       />
       <Parallax image={landingBackground} filter="dark">
@@ -64,14 +56,6 @@ export default function LandingPage({ ...rest }) {
                 An intuitive task manager designed to help you clear your mind and fulfill your unique purpose.
               </h4>
               <br />
-              {/* <Button
-                color="primary"
-                size="lg"
-                onClick={e => (navigate('/signup'))}
-                target="_blank"
-              >
-                Sign-up
-              </Button> */}
             </GridItem>
           </GridContainer>
         </div>
@@ -89,7 +73,6 @@ export default function LandingPage({ ...rest }) {
             <div className={classes.right}>
               <List className={classes.list}>
                 <ListItem className={classes.inlineBlock}>
-                  
                   <a
                     href="mailto:creative.andrew@outlook.com"
                     target="_blank"
@@ -98,42 +81,8 @@ export default function LandingPage({ ...rest }) {
                     Contact: creative.andrew@outlook.com
                   </a>
                 </ListItem>
-                {/* <ListItem className={classes.inlineBlock}>
-                  <a
-                    href="#"
-                    target="_blank"
-                    className={classes.block}
-                  >
-                    Contact
-                  </a>
-                </ListItem> */}
-                {/* <ListItem className={classes.inlineBlock}>
-                  <a href="//blog.creative-tim.com/" className={classes.block}>
-                    Blog
-                  </a>
-                </ListItem> */}
-                {/* <ListItem className={classes.inlineBlock}>
-                  <a
-                    href="https://www.creative-tim.com/license?ref=mkpr-landing"
-                    target="_blank"
-                    className={classes.block}
-                  >
-                    Licenses
-                  </a>
-                </ListItem> */}
               </List>
             </div>
-            {/* <div className={classes.right}>
-              &copy; {1900 + new Date().getYear()} , made with{" "}
-              <Favorite className={classes.icon} /> by{" "}
-              <a
-                href="https://www.creative-tim.com/?ref=mkpr-landing"
-                target="_blank"
-              >
-                Creative Tim
-              </a>{" "}
-              for a better web.
-            </div> */}
           </div>
         }
       />

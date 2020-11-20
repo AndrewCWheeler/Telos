@@ -172,6 +172,7 @@ const Do = () => {
   const [openCal, setOpenCal] = useState(false);
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
+  const [severity, setSeverity] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -271,9 +272,10 @@ const Do = () => {
   
   // Dialog and Snack Handlers:
 
-  const handleOpenSnackBar = (snack) => {
+  const handleOpenSnackBar = (snack, severity) => {
     setOpenSnack(true);
     setSnack(snack); 
+    setSeverity(severity)
   };
 
   const handleCloseSnackBar = (event, reason) => {
@@ -339,7 +341,18 @@ const Do = () => {
       .patch('http://localhost:8000/api/tasks/' + id, task, {
         withCredentials: true,
       })
-      .then(res => {
+      .then(() => {
+        setTask({
+          name: '',
+          category: '',
+          chunked: '',
+          scheduled: '',
+          scheduledAt: '',
+          completed: '',
+          completedAt: '',
+          priority: 0,
+          owner: '',
+        });
         let count = load;
         if (count >= 0) {
           count++;
@@ -349,7 +362,7 @@ const Do = () => {
       .catch();
   };
 
-  const onPatchUnScheduleHandler = (e, id, snack) => {
+  const onPatchUnScheduleHandler = (e, id, snack, severity) => {
     task.scheduledAt = '';
     task.scheduled = false;
     axios
@@ -360,7 +373,7 @@ const Do = () => {
         if (res.data.message === 'success') {
           removeFromDom(id);
           handleCloseEdit();
-          handleOpenSnackBar(snack);
+          handleOpenSnackBar(snack, severity);
         }
       })
       .catch();
@@ -376,12 +389,29 @@ const Do = () => {
       .then(res => {
         if (res.data.message === 'success'){
           handleCloseEdit();
+          setTask({
+            name: '',
+            category: '',
+            chunked: '',
+            scheduled: '',
+            scheduledAt: '',
+            completed: '',
+            completedAt: '',
+            priority: 0,
+            owner: '',
+          });
+          handleOpenSnackBar("Task re-chunked!", "success");
+          let count = load;
+          if (count >= 0) {
+          count++;
+          setLoad(count);
+          }
         }
       })
       .catch();
   };
 
-  const onPatchDateHandler = (e, id, snack) => {
+  const onPatchDateHandler = (e, id, snack, severity) => {
     task.scheduledAt = selectedDate;
     task.scheduled = true;
     axios
@@ -392,13 +422,29 @@ const Do = () => {
         if(res.data.message === 'success') {
           removeFromDom(id);
           handleCloseCal();
-          handleOpenSnackBar(snack);
+          handleOpenSnackBar(snack, severity);
+          setTask({
+            name: '',
+            category: '',
+            chunked: '',
+            scheduled: '',
+            scheduledAt: '',
+            completed: '',
+            completedAt: '',
+            priority: 0,
+            owner: '',
+          });
+            let count = load;
+            if (count >= 0) {
+            count++;
+            setLoad(count);
+            }
         };
       })
       .catch();
   };
 
-  const onCompleteHandler = (e,id,snack) => {
+  const onCompleteHandler = (e,id,snack,severity) => {
     axios.get(`http://localhost:8000/api/tasks/${id}`, {withCredentials: true})
     .then(res => {
       let completedTask = {};
@@ -409,7 +455,7 @@ const Do = () => {
       .then(res => {
         if (res.data.message === 'success'){
           removeFromDom(id);
-          handleOpenSnackBar(snack);
+          handleOpenSnackBar(snack, severity);
         }
       }).catch();
     }).catch();
@@ -486,7 +532,7 @@ const Do = () => {
                     >
                       <ListItemIcon
                       style={{marginLeft: 12}}
-                      onClick={e => onCompleteHandler(e,task._id,"Task Completed!")}
+                      onClick={e => onCompleteHandler(e,task._id,"Task Completed!", "success")}
                       >
                         
                         <FormControlLabel
@@ -578,7 +624,7 @@ const Do = () => {
             <IconButton 
             className={classes.undo}
             role='button'
-            onClick={e => {onPatchUnScheduleHandler(e, task._id, "Removed from Calendar!")}}
+            onClick={e => {onPatchUnScheduleHandler(e, task._id, "Removed from Calendar!", "success")}}
             >
               <Undo />
             </IconButton>
@@ -699,7 +745,7 @@ const Do = () => {
           <IconButton
             aria-label='add to calendar'
             onClick={e => {
-              onPatchDateHandler(e, task._id, "Date Changed!");
+              onPatchDateHandler(e, task._id, "Date Changed!", "success");
             }}
           >
             <LibraryAddIcon />
@@ -708,6 +754,8 @@ const Do = () => {
       </Dialog>
       <SimpleSnackbar 
         snack={snack}
+        severity={severity}
+        setSeverity={setSeverity}
         openSnack={openSnack}
         handleOpenSnackBar={handleOpenSnackBar}
         handleCloseSnackBar={handleCloseSnackBar} 

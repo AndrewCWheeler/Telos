@@ -208,7 +208,7 @@ const Trajectory = () => {
         data={data}
         options={options}
         width={39}
-        height={48}
+        height={45}
         style={{paddingTop: 20, paddingBottom: 20}}
       />
     </Container>

@@ -79,10 +79,12 @@ const SignInSide = () => {
   });
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
+  const [severity, setSeverity] = useState('');
   
-  const handleOpenSnackBar = (snack) => {
+  const handleOpenSnackBar = (snack, severity) => {
     setOpenSnack(true);
-    setSnack(snack); 
+    setSnack(snack);
+    setSeverity(severity);
   };
 
   const handleCloseSnackBar = (event, reason) => {
@@ -113,7 +115,7 @@ const SignInSide = () => {
           navigate('/');
       })
       .catch(() => {
-        handleOpenSnackBar("Email and password do not match!");
+        handleOpenSnackBar("Email and password do not match!", "error");
       });
     navigate('/signin');
   };
@@ -189,6 +191,8 @@ const SignInSide = () => {
       </Grid>
       <SimpleSnackbar 
         snack={snack}
+        severity={severity}
+        setSeverity={setSeverity}
         openSnack={openSnack}
         handleOpenSnackBar={handleOpenSnackBar}
         handleCloseSnackBar={handleCloseSnackBar} 

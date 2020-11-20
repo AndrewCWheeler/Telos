@@ -190,6 +190,7 @@ const Profile = () => {
   });
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
+  const [severity, setSeverity] = useState('');
   
   useEffect(() => {
     let isMounted = true;
@@ -229,9 +230,10 @@ const Profile = () => {
       return () => { isMounted = false };
   }, []);
 
-  const handleOpenSnackBar = (snack) => {
+  const handleOpenSnackBar = (snack, severity) => {
     setOpenSnack(true);
     setSnack(snack);
+    setSeverity(severity)
   };
   const handleCloseSnackBar = (event, reason) => {
     if (reason === 'clickaway') {
@@ -272,7 +274,7 @@ const Profile = () => {
       .catch();
   };
 
-  const handleUndoComplete = (e,id,snack) => {
+  const handleUndoComplete = (e,id,snack, severity) => {
     axios.get(`http://localhost:8000/api/tasks/${id}`, {withCredentials: true})
     .then(res => { 
       let completedTask = {};
@@ -282,13 +284,13 @@ const Profile = () => {
       .then(res => {
         if (res.data.message === 'success'){
           removeFromDom(id);
-          handleOpenSnackBar(snack);
+          handleOpenSnackBar(snack, severity);
         }
       }).catch();
     }).catch();
   };
 
-  const deleteTask = (e,id, snack) => {
+  const deleteTask = (e,id, snack, severity) => {
     axios
       .delete(`http://localhost:8000/api/tasks/${id}`,
         {withCredentials: true,
@@ -297,7 +299,7 @@ const Profile = () => {
         if(res.data.message==='success'){
         handleCloseDeleteTask(snack);
         removeFromDom(id);
-        handleOpenSnackBar(snack);
+        handleOpenSnackBar(snack, severity);
       }
       }).catch();
   };
@@ -416,7 +418,7 @@ const Profile = () => {
                   className={classes.secondaryIconStyle} 
                   edge='end' 
                   aria-label='undo completed'
-                  onClick={e => {handleUndoComplete(e, task._id, "Task marked incomplete.")}}
+                  onClick={e => {handleUndoComplete(e, task._id, "Task marked incomplete.", "success")}}
                 >
                   <UndoIcon></UndoIcon> 
                 </IconButton>
@@ -455,7 +457,7 @@ const Profile = () => {
           </Button>
           <Button
             className={classes.error} 
-            onClick={e => {deleteTask(e, task._id, "Task deleted successfully.")}}>
+            onClick={e => {deleteTask(e, task._id, "Task deleted successfully.", "success")}}>
             Delete Task
           </Button>
         </DialogActions>
@@ -485,6 +487,8 @@ const Profile = () => {
         </DialogActions>
       </Dialog>
       <SimpleSnackbar 
+        severity={severity}
+        setSeverity={setSeverity}
         snack={snack}
         openSnack={openSnack}
         handleOpenSnackBar={handleOpenSnackBar}

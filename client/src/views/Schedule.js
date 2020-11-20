@@ -141,6 +141,7 @@ const Schedule = () => {
   const [openCal, setOpenCal] = useState(false);
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
+  const [severity, setSeverity] = useState('');
   const [openEdit, setOpenEdit] = useState(false);
 
   useEffect(() => {
@@ -186,9 +187,10 @@ const Schedule = () => {
   }, [load]);
 
   // DIALOG AND SNACK HANDLERS
-  const handleOpenSnackBar = (snack) => {
+  const handleOpenSnackBar = (snack, severity) => {
     setOpenSnack(true);
     setSnack(snack); 
+    setSeverity(severity);
   };
   const handleCloseSnackBar = (event, reason) => {
     if (reason === 'clickaway') {
@@ -314,12 +316,7 @@ const Schedule = () => {
       .patch('http://localhost:8000/api/tasks/' + id, task, {
         withCredentials: true,
       })
-      .then(res => {
-        let count = load;
-        if (count >= 0) {
-          count++;
-          setLoad(count);
-        }
+      .then(() => {
       })
       .catch();
   };
@@ -335,7 +332,13 @@ const Schedule = () => {
         if (res.data.message === 'success'){
           removeFromDom(id);
           handleCloseEdit();
+          handleOpenSnackBar("Task re-chunked!", "success");
         }
+        let count = load;
+          if (count >= 0) {
+          count++;
+          setLoad(count);
+          }
       })
       .catch();
   };
@@ -351,6 +354,7 @@ const Schedule = () => {
         if (res.data.message === 'success') {
           removeFromDom(id);
           handleCloseEdit();
+          handleOpenSnackBar("Task un-chunked!", "success");
         }
       })
       .catch();
@@ -367,7 +371,7 @@ const Schedule = () => {
         if(res.data.message === 'success') {
           removeFromDom(id);
           handleCloseCal();
-          handleOpenSnackBar("Task scheduled!");
+          handleOpenSnackBar("Task scheduled!", "success");
         };
       })
       .catch();
@@ -526,9 +530,7 @@ const Schedule = () => {
             </IconButton>
           </Tooltip>
           <Typography className={classes.title}>
-            <h2>
-              {task.name}
-            </h2>
+            {task.name}
           </Typography>
           <TextField
             id='dump'
@@ -540,7 +542,6 @@ const Schedule = () => {
             onChange={e => {
               onChangeHandler(e);
             }}
-
             onBlur={e => {
               onPatchEditNameHandler(e, task._id);
             }}
@@ -651,7 +652,9 @@ const Schedule = () => {
           </IconButton>
         </DialogActions>
       </Dialog>
-      <SimpleSnackbar 
+      <SimpleSnackbar
+        severity={severity}
+        setSeverity={setSeverity}
         snack={snack}
         openSnack={openSnack}
         handleOpenSnackBar={handleOpenSnackBar}

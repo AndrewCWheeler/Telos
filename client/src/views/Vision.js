@@ -1,43 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { navigate } from '@reach/router';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import Container from '@material-ui/core/Container';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 
-import SaveIcon from '@material-ui/icons/Save';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
+import InfoIcon from '@material-ui/icons/Info';
 
 import SimpleSnackbar from '../components/SimpleSnackBar';
+import { IconButton } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
     maxWidth: 840,
+    overflow: 'scroll',
     '& .MuiTextField-root': {
       margin: theme.spacing(1),
-      width: '39ch',
+      width: '33ch',
       color: theme.palette.text.primary,
     },
-  },
-  myBorder: {
-    borderTop: `1px solid ${theme.palette.text.secondary}`,
   },
   fab: {
     margin: theme.spacing(2),
     color: theme.palette.primary.main,
   },
-  layout: {
-    flexGrow: 1,
-    overflow: 'hidden',
-    padding: theme.spacing(0, 3),
-  },
   title: {
-    margin: theme.spacing(4, 0, 2),
+    marginTop: theme.spacing(4),
   },
   link: {
     textDecoration: 'none',
@@ -50,26 +49,27 @@ const useStyles = makeStyles(theme => ({
       textDecoration: 'none',
     },
   },
+  visionStyle: {
+    maxWidth: 519,
+    marginTop: 30,
+    marginBottom: 300,
+    overflow: 'scroll',
+    padding: 9,
+  },
 }));
 
 const Vision = props => {
+  const domRef = useRef();
   const classes = useStyles();
   const { navigatePage } = props;
   const [sessionUser, setSessionUser] = useState('');
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
+  const [severity, setSeverity] = useState('');
   const [vision, setVision] = useState('');
+  const [openVisionDialog, setOpenVisionDialog] = useState(false);
+
   
-  const handleOpenSnackBar = (snack) => {
-    setOpenSnack(true);
-    setSnack(snack); 
-  };
-  const handleCloseSnackBar = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setOpenSnack(false);
-  };
   useEffect(() => {
     let isMounted = true;
     axios.get('http://localhost:8000/api/users/one', {withCredentials: true})
@@ -82,13 +82,35 @@ const Vision = props => {
     return () => { isMounted = false };
   }, []);
 
+  const handleOpenSnackBar = (snack, severity) => {
+    setOpenSnack(true);
+    setSnack(snack);
+    setSeverity(severity);
+  };
+  const handleCloseSnackBar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnack(false);
+  };
+
+  const handleOpenVisionDialog = () => {
+    setOpenVisionDialog(true);
+  };
+  const handleCloseVisionDialog = () => {
+    setOpenVisionDialog(false);
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      onSubmitHandler(e);
+      onSubmitHandler(e, "Vision updated!", "success");
     }
   }
-  const onSubmitHandler = (e, snack) => {
-    e.preventDefault();
+  const onSubmitHandler = (e, snack, severity) => {
+    if (vision === ''){
+      handleOpenSnackBar("You have no vision?", "warning")
+      return
+    }
     sessionUser.vision = vision;
     axios
       .patch('http://localhost:8000/api/users/one', sessionUser, {
@@ -96,94 +118,94 @@ const Vision = props => {
       })
       .then(res => {
         if(res.data.message === 'success'){
-          handleOpenSnackBar(snack);
+          handleOpenSnackBar(snack, severity);
           setVision('');
         }}).catch();
   };
 
   return (
-    <Container className={classes.root}>
+    <div>
       <CssBaseline />
-      <div style={{marginTop:'90px'}}>
-      <Typography 
-      className={classes.title}
-      variant='h5'>
-        Vision
-      </Typography>
-      <Typography
-        variant="body2"
-      >
-        Aristotle famously said, "We are what we repeatedly do." What if the reverse were also true? "We do what we repeatedly tell ourselves we are." In other words, we act out of who we perceive ourselves to be. Before you begin creating task lists, take a moment to create your own personal vision statement. Then let this vision influence the <Button role='link' className={classes.link} onClick={e => {navigatePage(e, 'category')}}>categories</Button> you create.
-      </Typography>
-      </div>
-      <form noValidate autoComplete='off'>
-        <Grid className={classes.dump} container direction='row' justify='center' alignItems='center'>
-          <Grid item>
-            <TextField
-              style={{marginTop: 30}}
-              rows={4}
-              placeholder="I am..."
-              id='vision'
-              label='Vision here...'
-              multiline
-              rowsMax={6}
-              size='medium'
-              variant='outlined'
-              onChange={e => {
-                setVision(e.target.value);
-              }}
-              onKeyPress={handleKeyDown}
-              name='vision'
-              value={vision}
-            />
-          </Grid>
-        </Grid>
-        <Grid className={classes.dump} container direction='row' justify='center' alignItems='center'>
-          <Grid item>
-            <Tooltip title="Add" placement="right">
-              <Button
-                onClick={e => {
-                  onSubmitHandler(e, "Vision updated!");
-                }}
-                variant="contained"
-                color="primary"
-                className={classes.button}
-                startIcon={<SaveIcon />}
-              >
-                Save
-              </Button>
-            </Tooltip>
-          </Grid>
-        </Grid>
-      </form>
-      <Grid container justify="center">    
-        </Grid>
-          <Typography 
-            variant='h3'
-            style={{marginTop:60, marginBottom:9}}
-          >
-            My Vision
+      <Grid container direction='row' justify='center' alignItems='center' style={{marginTop: 60}}>
+        <Grid item xs={12}>
+          <Typography
+          className={classes.title}
+          variant='h5'>
+            Vision 
+            <IconButton onClick={e => {handleOpenVisionDialog(e)}}>
+              <InfoIcon color="primary"/>
+          </IconButton>
           </Typography>
-        <Grid item>
-        <Grid 
-          item
-          className={classes.myBorder}
-        >
+        </Grid>
+      </Grid>
+      <Grid container direction="row" justify='center' alignItems='center'>
+        <Grid item xs={12} className={classes.root}>
+          <TextField
+            placeholder="I am..."
+            id='vision'
+            label='Vision here...'
+            multiline
+            rows={3}
+            fullWidth
+            variant='outlined'
+            onChange={e => {
+              setVision(e.target.value);
+            }}
+            onKeyPress={e => {handleKeyDown(e)}}
+            name='vision'
+            value={vision}
+          />
+        </Grid>
+      </Grid>
+      <Grid container direction="row" justify='center' alignItems='center' style={{marginTop: 12}}>
+        <Grid item xs={12} style={{marginBottom: 30}}>
+          <Tooltip ref={domRef} title="Add/Update" placement="right">  
+            <IconButton
+              onClick={e => {onSubmitHandler(e, "Vision updated!", "success")}} 
+              className={classes.fab}
+            >
+              <AddCircleIcon style={{fontSize: 60}}/>
+            </IconButton>
+          </Tooltip>
+        </Grid>
+      </Grid>
+      <Grid container direction="row" justify='center' alignItems='center' style={{marginTop: 12, marginBottom: 6}}>
+        <Grid item item xs={12} className={classes.visionStyle}>
           <Typography 
-            variant='body1'
-            style={{marginTop: 30, marginBottom: 300}}
+            variant='h5'
           >
             {sessionUser.vision}
           </Typography>
         </Grid>
       </Grid>
-      <SimpleSnackbar 
+      <Dialog
+        open={openVisionDialog}
+        onClose={handleCloseVisionDialog}
+        aria-labelledby="alert-vision-dialog"
+        aria-describedby="alert-vision-explanation"
+      >
+        <DialogTitle id="VisionDialogTitle">{"Vision"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="VisionDialogAlert">
+          Aristotle famously said, "We are what we repeatedly do." What if the reverse were also true? "We do what we repeatedly tell ourselves we are." In other words, we act out of who we perceive ourselves to be. Before you begin creating task lists, take a moment to create your own personal vision statement. Then let this vision influence the <Button role='link' className={classes.link} onClick={e => {navigatePage(e, 'category')}}>categories</Button> you create.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseVisionDialog} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <SimpleSnackbar
+        severity={severity}
+        setSeverity={setSeverity}
         snack={snack}
         openSnack={openSnack}
         handleOpenSnackBar={handleOpenSnackBar}
         handleCloseSnackBar={handleCloseSnackBar}
       />
-    </Container>
+
+    </div>
   );
 };
 

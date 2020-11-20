@@ -31,13 +31,14 @@ import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 
 const useStyles = makeStyles(theme => ({
   root: {
-    '& .MuiTextField-root': {
-      margin: theme.spacing(1),
-      width: '36ch',
-      color: theme.palette.text.primary,
-    },
     width: '100%',
     maxWidth: 840,
+    overflow: 'scroll',
+    '& .MuiTextField-root': {
+      margin: theme.spacing(1),
+      width: '33ch',
+      color: theme.palette.text.primary,
+    },
   },
   fab: {
     margin: theme.spacing(2),
@@ -49,19 +50,14 @@ const useStyles = makeStyles(theme => ({
   },
   layout: {
     flexGrow: 1,
-    overflow: 'hidden',
+    overflow: 'scroll',
     padding: theme.spacing(0, 3),
   },
   neutralIconStyle: {
     fontSize:24,
   },
-  paper: {
-    maxWidth: 840,
-    margin: `${theme.spacing(1)}px auto`,
-    padding: theme.spacing(3, 0),
-  },
   title: {
-    marginTop: theme.spacing(4),
+    margin: theme.spacing(4, 0, 2),
   },
   list: {
     marginBottom: '90px',
@@ -92,10 +88,40 @@ const Category = () => {
   const [load, setLoad] = useState(0);
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
+  const [severity, setSeverity] = useState('');
   const [openEdit, setOpenEdit] = useState(false);
   const [selectedColor, setSelectedColor] = useState('');
   const [openDeleteCategory, setOpenDeleteCategory] = useState(false);
 
+  useEffect(() => {
+    let isMounted = true;
+    let one = 'http://localhost:8000/api/users/one';
+    const requestOne = axios.get(one, { withCredentials: true });
+    requestOne
+      .then(response => {
+        if (isMounted) setSessionUserId(response.data.results._id);
+      })
+      .catch();
+    let two = 'http://localhost:8000/api/categories/user';
+    const requestTwo = axios.get(two, { withCredentials: true });
+    requestTwo
+      .then(response => {
+        if (isMounted) setAllCategories(response.data.results);
+      })
+      .catch();
+    axios
+      .all([requestOne, requestTwo])
+      .then(
+        axios.spread((...responses) => {
+          const responseOne = responses[0];
+          const responseTwo = responses[1];
+        })
+      )
+      .catch(() => {
+        navigate('/landing');
+      });
+      return () => { isMounted = false };
+  }, [load]);
 
   const handleChangeColor = (e) => {
     setSelectedColor(e.target.value);
@@ -111,8 +137,9 @@ const Category = () => {
     setOpenEdit(false);
   };
   
-  const handleOpenSnackBar = (snack) => {
+  const handleOpenSnackBar = (snack, severity) => {
     setSnack(snack); 
+    setSeverity(severity);
     setOpenSnack(true);
   };
 
@@ -145,14 +172,17 @@ const Category = () => {
     }
   };
 
-  const onSubmitHandler = (e, snack) => {
-    // e.preventDefault();
+  const onSubmitHandler = (e, snack, severity) => {
+    if (category.name === ''){
+      handleOpenSnackBar("Category cannot be blank!", "error")
+      return
+    }
     axios
       .post(`http://localhost:8000/api/categories/${sessionUserId}`, category, {
         withCredentials: true,
       })
       .then(res => {
-        handleOpenSnackBar(snack);
+        handleOpenSnackBar(snack, severity);
         setCategory({
           name: '',
           color: '',
@@ -167,35 +197,7 @@ const Category = () => {
       .catch();
   };
   
-  useEffect(() => {
-    let isMounted = true;
-    let one = 'http://localhost:8000/api/users/one';
-    const requestOne = axios.get(one, { withCredentials: true });
-    requestOne
-      .then(response => {
-        if (isMounted) setSessionUserId(response.data.results._id);
-      })
-      .catch();
-    let two = 'http://localhost:8000/api/categories/user';
-    const requestTwo = axios.get(two, { withCredentials: true });
-    requestTwo
-      .then(response => {
-        if (isMounted) setAllCategories(response.data.results);
-      })
-      .catch();
-    axios
-      .all([requestOne, requestTwo])
-      .then(
-        axios.spread((...responses) => {
-          const responseOne = responses[0];
-          const responseTwo = responses[1];
-        })
-      )
-      .catch(() => {
-        navigate('/landing');
-      });
-      return () => { isMounted = false };
-  }, [load]);
+  
 
   const removeFromDom = categoryId => {
     setAllCategories(allCategories.filter(category => category._id !== categoryId));
@@ -212,7 +214,7 @@ const Category = () => {
       .catch();
   };
 
-  const onPutHandler = (e, id, snack) => {
+  const onPutHandler = (e, id, snack, severity) => {
     category.color = selectedColor;
     axios
       .patch('http://localhost:8000/api/categories/color/' + id, category, {
@@ -220,8 +222,12 @@ const Category = () => {
       })
       .then(res => {
         if (res.data.message === 'success'){
-          handleOpenSnackBar(snack);
+          handleOpenSnackBar(snack, severity);
           handleCloseEdit();
+          setCategory({
+            name: '',
+            color: '',
+          });
         }
         let count = load;
         if (count >= 0) {
@@ -233,7 +239,7 @@ const Category = () => {
       .catch();
   };
 
-  const deleteCategory = (e, id, snack) => {
+  const deleteCategory = (e, id, snack, severity) => {
     axios
       .delete(`http://localhost:8000/api/categories/${id}`, {
         withCredentials: true,
@@ -241,7 +247,11 @@ const Category = () => {
       .then(res => {
         removeFromDom(id);
         handleCloseDeleteCategory();
-        handleOpenSnackBar(snack);
+        handleOpenSnackBar(snack, severity);
+        setCategory({
+          name: '',
+          color: '',
+        });
       }).catch();
   };
 
@@ -255,83 +265,69 @@ const Category = () => {
           Categories
         </Typography>
       </div>
-      <div 
-      className={classes.paper}
-      >
-        <form className={classes.root} noValidate autoComplete='off'>
-          <Grid container direction='row' justify='center' alignItems='center'>
-            <Grid item>
-              <TextField
-                id='category'
-                label='Add Category...'
-                multiline
-                rowsMax={2}
-                size='medium'
-                variant='outlined'
-                onChange={e => {
-                  onChangeHandler(e);
-                }}
-                onKeyPress={e => {handleKeyDown(e, "Category Created!")}}
-                name='name'
-                value={category.name}
-              />
-            </Grid>
-          </Grid>
-          <Grid container direction='row' justify='center' alignItems='center'>
-            <Grid item>
-              <Tooltip title="Add" placement="right">
-                <IconButton
-                  className={classes.fab}
-                  onClick={e => {
-                    onSubmitHandler(e, "Category Created!");
-                  }}
-                  >
-                  <AddCircleIcon fontSize='large' />
-                </IconButton>
-              </Tooltip>
-            </Grid>
-          </Grid>
-        </form>
-        <Grid container spacing={1}>
-          <Grid item xs={12}>
-            <div>
-              <List dense secondary="true" className={classes.list}>
-                {allCategories.map((category, i) =>
-                    <ListItem
-                      className={classes.listItem}
-                      key={i}
-                      button="true"
-                    >
-                      <Tooltip title="Edit" placement="left">
-                      <IconButton
-                        type='button'
-                        edge='end'
-                        onClick={e => {
-                          handleOpenEdit(e, category._id);
-                        }}
-                      >
-                        <LabelIcon
-                        className={classes.neutralIconStyle}
-                        style={{color:category.color}}
-                        />
-                      </IconButton>
-                      </Tooltip>
-                      <ListItemText
-                        disableTypography
-                        primary={<Typography style={{fontSize:15, color: category.color, marginLeft: 9}}>{category.name}</Typography>}
-                      />
-                      <Tooltip title="Delete Category?" placement="right">
-                        <IconButton edge='end' aria-label='delete' onClick={e => {handleOpenDeleteCategory(e, category._id)}}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </ListItem>
-                )}
-              </List>
-            </div>
-          </Grid>
+      <Grid container direction='row' justify='center' alignItems='center'>
+        <Grid item xs={12} className={classes.root}>
+          <TextField
+            style={{marginTop: 6}}
+            fullWidth
+            id='category'
+            label='Add Category...'
+            size='medium'
+            variant='outlined'
+            onChange={e => {
+              onChangeHandler(e);
+            }}
+            onKeyPress={e => {handleKeyDown(e, "Category Created!")}}
+            name='name'
+            value={category.name}
+          />
         </Grid>
-      </div>
+        <Grid item xs={12} className={classes.root}>
+          <Tooltip title="Add" placement="right">
+            <IconButton
+              className={classes.fab}
+              onClick={e => {
+                onSubmitHandler(e, "Category Created!", "success");
+              }}
+              >
+              <AddCircleIcon style={{fontSize: 60}}/>
+            </IconButton>
+          </Tooltip>
+          <List dense secondary="true" className={classes.list}>
+            {allCategories.map((category, i) =>
+                <ListItem
+                  className={classes.listItem}
+                  key={i}
+                  button="true"
+                >
+                  <Tooltip title="Edit" placement="left">
+                  <IconButton
+                    type='button'
+                    edge='end'
+                    onClick={e => {
+                      handleOpenEdit(e, category._id);
+                    }}
+                  >
+                    <LabelIcon
+                    className={classes.neutralIconStyle}
+                    style={{color:category.color}}
+                    />
+                  </IconButton>
+                  </Tooltip>
+                  <ListItemText
+                    disableTypography
+                    primary={<Typography style={{fontSize:15, color: category.color, marginLeft: 9}}>{category.name}</Typography>}
+                  />
+                  <Tooltip title="Delete Category?" placement="right">
+                    <IconButton edge='end' aria-label='delete' onClick={e => {handleOpenDeleteCategory(e, category._id)}}>
+                      <DeleteIcon style={{fontSize:24}}/>
+                    </IconButton>
+                  </Tooltip>
+                </ListItem>
+            )}
+          </List>
+        </Grid>
+      </Grid>
       <Dialog
         aria-labelledby='modal-edit-select'
         aria-describedby='choose-edit-category'
@@ -385,7 +381,7 @@ const Category = () => {
           Cancel
         </Button>
           <IconButton
-            onClick={e => {onPutHandler(e, category._id, "Category Updated!")}}
+            onClick={e => {onPutHandler(e, category._id, "Category Updated!", "success")}}
             aria-label='update category'
             color="primary"
           >
@@ -412,13 +408,15 @@ const Category = () => {
           </Button>
           <Button
             className={classes.error} 
-            onClick={e => {deleteCategory(e, category._id, "Category successfully deleted.")}}>
+            onClick={e => {deleteCategory(e, category._id, "Category successfully deleted.", "success")}}>
             Delete Category
           </Button>
         </DialogActions>
       </Dialog>
       <SimpleSnackbar 
         snack={snack}
+        severity={severity}
+        setSeverity={setSeverity}
         openSnack={openSnack}
         handleOpenSnackBar={handleOpenSnackBar}
         handleCloseSnackBar={handleCloseSnackBar} 

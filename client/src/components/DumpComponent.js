@@ -8,26 +8,24 @@ import IconButton from '@material-ui/core/IconButton';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
+import SimpleSnackbar from './SimpleSnackBar';
 // Material-ui core icons:
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 
 const useStyles = makeStyles(theme => ({
   root: {
+    maxWidth: 840,
+    width: '100%',
+    overflow: 'hidden',
     '& .MuiTextField-root': {
       margin: theme.spacing(1),
-      width: '36ch',
-      maxWidth: '100%',
+      maxWidth: '33ch',
       color: theme.palette.text.primary,
     },
   },
   fab: {
     margin: theme.spacing(2),
     color: theme.palette.primary.main,
-  },
-  layout: {
-    flexGrow: 1,
-    overflow: 'hidden',
-    padding: theme.spacing(0, 3),
   },
   paper: {
     maxWidth: 500,
@@ -58,6 +56,22 @@ const DumpComponent = props => {
     owner: '',
     priority: 0,
   });
+  const [snack, setSnack] = useState('');
+  const [openSnack, setOpenSnack] = useState('');
+  const [severity, setSeverity] = useState('');
+
+  const handleOpenSnackBar = (snack, severity) => {
+    setOpenSnack(true);
+    setSnack(snack);
+    setSeverity(severity);
+  };
+
+  const handleCloseSnackBar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnack(false);
+  };
 
   const onChangeHandler = e => {
     setTask({
@@ -73,8 +87,10 @@ const DumpComponent = props => {
     }
   }
   // Create Task 
-  const onSubmitHandler = e => {
-    e.preventDefault();
+  const onSubmitHandler = (e) => {
+    if (task.name === ''){
+      handleOpenSnackBar("You have to enter something!", "error")
+    }
     axios
       .post(`http://localhost:8000/api/tasks/${sessionUserId}`, task, {
         withCredentials: true,
@@ -101,43 +117,48 @@ const DumpComponent = props => {
   };
 
   return (
-    <div className={classes.layout}>
+    <div>
       <CssBaseline />
-      <form className={classes.root} noValidate autoComplete='off'>
-        <Grid className={classes.dump} container direction='row' justify='center' alignItems='center'>
-          <Grid item>
-            <TextField
-              id='dump'
-              label='Dump...'
-              multiline
-              rowsMax={2}
-              variant='outlined'
-              onChange={e => {
-                onChangeHandler(e);
+      <Grid container direction='row' justify='center' alignItems='center'>
+        <Grid item xs={12} className={classes.root}>
+          <TextField
+            style={{marginTop: 6}}
+            fullWidth
+            id='dump'
+            label='Dump...'
+            variant='outlined'
+            onChange={e => {
+              onChangeHandler(e);
+            }}
+            onKeyPress={e => {handleKeyDown(e)}}
+            name='name'
+            value={task.name}
+          />
+        </Grid>
+      </Grid>
+      <Grid className={classes.dump} container direction='row' justify='center' alignItems='center'>
+        <Grid item>
+          <Tooltip ref={domRef} title="Add" placement="right">
+            <IconButton
+              className={classes.fab}
+              onClick={e => {
+                onSubmitHandler(e);
               }}
-              onKeyPress={handleKeyDown}
-              name='name'
-              value={task.name}
-            />
-          </Grid>
+              >
+              <AddCircleIcon style={{fontSize: 60}}/>
+            </IconButton>
+          </Tooltip>
+        
         </Grid>
-        <Grid className={classes.dump} container direction='row' justify='center' alignItems='center'>
-          <Grid item>
-            <Tooltip ref={domRef} title="Add" placement="right">
-              <IconButton
-                className={classes.fab}
-                onClick={e => {
-                  onSubmitHandler(e);
-                }}
-
-                >
-                <AddCircleIcon style={{fontSize: 60}}/>
-              </IconButton>
-            </Tooltip>
-          
-          </Grid>
-        </Grid>
-      </form>
+      </Grid>
+      <SimpleSnackbar
+        severity={severity}
+        setSeverity={setSeverity}
+        snack={snack}
+        openSnack={openSnack}
+        handleOpenSnackBar={handleOpenSnackBar}
+        handleCloseSnackBar={handleCloseSnackBar}
+      />
     </div>
   );
 };

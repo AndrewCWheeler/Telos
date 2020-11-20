@@ -207,10 +207,12 @@ const PersistentDrawer = (props) => {
   const [sessionUserFirstName, setSessionUserFirstName] = useState('');
   const [firstInitial, setFirstInitial] = useState('');
   const [snack, setSnack] = useState('');
+  const [severity, setSeverity] = useState('');
   
-  const handleOpenSnackBar = (snack) => {
+  const handleOpenSnackBar = (snack, severity) => {
     setOpenSnack(true);
     setSnack(snack);
+    setSeverity(severity);
   };
 
   const handleCloseSnackBar = (event, reason) => {
@@ -286,7 +288,7 @@ const PersistentDrawer = (props) => {
         <Typography>
           <Link
           className={classes.link}
-          onClick={e => {logoutUser(e, "Successfully logged out!")}}
+          onClick={e => {logoutUser(e, "Successfully logged out!", "info")}}
           >
             Logout
           </Link>
@@ -508,6 +510,7 @@ const PersistentDrawer = (props) => {
       </Drawer>
       <Snackbar 
         snack={snack}
+        severity={severity}
         openSnack={openSnack}
         handleOpenSnackBar={handleOpenSnackBar}
         handleCloseSnackBar={handleCloseSnackBar}

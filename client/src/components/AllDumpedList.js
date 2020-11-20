@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 // Material-ui core components:
 import Backdrop from '@material-ui/core/Backdrop';
 import Button from '@material-ui/core/Button';
-import Container from '@material-ui/core/Container';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -89,7 +88,7 @@ const AllDumpedList = props => {
     onChangeChunkHandler,
     removeFromDom,
     onPatchHandler,
-    selectedObject,
+    selectedCategory,
     onChangeHandler,
     onPatchEditNameHandler,
 
@@ -196,7 +195,7 @@ const AllDumpedList = props => {
             Chunk...
           </InputLabel>
           <Select
-            value={selectedObject}
+            value={selectedCategory}
             onChange={e => {
               onChangeChunkHandler(e);
             }}
@@ -204,7 +203,7 @@ const AllDumpedList = props => {
             label='Chunk...'
             name='categoryObject'
             >
-            <MenuItem aria-label='None' value=''><em>None</em></MenuItem>
+            <MenuItem aria-label='None' selected value=''><em>None</em></MenuItem>
             {allCategories.map((category, catIdx) => 
               <MenuItem
                 key={catIdx}
@@ -233,7 +232,7 @@ const AllDumpedList = props => {
           className={classes.icon}
           aria-label='update task'
           onClick={e => {
-            onPatchHandler(e, task._id, selectedObject, 'Task Chunked!');
+            onPatchHandler(e, task._id, selectedCategory, 'Task Chunked!', "success");
           }}
           >
           <LibraryAddIcon />

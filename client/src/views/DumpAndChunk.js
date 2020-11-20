@@ -29,11 +29,12 @@ const DumpAndChunk = () => {
   const [load, setLoad] = useState(0);
   const [allTasks, setAllTasks] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
-  const [selectedObject, setSelectedObject] = useState({});
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [sessionUserId, setSessionUserId] = useState('');
   const [open, setOpen] = useState(false);
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
+  const [severity, setSeverity] = useState('');
   const [task, setTask] = useState({
     name: '',
     category: '',
@@ -46,9 +47,10 @@ const DumpAndChunk = () => {
     owner: '',
   });
 
-  const handleOpenSnackBar = (snack) => {
+  const handleOpenSnackBar = (snack, severity) => {
     setOpenSnack(true);
     setSnack(snack); 
+    setSeverity(severity)
   };
 
   const handleCloseSnackBar = (event, reason) => {
@@ -98,7 +100,7 @@ const DumpAndChunk = () => {
           const responseThree = responses[2];
         })
       )
-      .catch(errors => {
+      .catch(() => {
         navigate('/landing');
       });
       return () => { isMounted = false }
@@ -123,17 +125,20 @@ const DumpAndChunk = () => {
     setTask({
       ...task,
       owner: sessionUserId,
-      priority: 3,
       [e.target.name]: e.target.value,
     });
   };
 
   const onChangeChunkHandler = (e) => {
-    setSelectedObject(e.target.value);
+    setSelectedCategory(e.target.value);
   };
 
-  const onPatchHandler = (e, taskId, cat, snack) => {
+  const onPatchHandler = (e, taskId, cat, snack, severity) => {
     // Assign arguments to applicable targets:
+    if (selectedCategory === ''){
+      handleOpenSnackBar("You must select a category!", "warning")
+      return
+    }
     let catId = '';
     catId = cat._id;
     task.labelIdentity = cat._id;
@@ -145,7 +150,7 @@ const DumpAndChunk = () => {
     requestOne
       .then(res => {
         if(res.data.message === 'success'){
-          handleOpenSnackBar(snack);
+          handleOpenSnackBar(snack, severity);
           removeFromDom(taskId);
           handleClose();
         }
@@ -209,14 +214,16 @@ const DumpAndChunk = () => {
         setAllTasks={setAllTasks}
         allCategories={allCategories}
         removeFromDom={removeFromDom}
-        selectedObject={selectedObject}
-        setSelectedObject={setSelectedObject}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
         onPatchHandler={onPatchHandler}
         onChangeHandler={onChangeHandler}
         onChangeChunkHandler={onChangeChunkHandler}
         onPatchEditNameHandler={onPatchEditNameHandler}
       />
       <SimpleSnackbar 
+        severity={severity}
+        setSeverity={setSeverity}
         snack={snack}
         openSnack={openSnack}
         handleOpenSnackBar={handleOpenSnackBar}
