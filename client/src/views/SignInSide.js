@@ -107,12 +107,14 @@ const SignInSide = () => {
       .post('http://localhost:8000/api/login', userLogin, {
         withCredentials: true,
       })
-      .then(() => {
+      .then(res => {
+        if (res.data.message === 'success'){
           setUserLogin({
             email: '',
             password: '',
           });
-          navigate('/');
+          navigate('/dump');
+        }
       })
       .catch(() => {
         handleOpenSnackBar("Email and password do not match!", "error");

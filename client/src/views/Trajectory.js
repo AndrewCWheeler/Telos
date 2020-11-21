@@ -1,5 +1,4 @@
-import React, {useState, useEffect} from 'react';
-import axios from 'axios';
+import React, {useEffect} from 'react';
 import { navigate } from '@reach/router';
 import { Radar }  from 'react-chartjs-2';
 import { makeStyles } from '@material-ui/core/styles';
@@ -24,49 +23,22 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const Trajectory = () => {
-  const [sessionUserId, setSessionUserId] = useState('');
-  const [allTasks, setAllTasks] = useState([]);
-  const [allCategories, setAllCategories] = useState([]);
-  const [load, setLoad] = useState('');
+const Trajectory = props => {
+  const { navigatePage, load, setLoad, navValue, setNavValue, allTasks, allCategories } = props;
 
   const classes = useStyles();
 
   useEffect(() => {
-    let isMounted = true;
-    let one = 'http://localhost:8000/api/users/one';
-    const requestOne = axios.get(one, { withCredentials: true });
-    requestOne
-      .then(response => {
-        if (isMounted) setSessionUserId(response.data.results._id);
-      })
-      .catch();
-    let two = 'http://localhost:8000/api/tasks/user';
-    const requestTwo = axios.get(two, { withCredentials: true });
-    requestTwo
-      .then(response => {
-        if (isMounted) setAllTasks(response.data.results);
-      })
-      .catch();
-    let three = 'http://localhost:8000/api/categories/user';
-    const requestThree = axios.get(three, {withCredentials: true });
-    requestThree
-      .then(response => {
-        if (isMounted) setAllCategories(response.data.results);
-      })
-      .catch();
-    axios
-      .all([requestOne, requestTwo, requestThree])
-      .then(
-        axios.spread((...responses) => {
-          const responseOne = responses[0];
-          const responseTwo = responses[1];
-          const responseThree = responses[2];
-        })
-      )
-      .catch(()=>navigate('/landing'));
-      return () => { isMounted = false }
-  }, [load]);
+    if (navValue === 'trajectory'){
+      load === 1 ? (setLoad(0)) : setLoad(1);
+      return
+    }
+    else if (navValue !== 'trajectory'){
+      load === 1 ? (setLoad(0)) : setLoad(1);
+      setNavValue('trajectory');
+    }
+    return
+  }, []);
 
   const getCategoryNames = (arr) => {
     let names = [];

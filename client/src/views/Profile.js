@@ -168,13 +168,9 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const Profile = () => {
+const Profile = props => {
   const classes = useStyles();
-  const [sessionUser, setSessionUser] = useState({});
-  const [allTasks, setAllTasks] = useState([]);
-  const [allCategories, setAllCategories] = useState([]);
-  // const [secondary, setSecondary] = useState(true);
-  const [firstInitial, setFirstInitial] = useState('');
+  const { navigatePage, navValue, allTasks, setAllTasks, allCategories, sessionUser, firstInitial } = props;
   const [openDeleteUser, setOpenDeleteUser] = useState(false);
   const [openDeleteTask, setOpenDeleteTask] = useState(false);
   const [task, setTask] = useState({
@@ -192,44 +188,6 @@ const Profile = () => {
   const [snack, setSnack] = useState('');
   const [severity, setSeverity] = useState('');
   
-  useEffect(() => {
-    let isMounted = true;
-    let one = 'http://localhost:8000/api/users/one';
-    const requestOne = axios.get(one, { withCredentials: true });
-    requestOne
-      .then(response => {
-        if (isMounted) {
-          setSessionUser(response.data.results);
-          setFirstInitial(response.data.results.firstName.charAt());
-        }
-      })
-      .catch();
-    let two = 'http://localhost:8000/api/tasks/user';
-    const requestTwo = axios.get(two, { withCredentials: true });
-    requestTwo
-      .then(response => {
-        if (isMounted) setAllTasks(response.data.results);
-      })
-      .catch();
-    let three = 'http://localhost:8000/api/categories/user';
-    const requestThree = axios.get(three, {withCredentials: true });
-    requestThree
-      .then(response => {
-        if (isMounted) setAllCategories(response.data.results);
-      }).catch();
-    axios
-      .all([requestOne, requestTwo, requestThree])
-      .then(
-        axios.spread((...responses) => {
-          const responseOne = responses[0];
-          const responseTwo = responses[1];
-          const responseThree = responses[2];;
-        })
-      )
-      .catch(() => {navigate('/landing')});
-      return () => { isMounted = false };
-  }, []);
-
   const handleOpenSnackBar = (snack, severity) => {
     setOpenSnack(true);
     setSnack(snack);

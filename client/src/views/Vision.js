@@ -59,28 +59,14 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Vision = props => {
+  const { navigatePage, navValue, sessionUser } = props;
   const domRef = useRef();
   const classes = useStyles();
-  const { navigatePage } = props;
-  const [sessionUser, setSessionUser] = useState('');
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
   const [severity, setSeverity] = useState('');
   const [vision, setVision] = useState('');
   const [openVisionDialog, setOpenVisionDialog] = useState(false);
-
-  
-  useEffect(() => {
-    let isMounted = true;
-    axios.get('http://localhost:8000/api/users/one', {withCredentials: true})
-    .then(res => {
-      if (res.data.message === 'success' && isMounted){
-        setSessionUser(res.data.results);
-        setVision('');
-      }
-    }).catch(()=>{navigate('/landing')});
-    return () => { isMounted = false };
-  }, []);
 
   const handleOpenSnackBar = (snack, severity) => {
     setOpenSnack(true);

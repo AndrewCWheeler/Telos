@@ -46,7 +46,7 @@ export default function HeaderLinks(props) {
   const classes = useStyles();
   return (
     <List className={classes.list + " " + classes.mlAuto}>
-      <ListItem button="true" className={classes.listItem} >
+      <ListItem button className={classes.listItem} >
           <Link 
             className={classes.navLink}
             style={{marginRight: 6}}

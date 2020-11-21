@@ -72,7 +72,7 @@ const App = () => {
       >
         <CssBaseline />
         <Router>
-          <LandingPage path='/landing' />
+          <LandingPage path='/' />
           <SignInSide path='/signin' />
           <SignUp path='/signup' />
           <Main 

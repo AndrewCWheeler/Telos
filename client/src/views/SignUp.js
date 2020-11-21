@@ -11,19 +11,6 @@ import Typography from '@material-ui/core/Typography';
 // For seamless front-end validations that work with material-ui components:
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
-// function Copyright() {
-//   return (
-//     <Typography variant='body2' color='textSecondary' align='center'>
-//       {'Copyright © '}
-//       <Link color='inherit' to='https://material-ui.com/'>
-//         Telos.com
-//       </Link>{' '}
-//       {new Date().getFullYear()}
-//       {'.'}
-//     </Typography>
-//   );
-// }
-
 const useStyles = makeStyles(theme => ({
   root: {
     '& .MuiTextField-root': {
@@ -94,9 +81,13 @@ export default function SignUp() {
       .then(res => {
         if (res.data.message === 'success') {
         }
-        navigate('/');
+        navigate('/dump');
       })
-      .catch();
+      .catch(res => {
+        if (res.data.message === 'error') {
+          navigate('/');
+        }
+      });
   };
 
   ValidatorForm.addValidationRule('isPasswordMatch', (value) => {

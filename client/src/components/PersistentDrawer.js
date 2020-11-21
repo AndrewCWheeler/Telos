@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect } from 'react';
 import axios from 'axios';
 import { navigate } from '@reach/router';
 import clsx from 'clsx';
@@ -194,18 +194,14 @@ function HideOnScroll(props) {
 }
 
 const PersistentDrawer = (props) => {
-  const domRef = useRef();
   const classes = useStyles();
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-  const {toggleDarkMode, navigatePage, handleDrawerOpen, handleDrawerClose, open, setOpen, navValue} = props;
+  const {toggleDarkMode, navigatePage, sessionUserFirstName, firstInitial, handleDrawerOpen, handleDrawerClose, open, setOpen, navValue} = props;
   const [openSnack, setOpenSnack] = useState(false);
-  const [sessionUserId, setSessionUserId] = useState('');
-  const [sessionUserFirstName, setSessionUserFirstName] = useState('');
-  const [firstInitial, setFirstInitial] = useState('');
   const [snack, setSnack] = useState('');
   const [severity, setSeverity] = useState('');
   
@@ -243,20 +239,6 @@ const PersistentDrawer = (props) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
-  useEffect(() => {
-    let isMounted = true;
-    axios.get('http://localhost:8000/api/users/one', {withCredentials: true})
-      .then(res => {
-        if (res.data.message === 'success' && isMounted){
-          setSessionUserId(res.data.results._id);
-          setSessionUserFirstName(res.data.results.firstName);
-          setFirstInitial(res.data.results.firstName.charAt());
-        }
-      })
-      .catch();
-      return ()=> { isMounted = false };
-  }, []);
-
   const logoutUser = (e, snack) => {
     axios
       .get('http://localhost:8000/api/users/logout', { withCredentials: true })
@@ -264,7 +246,7 @@ const PersistentDrawer = (props) => {
         if (res.data.message === 'success') {
           handleOpenSnackBar(snack);
         }
-        navigate('/landing');
+        navigate('/');
       })
       .catch();
   };
@@ -436,7 +418,6 @@ const PersistentDrawer = (props) => {
   
 
   return (
-    <RootRef rootRef={domRef}>
     <div className={classes.root}>
       <CssBaseline />
       <div className={classes.grow}>
@@ -516,7 +497,6 @@ const PersistentDrawer = (props) => {
         handleCloseSnackBar={handleCloseSnackBar}
       />
     </div>
-    </RootRef>
   );
 }
 

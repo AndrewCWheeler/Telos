@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { navigate } from '@reach/router';
 // Material-ui core components:
@@ -16,6 +16,7 @@ import IconButton from '@material-ui/core/IconButton';
 import InputLabel from '@material-ui/core/InputLabel';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import { makeStyles } from '@material-ui/core/styles';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -23,7 +24,6 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
-import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 // Material-ui icons:
 import EditIcon from '@material-ui/icons/Edit';
@@ -70,14 +70,14 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.primary.main,
   },
   list: {
-    marginBottom: '90px',
+    marginBottom: 90,
   },
   listItem: {
     maxHeight: '100%',
+    height: 75,
     width: '100%',
     backgroundColor: theme.palette.background.default,
-    borderBottom: '1px solid #e1dfdc',
-    paddingLeft: 0,
+    borderBottom: `.5px solid ${theme.palette.background.paper}`,
   },
   primaryIconStyle: {
     fontSize:24,
@@ -86,6 +86,17 @@ const useStyles = makeStyles(theme => ({
   radioStyle: {
     justifyContent: 'center',
     fontSize:18,
+  },
+  text: {
+    color: theme.palette.text.primary,
+    display: 'inline-block',
+    overflowX: 'scroll',
+    overflowY: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    width: '120px',
+    height: '100%',
+    marginTop: 12,
   },
   textPrimary: {
     color: theme.palette.text.primary,
@@ -116,11 +127,11 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const Schedule = () => {
+const Schedule = props => {
   const classes = useStyles();
-  const domRef = useRef();
+  const { navigatePage, navValue, setNavValue, allTasks, setAllTasks, allCategories, sessionUserId, load, setLoad } = props;
+
   // STATES
-  const [load, setLoad] = useState(0);
   const [task, setTask] = useState({
     name: '',
     category: '',
@@ -132,12 +143,9 @@ const Schedule = () => {
     owner: '',
     priority: 0,
   });
-  const [allTasks, setAllTasks] = useState([]);
-  const [allCategories, setAllCategories] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [sessionUserId, setSessionUserId] = useState('');
   const [openCal, setOpenCal] = useState(false);
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
@@ -145,46 +153,16 @@ const Schedule = () => {
   const [openEdit, setOpenEdit] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
-    let one = 'http://localhost:8000/api/users/one';
-    const requestOne = axios.get(one, { withCredentials: true });
-    requestOne
-      .then(response => {
-        if (isMounted) setSessionUserId(response.data.results._id);
-      })
-      .catch();
-    let two = 'http://localhost:8000/api/tasks/user';
-    const requestTwo = axios.get(two, { withCredentials: true });
-    requestTwo
-      .then(response => {
-        if (response.data.message === 'success' && isMounted){
-          let orderedTasks = response.data.results;
-          orderedTasks.sort((a,b) => a.priority - b.priority)
-          setAllTasks(orderedTasks);
-        }
-      })
-      .catch();
-    let three = 'http://localhost:8000/api/categories/user';
-    const requestThree = axios.get(three, {withCredentials: true });
-    requestThree
-      .then(response => {
-        if (isMounted) setAllCategories(response.data.results);
-      })
-      .catch();
-    axios
-      .all([requestOne, requestTwo, requestThree])
-      .then(
-        axios.spread((...responses) => {
-          const responseOne = responses[0];
-          const responseTwo = responses[1];
-          const responseThree = responses[2];
-        })
-      )
-      .catch(errors => {
-        navigate('/landing');
-      });
-      return () => { isMounted = false }
-  }, [load]);
+    if (navValue === 'schedule'){
+      load === 1 ? (setLoad(0)) : setLoad(1);
+      return
+    }
+    else if (navValue !== 'schedule'){
+      load === 1 ? (setLoad(0)) : setLoad(1);
+      setNavValue('schedule');
+    }
+    return
+  }, []);
 
   // DIALOG AND SNACK HANDLERS
   const handleOpenSnackBar = (snack, severity) => {
@@ -259,20 +237,14 @@ const Schedule = () => {
   };
   // Assign priority to tasks according to DOM state index and update priority property in db:
   const assignPriority = (arr) => {
-    if(load === 0){
-      return arr;
-    }
-    else {
     for (let i=0; i<arr.length; i++){
       arr[i].priority = i;
     }
     axios.put('http://localhost:8000/api/bulk/' + sessionUserId, arr, {withCredentials: true})
-    .then(response => {
-    })
+    .then()
     .catch();
     return arr;
-  }
-  }
+    }
   const SortedTasks = assignPriority(FilteredTasks).sort((a, b) => a.priority - b.priority);
 
   // onCHANGE HANDLERS
@@ -295,7 +267,7 @@ const Schedule = () => {
 
   const onSelectHandler = e => {
     setSelectedCategory(e.target.value);
-    setLoad(1);
+    load === 1 ? (setLoad(0)) : setLoad(1);
   };
 
   // GET and PATCH axios calls:
@@ -316,8 +288,7 @@ const Schedule = () => {
       .patch('http://localhost:8000/api/tasks/' + id, task, {
         withCredentials: true,
       })
-      .then(() => {
-      })
+      .then()
       .catch();
   };
 
@@ -334,16 +305,12 @@ const Schedule = () => {
           handleCloseEdit();
           handleOpenSnackBar("Task re-chunked!", "success");
         }
-        let count = load;
-          if (count >= 0) {
-          count++;
-          setLoad(count);
-          }
+      load === 1 ? (setLoad(0)) : setLoad(1);
       })
       .catch();
   };
 
-  const onPatchUnChunkHandler = (e, id) => {
+  const onPatchUnChunkHandler = (e, id, snack, severity) => {
     task.category = '';
     task.chunked = false;
     axios
@@ -354,7 +321,7 @@ const Schedule = () => {
         if (res.data.message === 'success') {
           removeFromDom(id);
           handleCloseEdit();
-          handleOpenSnackBar("Task un-chunked!", "success");
+          handleOpenSnackBar(snack, severity);
         }
       })
       .catch();
@@ -372,6 +339,7 @@ const Schedule = () => {
           removeFromDom(id);
           handleCloseCal();
           handleOpenSnackBar("Task scheduled!", "success");
+          load === 1 ? (setLoad(0)) : setLoad(1);
         };
       })
       .catch();
@@ -394,7 +362,7 @@ const Schedule = () => {
       </Typography>
       </div>
       <Grid container direction='row' justify='center' alignItems='center'>
-        <Grid item xs={12} className={classes.root}>
+        <Grid item xs={12} wrap="nowrap" className={classes.root}>
           <FormControl component="fieldset" className={classes.formControl}>
             <RadioGroup 
               row aria-label="category" 
@@ -444,7 +412,7 @@ const Schedule = () => {
                           {provided => (
                             <ListItem
                               className={classes.listItem}
-                              button
+                              
                               ref={provided.innerRef}
                               id='ScheduleTask'
                               {...provided.draggableProps}
@@ -452,23 +420,17 @@ const Schedule = () => {
                               key={task._id}
                               index={i}
                             >
-                              <Tooltip 
-                                ref={domRef}
-                                title="Open Calendar" 
-                                placement="left">
-                                  <IconButton
-                                    // edge='start'
-                                    type='button'
-                                    onClick={e => {handleOpenCal(e, task._id)}}
-                                  >
-                                    <EventIcon className={classes.neutralIconStyle} />
-                                  </IconButton>
-                              </Tooltip>
+                              <ListItemIcon button style={{marginRight: -24, marginTop: -30, cursor: 'pointer'}}
+                                onClick={e => {handleOpenCal(e, task._id)}}
+                              >
+                                <EventIcon className={classes.neutralIconStyle} />
+                              </ListItemIcon>
                               {allCategories.map((category, catIdx) => 
                                 task.category === category.name ?
                                 (
                               <ListItemText
                               key={catIdx}
+                              className={classes.text}
                               disableTypography
                               textoverflow='ellipsis'
                               overflow='hidden'
@@ -478,7 +440,6 @@ const Schedule = () => {
                               ) : null
                               )}
                               <div>
-                              <Tooltip title="Edit Task" placement="right">
                                 <IconButton
                                   type='button'
                                   edge='end'
@@ -490,7 +451,6 @@ const Schedule = () => {
                                   className={classes.neutralIconStyle}
                                   />
                                 </IconButton>
-                              </Tooltip>
                               </div>
                             </ListItem>
                           )}
@@ -502,9 +462,9 @@ const Schedule = () => {
                 )}
               </Droppable>
             </DragDropContext>
-        {/* Edit Task Dialog */}
         </Grid>
       </Grid>
+      {/* Edit Task Dialog */}
       <Dialog
         aria-labelledby='modal-edit-select'
         aria-describedby='choose-edit-category'
@@ -520,15 +480,14 @@ const Schedule = () => {
         <DialogContent
           className={classes.dialogStyle}
         >
-          <Tooltip title="Unchunk" placement="top">
-            <IconButton 
-            className={classes.undo}
-            role='button'
-            onClick={e => {onPatchUnChunkHandler(e, task._id)}}
-            >
-              <Undo />
-            </IconButton>
-          </Tooltip>
+          <Button 
+          className={classes.undo}
+          role='button'
+          onClick={e => {onPatchUnChunkHandler(e, task._id, "Task un-chunked!", "success")}}
+          >
+            <Undo />
+            Un-chunk
+          </Button>
           <Typography className={classes.title}>
             {task.name}
           </Typography>

@@ -60,14 +60,26 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(4, 0, 2),
   },
   list: {
-    marginBottom: '90px',
+    marginBottom: 90,
+    marginTop: 30,
   },
   listItem: {
     maxHeight: '100%',
+    height: 75,
     width: '100%',
     backgroundColor: theme.palette.background.default,
-    borderBottom: '1px solid #e1dfdc',
-    paddingLeft: 0,
+    borderBottom: `.5px solid ${theme.palette.background.paper}`,
+  },
+  text: {
+    color: theme.palette.text.primary,
+    display: 'inline-block',
+    overflowX: 'scroll',
+    overflowY: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    width: '120px',
+    height: '100%',
+    marginTop: 20,
   },
   formControl: {
     maxWidth: 300,
@@ -77,15 +89,13 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const Category = () => {
+const Category = (props) => {
+  const { navigatePage, navValue, setNavValue, sessionUserId, allCategories, setAllCategories, load, setLoad } = props;
   const classes = useStyles();
-  const [sessionUserId, setSessionUserId] = useState('');
   const [category, setCategory] = useState({
     name: '',
     color: '',
   });
-  const [allCategories, setAllCategories] = useState([]);
-  const [load, setLoad] = useState(0);
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
   const [severity, setSeverity] = useState('');
@@ -93,39 +103,8 @@ const Category = () => {
   const [selectedColor, setSelectedColor] = useState('');
   const [openDeleteCategory, setOpenDeleteCategory] = useState(false);
 
-  useEffect(() => {
-    let isMounted = true;
-    let one = 'http://localhost:8000/api/users/one';
-    const requestOne = axios.get(one, { withCredentials: true });
-    requestOne
-      .then(response => {
-        if (isMounted) setSessionUserId(response.data.results._id);
-      })
-      .catch();
-    let two = 'http://localhost:8000/api/categories/user';
-    const requestTwo = axios.get(two, { withCredentials: true });
-    requestTwo
-      .then(response => {
-        if (isMounted) setAllCategories(response.data.results);
-      })
-      .catch();
-    axios
-      .all([requestOne, requestTwo])
-      .then(
-        axios.spread((...responses) => {
-          const responseOne = responses[0];
-          const responseTwo = responses[1];
-        })
-      )
-      .catch(() => {
-        navigate('/landing');
-      });
-      return () => { isMounted = false };
-  }, [load]);
-
   const handleChangeColor = (e) => {
     setSelectedColor(e.target.value);
-    // onChangeHandler(e);
   };
 
   const handleOpenEdit = (e, id) => {
@@ -197,8 +176,6 @@ const Category = () => {
       .catch();
   };
   
-  
-
   const removeFromDom = categoryId => {
     setAllCategories(allCategories.filter(category => category._id !== categoryId));
   };

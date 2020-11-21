@@ -23,14 +23,12 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const DumpAndChunk = () => {
+const DumpAndChunk = props => {
   const classes = useStyles();
-
-  const [load, setLoad] = useState(0);
-  const [allTasks, setAllTasks] = useState([]);
-  const [allCategories, setAllCategories] = useState([]);
+  const [openDumpSubmit, setOpenDumpSubmit] = useState(false);
+  const [openDumpEdit, setOpenDumpEdit] = useState(false);
+  const { navigatePage, navValue, setNavValue, allTasks, setAllTasks, allCategories, sessionUserId, load, setLoad } = props;
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [sessionUserId, setSessionUserId] = useState('');
   const [open, setOpen] = useState(false);
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
@@ -46,6 +44,43 @@ const DumpAndChunk = () => {
     priority: 0,
     owner: '',
   });
+
+  useEffect(() => {
+    if (navValue === 'dump'){
+      load === 1 ? (setLoad(0)) : setLoad(1);
+      return
+    }
+    else if (navValue !== 'dump'){
+      load === 1 ? (setLoad(0)) : setLoad(1);
+      setNavValue('dump');
+    }
+    return
+  }, []);
+
+  const handleOpenDumpSubmit = () => {
+    setOpenDumpSubmit(true);
+  }
+  const handleCloseDumpSubmit = () => {
+    setOpenDumpSubmit(false);
+  }
+
+  const handleOpenDumpEdit = (e, id) => {
+    onClickHandler(e, id);
+    setOpenDumpEdit(true);
+  }
+  const handleCloseDumpEdit = () => {
+    setOpenDumpEdit(false);
+    setTask({
+      name: '',
+      category: '',
+      chunked: false,
+      scheduled: false,
+      scheduledAt: '',
+      completed: false,
+      completedAt: '',
+      owner: '',
+    });
+  }
 
   const handleOpenSnackBar = (snack, severity) => {
     setOpenSnack(true);
@@ -64,47 +99,20 @@ const DumpAndChunk = () => {
     onClickHandler(e, id);
     setOpen(true);
   };
-  const handleClose = () => {
+  const handleClose = (e) => {
     setOpen(false);
+    setTask({
+      name: '',
+    category: '',
+    chunked: false,
+    scheduled: false,
+    scheduledAt: '',
+    completed: false,
+    completedAt: '',
+    priority: 0,
+    owner: '',
+    });
   };
-
-  useEffect(() => {
-    let isMounted = true;
-    let one = 'http://localhost:8000/api/users/one';
-    const requestOne = axios.get(one, { withCredentials: true });
-    requestOne
-      .then(response => {
-        if (isMounted) setSessionUserId(response.data.results._id);
-      })
-      .catch();
-    let two = 'http://localhost:8000/api/tasks/user';
-    const requestTwo = axios.get(two, { withCredentials: true });
-    requestTwo
-      .then(response => {
-        if (isMounted) setAllTasks(response.data.results);
-      })
-      .catch();
-    let three = 'http://localhost:8000/api/categories/user';
-    const requestThree = axios.get(three, {withCredentials: true });
-    requestThree
-      .then(response => {
-        if (isMounted) setAllCategories(response.data.results);
-      })
-      .catch();
-    axios
-      .all([requestOne, requestTwo, requestThree])
-      .then(
-        axios.spread((...responses) => {
-          const responseOne = responses[0];
-          const responseTwo = responses[1];
-          const responseThree = responses[2];
-        })
-      )
-      .catch(() => {
-        navigate('/landing');
-      });
-      return () => { isMounted = false }
-  }, [load]);
 
   const removeFromDom = taskId => {
     setAllTasks(allTasks.filter(task => task._id !== taskId));
@@ -132,6 +140,41 @@ const DumpAndChunk = () => {
   const onChangeChunkHandler = (e) => {
     setSelectedCategory(e.target.value);
   };
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      onSubmitHandler(e);
+    }
+  }
+  const handleKeyDownEdit = (e, id) => {
+    if (e.key === 'Enter') {
+      onPatchEditNameHandler(e, id);
+    }
+  }
+
+  const onSubmitHandler = (e) => {
+    if (task.name === ''){
+      handleOpenSnackBar("You have to enter something!", "error")
+    }
+    axios
+      .post(`http://localhost:8000/api/tasks/${sessionUserId}`, task, {
+        withCredentials: true,
+      })
+      .then(res => {
+        setTask({
+          name: '',
+          category: '',
+          chunked: false,
+          scheduled: false,
+          scheduledAt: '',
+          completed: false,
+          completedAt: '',
+          owner: '',
+        });
+        handleCloseDumpSubmit();
+        load === 1 ? (setLoad(0)) : setLoad(1);
+      })
+      .catch();
+  };
 
   const onPatchHandler = (e, taskId, cat, snack, severity) => {
     // Assign arguments to applicable targets:
@@ -154,6 +197,7 @@ const DumpAndChunk = () => {
           removeFromDom(taskId);
           handleClose();
         }
+        load === 1 ? (setLoad(0)) : setLoad(1);
       })
       .catch();
     let two = `http://localhost:8000/api/categories/${catId}`;
@@ -177,10 +221,20 @@ const DumpAndChunk = () => {
         withCredentials: true,
       })
       .then(res => {
-        let count = load;
-        if (count >= 0) {
-          count++;
-          setLoad(count);
+        if (res.data.message === 'success'){
+          setTask({
+            name: '',
+            category: '',
+            chunked: false,
+            scheduled: false,
+            scheduledAt: '',
+            completed: false,
+            completedAt: '',
+            owner: '',
+          });
+          handleCloseDumpEdit();
+          handleOpenSnackBar("Task Updated!", "success");
+          load === 1 ? (setLoad(0)) : setLoad(1);
         }
       })
       .catch();
@@ -198,15 +252,24 @@ const DumpAndChunk = () => {
         </Typography>
       </div>
       <DumpComponent
-        load={load}
-        setLoad={setLoad}
-        sessionUserId={sessionUserId}
+        task={task}
+        onChangeHandler={onChangeHandler}
+        onSubmitHandler={onSubmitHandler}
+        handleKeyDown={handleKeyDown}
+        openDumpSubmit={openDumpSubmit}
+        setOpenDumpSubmit={setOpenDumpSubmit}
+        handleOpenDumpSubmit={handleOpenDumpSubmit}
+        handleCloseDumpSubmit={handleCloseDumpSubmit}
       />
       <AllDumpedList
         open={open}
         setOpen={setOpen}
         handleOpen={handleOpen}
         handleClose={handleClose}
+        openDumpEdit={openDumpEdit}
+        setOpenDumpEdit={setOpenDumpEdit}
+        handleOpenDumpEdit={handleOpenDumpEdit}
+        handleCloseDumpEdit={handleCloseDumpEdit}
         onClickHandler={onClickHandler}
         task={task}
         setTask={setTask}
@@ -219,6 +282,7 @@ const DumpAndChunk = () => {
         onPatchHandler={onPatchHandler}
         onChangeHandler={onChangeHandler}
         onChangeChunkHandler={onChangeChunkHandler}
+        handleKeyDownEdit={handleKeyDownEdit}
         onPatchEditNameHandler={onPatchEditNameHandler}
       />
       <SimpleSnackbar 
