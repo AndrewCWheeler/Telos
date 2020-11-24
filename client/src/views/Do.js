@@ -186,7 +186,7 @@ const useStyles = makeStyles(theme => ({
 
 const Do = props => {
   const classes = useStyles();
-  const { navigatePage, navValue, setNavValue, allTasks, setAllTasks, allCategories, sessionUserId, load, setLoad } = props;
+  const { navValue, setNavValue, allTasks, setAllTasks, allCategories, sessionUserId, load, setLoad } = props;
   const [task, setTask] = useState({
     name: '',
     category: '',

@@ -1,6 +1,5 @@
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
-import { navigate } from '@reach/router';
 // Material-ui core components:
 import Backdrop from '@material-ui/core/Backdrop';
 import Button from '@material-ui/core/Button';
@@ -10,6 +9,8 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Fab from '@material-ui/core/Fab';
+import { green } from '@material-ui/core/colors';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/core/List';
@@ -24,7 +25,7 @@ import Typography from '@material-ui/core/Typography';
 // import DeleteCategoryComponent from '../components/DeleteCategoryComponent';
 import RadioColorButtons from '../components/RadioColorButtons';
 // Material-ui icons:
-import AddCircleIcon from '@material-ui/icons/AddCircle';
+import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import LabelIcon from '@material-ui/icons/Label';
 import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
@@ -40,7 +41,23 @@ const useStyles = makeStyles(theme => ({
       color: theme.palette.text.primary,
     },
   },
+  dialogStyle: {
+    backgroundColor: theme.palette.background.paper,
+  },
+  extraLarge: {
+    fontSize: 32,
+  },
   fab: {
+    position: 'sticky',
+    bottom: theme.spacing(9),
+    right: theme.spacing(3),
+    color: theme.palette.common.white,
+    backgroundColor: green[500],
+    '&:hover': {
+      backgroundColor: green[600],
+    },
+  },
+  submit: {
     margin: theme.spacing(2),
     color: theme.palette.primary.main,
   },
@@ -52,6 +69,11 @@ const useStyles = makeStyles(theme => ({
     flexGrow: 1,
     overflow: 'scroll',
     padding: theme.spacing(0, 3),
+  },
+  modal: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   neutralIconStyle: {
     fontSize:24,
@@ -90,7 +112,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Category = (props) => {
-  const { navigatePage, navValue, setNavValue, sessionUserId, allCategories, setAllCategories, load, setLoad } = props;
+  const { navValue, setNavValue, sessionUserId, allCategories, setAllCategories, load, setLoad } = props;
   const classes = useStyles();
   const [category, setCategory] = useState({
     name: '',
@@ -102,6 +124,19 @@ const Category = (props) => {
   const [openEdit, setOpenEdit] = useState(false);
   const [selectedColor, setSelectedColor] = useState('');
   const [openDeleteCategory, setOpenDeleteCategory] = useState(false);
+  const [openCategorySubmit, setOpenCategorySubmit] = useState(false);
+
+  useEffect(() => {
+    if (navValue === 'category'){
+      load === 1 ? (setLoad(0)) : setLoad(1);
+      return
+    }
+    else if (navValue !== 'category'){
+      setNavValue('category');
+      load === 1 ? (setLoad(0)) : setLoad(1);
+    }
+    return
+  }, []);
 
   const handleChangeColor = (e) => {
     setSelectedColor(e.target.value);
@@ -115,7 +150,15 @@ const Category = (props) => {
   const handleCloseEdit = () => {
     setOpenEdit(false);
   };
+
+  const handleOpenCategorySubmit = () => {
+    setOpenCategorySubmit(true);
+  };
   
+  const handleCloseCategorySubmit = () => {
+    setOpenCategorySubmit(false);
+  };
+
   const handleOpenSnackBar = (snack, severity) => {
     setSnack(snack); 
     setSeverity(severity);
@@ -145,9 +188,9 @@ const Category = (props) => {
     });
   };
 
-  const handleKeyDown = (e, snack) => {
+  const handleKeyDown = (e, snack, severity) => {
     if (e.key === 'Enter') {
-      onSubmitHandler(e, snack);
+      onSubmitHandler(e, snack, severity);
     }
   };
 
@@ -166,12 +209,8 @@ const Category = (props) => {
           name: '',
           color: '',
         });
-        let count = load;
-        if (count >= 0) {
-          count++;
-          setLoad(count);
-        }
-        navigate('/category');
+        load === 1 ? (setLoad(0)) : setLoad(1);
+        handleCloseCategorySubmit();
       })
       .catch();
   };
@@ -206,12 +245,7 @@ const Category = (props) => {
             color: '',
           });
         }
-        let count = load;
-        if (count >= 0) {
-          count++;
-          setLoad(count);
-        }
-        navigate('/category');
+        load === 1 ? (setLoad(0)) : setLoad(1);
       })
       .catch();
   };
@@ -242,34 +276,11 @@ const Category = (props) => {
           Categories
         </Typography>
       </div>
+      <Fab className={classes.fab} onClick={handleOpenCategorySubmit}>
+        <AddIcon className={classes.extraLarge}/>
+      </Fab>
       <Grid container direction='row' justify='center' alignItems='center'>
         <Grid item xs={12} className={classes.root}>
-          <TextField
-            style={{marginTop: 6}}
-            fullWidth
-            id='category'
-            label='Add Category...'
-            size='medium'
-            variant='outlined'
-            onChange={e => {
-              onChangeHandler(e);
-            }}
-            onKeyPress={e => {handleKeyDown(e, "Category Created!")}}
-            name='name'
-            value={category.name}
-          />
-        </Grid>
-        <Grid item xs={12} className={classes.root}>
-          <Tooltip title="Add" placement="right">
-            <IconButton
-              className={classes.fab}
-              onClick={e => {
-                onSubmitHandler(e, "Category Created!", "success");
-              }}
-              >
-              <AddCircleIcon style={{fontSize: 60}}/>
-            </IconButton>
-          </Tooltip>
           <List dense secondary="true" className={classes.list}>
             {allCategories.map((category, i) =>
                 <ListItem
@@ -305,6 +316,54 @@ const Category = (props) => {
           </List>
         </Grid>
       </Grid>
+      {/* Create Category Modal */}
+      <Dialog
+        aria-labelledby='category-modal-submit'
+        className={classes.modal}
+        open={openCategorySubmit}
+        onClose={handleCloseCategorySubmit}
+        closeAfterTransition
+        fullWidth
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <DialogTitle className={classes.title}>{"Category"}</DialogTitle>
+        <DialogContent className={classes.dialogStyle}>
+          <TextField
+            style={{marginTop: 6}}
+            fullWidth
+            label='Category...'
+            variant='outlined'
+            onChange={e => {
+              onChangeHandler(e);
+            }}
+            onKeyPress={e => {handleKeyDown(e, "Category Created!", "success")}}
+            name='name'
+            value={category.name}
+            autoFocus='true'
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            autoFocus
+            onClick={handleCloseCategorySubmit}
+            color="primary"
+            >
+            Cancel
+          </Button>
+          <IconButton
+              className={classes.submit}
+              onClick={e => {
+                onSubmitHandler(e, "Category Created!", "success");
+              }}
+              >
+              <LibraryAddIcon style={{fontSize: 24}}/>
+          </IconButton>
+        </DialogActions>
+      </Dialog>
+      {/* Edit Category Modal */}
       <Dialog
         aria-labelledby='modal-edit-select'
         aria-describedby='choose-edit-category'

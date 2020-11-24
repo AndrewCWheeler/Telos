@@ -85,24 +85,20 @@ const DumpComponent = props => {
       >
       <DialogTitle className={classes.title}>{"Dump"}</DialogTitle>
       <DialogContent className={classes.dialogStyle}>
-      {/* <Grid container direction='row' justify='center' alignItems='center'>
-        <Grid item xs={12} className={classes.root}> */}
-          <TextField
-            style={{marginTop: 6}}
-            fullWidth
-            id='dump'
-            label='Dump...'
-            variant='outlined'
-            onChange={e => {
-              onChangeHandler(e);
-            }}
-            onKeyPress={e => {handleKeyDown(e)}}
-            name='name'
-            value={task.name}
-            autoFocus='true'
-          />
-        {/* </Grid>
-      </Grid> */}
+        <TextField
+          style={{marginTop: 6}}
+          fullWidth
+          id='dump'
+          label='Dump...'
+          variant='outlined'
+          onChange={e => {
+            onChangeHandler(e);
+          }}
+          onKeyPress={e => {handleKeyDown(e)}}
+          name='name'
+          value={task.name}
+          autoFocus='true'
+        />
       </DialogContent>
       <DialogActions>
         <Button
@@ -118,7 +114,7 @@ const DumpComponent = props => {
               onSubmitHandler(e);
             }}
             >
-            <LibraryAddIcon style={{fontSize: 60}}/>
+            <LibraryAddIcon style={{fontSize: 24}}/>
         </IconButton>
       </DialogActions>
     </Dialog>

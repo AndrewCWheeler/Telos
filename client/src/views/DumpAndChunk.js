@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { navigate } from '@reach/router';
 // My components and modified material-ui components:
 import AllDumpedList from '../components/AllDumpedList';
 import DumpComponent from '../components/DumpComponent';
@@ -27,7 +26,7 @@ const DumpAndChunk = props => {
   const classes = useStyles();
   const [openDumpSubmit, setOpenDumpSubmit] = useState(false);
   const [openDumpEdit, setOpenDumpEdit] = useState(false);
-  const { navigatePage, navValue, setNavValue, allTasks, setAllTasks, allCategories, sessionUserId, load, setLoad } = props;
+  const { navValue, setNavValue, allTasks, setAllTasks, allCategories, sessionUserId, load, setLoad } = props;
   const [selectedCategory, setSelectedCategory] = useState('');
   const [open, setOpen] = useState(false);
   const [openSnack, setOpenSnack] = useState(false);

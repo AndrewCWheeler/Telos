@@ -16,6 +16,7 @@ import Typography from '@material-ui/core/Typography';
 
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import InfoIcon from '@material-ui/icons/Info';
+import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 
 import SimpleSnackbar from '../components/SimpleSnackBar';
 import { IconButton } from '@material-ui/core';
@@ -150,7 +151,7 @@ const Vision = props => {
               onClick={e => {onSubmitHandler(e, "Vision updated!", "success")}} 
               className={classes.fab}
             >
-              <AddCircleIcon style={{fontSize: 60}}/>
+              <LibraryAddIcon style={{fontSize: 60}}/>
             </IconButton>
           </Tooltip>
         </Grid>

@@ -13,7 +13,6 @@ import Header from "../../components/Header/Header.js";
 import Footer from "../../components/Footer/Footer.js";
 import GridContainer from "../../components/Grid/GridContainer.js";
 import GridItem from "../../components/Grid/GridItem.js";
-import Button from "../../components/CustomButtons/Button.js";
 import HeaderLinks from "../../components/Header/HeaderLinks.js";
 import Parallax from "../../components/Parallax/Parallax.js";
 import landingBackground from "../../images/landingBackground.jpg";
@@ -24,7 +23,6 @@ import landingPageStyle from "../../assets/jss/material-kit-pro-react/views/land
 import SectionProduct from "./Sections/SectionProduct.js";
 import SectionTeam from "./Sections/SectionTeam.js";
 import SectionWork from "./Sections/SectionWork.js";
-import { Tooltip } from "@material-ui/core";
 
 const useStyles = makeStyles(landingPageStyle);
 

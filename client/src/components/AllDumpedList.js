@@ -20,7 +20,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
-import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 // Material-ui icons:
 import LabelIcon from '@material-ui/icons/Label';
@@ -65,7 +64,7 @@ const useStyles = makeStyles(theme => ({
     }
   },
   name: {
-    margin: theme.spacing(4, 0, 2),
+    marginBottom: theme.spacing(2),
   },
   subtitle: {
     margin: theme.spacing(4, 1, 2),
@@ -102,9 +101,6 @@ const useStyles = makeStyles(theme => ({
   formControl: {
     margin: theme.spacing(1),
     minWidth: 250,
-  },
-  hugeIcon: {
-    fontSize: 72,
   },
 }));
 
@@ -232,7 +228,7 @@ const AllDumpedList = props => {
               onPatchEditNameHandler(e, task._id);
             }}
             >
-            <LibraryAddIcon color="primary" style={{fontSize: 60}}/>
+            <LibraryAddIcon color="primary" style={{fontSize: 24}}/>
         </IconButton>
       </DialogActions>
     </Dialog>
@@ -252,21 +248,6 @@ const AllDumpedList = props => {
         <Typography className={classes.name}>
             {task.name}
         </Typography>
-        {/* <TextField
-          inputProps={{ autoFocus: true }}
-          id='dump'
-          label='Edit task here...'
-          multiline
-          variant='outlined'
-          onChange={e => {
-            onChangeHandler(e);
-          }}
-          onBlur={e => {
-            onPatchEditNameHandler(e, task._id);
-          }}
-          name='name'
-          value={task.name}
-          /> */}
         <FormControl
           variant='standard'
           className={classes.formControl}
