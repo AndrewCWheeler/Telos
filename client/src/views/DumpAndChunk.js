@@ -250,7 +250,7 @@ const DumpAndChunk = props => {
       })
       .catch();
     let two = `http://localhost:8000/api/categories/${catId}`;
-    const requestTwo = axios.put(two, task, { withCredentials: true});
+    const requestTwo = axios.patch(two, task, { withCredentials: true});
     requestTwo
       .then(res => {
       }).catch();
