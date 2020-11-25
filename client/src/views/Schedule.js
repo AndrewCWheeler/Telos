@@ -664,7 +664,6 @@ const Schedule = props => {
         </DialogContent>
         <DialogActions>
           <Button
-            autoFocus
             onClick={handleCloseCal}
             color="secondary"
             >

@@ -7,6 +7,7 @@ import Container from '@material-ui/core/Container';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
+import SimpleSnackbar from '../components/SimpleSnackBar';
 import Typography from '@material-ui/core/Typography';
 // For seamless front-end validations that work with material-ui components:
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
@@ -64,6 +65,22 @@ export default function SignUp() {
     confirmPassword: '',
     vision: '',
   });
+  const [openSnack, setOpenSnack] = useState(false);
+  const [snack, setSnack] = useState('');
+  const [severity, setSeverity] = useState('');
+  
+  const handleOpenSnackBar = (snack, severity) => {
+    setOpenSnack(true);
+    setSnack(snack);
+    setSeverity(severity);
+  };
+
+  const handleCloseSnackBar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnack(false);
+  };
 
   const onChangeHandler = e => {
     setUser({
@@ -83,10 +100,8 @@ export default function SignUp() {
         }
         navigate('/dump');
       })
-      .catch(res => {
-        if (res.data.message === 'error') {
-          navigate('/');
-        }
+      .catch(err => {
+        handleOpenSnackBar("Something went wrong with your login. Please try again.", "error");
       });
   };
 
@@ -228,6 +243,14 @@ export default function SignUp() {
           </Grid>
         </ValidatorForm>
       </div>
+      <SimpleSnackbar 
+        snack={snack}
+        severity={severity}
+        setSeverity={setSeverity}
+        openSnack={openSnack}
+        handleOpenSnackBar={handleOpenSnackBar}
+        handleCloseSnackBar={handleCloseSnackBar} 
+      />
     </Container>
   );
 }

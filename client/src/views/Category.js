@@ -366,12 +366,11 @@ const Category = (props) => {
             onKeyPress={e => {handleKeyDown(e, "Category Created!", "success")}}
             name='name'
             value={category.name}
-            autoFocus='true'
+            autoFocus
           />
         </DialogContent>
         <DialogActions>
           <Button
-            autoFocus
             onClick={handleCloseCategorySubmit}
             color="primary"
             >
@@ -428,7 +427,6 @@ const Category = (props) => {
         </DialogContent>
         <DialogActions>
         <Button 
-          autoFocus 
           onClick={handleCloseEdit}
           color="primary"
         >

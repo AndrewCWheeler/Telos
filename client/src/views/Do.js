@@ -734,8 +734,7 @@ const Do = props => {
           />
         </MuiPickersUtilsProvider>
         <DialogActions>
-        <Button 
-            autoFocus 
+        <Button
             onClick={handleCloseCal}
             color="secondary"
             >
