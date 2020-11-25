@@ -43,7 +43,6 @@ const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
     maxWidth: 840,
-    // flexGrow: 1,
   },
   card: {
     maxWidth: 519,
@@ -66,31 +65,6 @@ const useStyles = makeStyles(theme => ({
   avatar: {
     backgroundColor: red[500],
   },
-  fab: {
-    margin: theme.spacing(2),
-    color: theme.palette.primary.main,
-  },
-  rootList: {
-    width: '100%',
-    maxWidth: 752,
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-  },
-  modal: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dialogStyle: {
-    backgroundColor: theme.palette.background.paper,
-  },
-  title: {
-    margin: theme.spacing(4, 0, 2),
-  },
-  subtitle: {
-    margin: theme.spacing(-1, 0, 0),
-    color: theme.palette.primary.main,
-  },
   text: {
     color: theme.palette.text.primary,
     display: 'inline-block',
@@ -102,10 +76,6 @@ const useStyles = makeStyles(theme => ({
     margin: '0 5px 0 0',
     width: '120px',
     height: '100%',
-  },
-  select: {
-    color: theme.palette.primary.main,
-    backgroundColor: theme.palette.primary.main,
   },
   link: {
     textDecoration: 'none',
@@ -129,31 +99,8 @@ const useStyles = makeStyles(theme => ({
     borderBottom: '1px solid #e1dfdc',
     paddingLeft: 0,
   },
-  primaryIconStyle: {
-    fontSize:24,
-    color: theme.palette.primary.main,
-  },
   secondaryIconStyle: {
     fontSize:24,
-    color: theme.palette.secondary.main,
-  },
-  neutralIconStyle: {
-    fontSize:'24px',
-    color: theme.palette.text.secondary,
-  },
-  inline: {
-    display: 'inline',
-    overflow: 'hidden',
-    overflowWrap: 'ellipsis',
-  },
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 150,
-  },
-  selectEmpty: {
-    marginTop: theme.spacing(2),
-  },
-  undo: {
     color: theme.palette.secondary.main,
   },
   success: {
@@ -170,7 +117,12 @@ const useStyles = makeStyles(theme => ({
 
 const Profile = props => {
   const classes = useStyles();
-  const { navigatePage, navValue, allTasks, setAllTasks, allCategories, sessionUser, firstInitial } = props;
+  const { navValue, setNavValue } = props;
+  const [firstInitial, setFirstInitial] = useState('');
+  const [sessionUser, setSessionUser] = useState({});
+  const [allTasks, setAllTasks] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
+  const [load, setLoad] = useState(0);
   const [openDeleteUser, setOpenDeleteUser] = useState(false);
   const [openDeleteTask, setOpenDeleteTask] = useState(false);
   const [task, setTask] = useState({
@@ -187,6 +139,60 @@ const Profile = props => {
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
   const [severity, setSeverity] = useState('');
+
+  useEffect(() => {
+    let isMounted = true;
+    if (navValue !== 'profile'){
+      setNavValue('profile');
+    }
+    let one = 'http://localhost:8000/api/users/one';
+    const requestOne = axios.get(one, { withCredentials: true });
+    requestOne
+      .then(response => {
+        if (response.data.message === 'success' && isMounted) {
+          setSessionUser(response.data.results);
+          setFirstInitial(response.data.results.firstName.charAt());
+        }
+      })
+      .catch(()=> {
+        navigate('/');
+      });
+    let two = 'http://localhost:8000/api/tasks/user';
+    const requestTwo = axios.get(two, { withCredentials: true });
+    requestTwo
+      .then(response => {
+        if (response.data.message === 'success' && isMounted){
+          let orderedTasks = response.data.results;
+          orderedTasks.sort((a,b) => a.priority - b.priority)
+          setAllTasks(orderedTasks);
+        }
+      })
+      .catch(()=> {
+        navigate('/');
+      });
+    let three = 'http://localhost:8000/api/categories/user';
+    const requestThree = axios.get(three, {withCredentials: true });
+    requestThree
+      .then(response => {
+        if (isMounted) setAllCategories(response.data.results);
+      })
+      .catch(()=> {
+        navigate('/');
+      });
+    axios
+      .all([requestOne, requestTwo, requestThree])
+      .then(
+        axios.spread((...responses) => {
+          const responseOne = responses[0];
+          const responseTwo = responses[1];
+          const responseThree = responses[2];
+        })
+      )
+      .catch(()=> {
+        navigate('/');
+      });
+      return () => { isMounted = false }
+  }, [load]);
   
   const handleOpenSnackBar = (snack, severity) => {
     setOpenSnack(true);
@@ -402,6 +408,7 @@ const Profile = props => {
         onClose={handleCloseDeleteTask}
         aria-labelledby="alert-delete-task"
         aria-describedby="alert-are-you-sure?"
+        fullWidth
       >
         <DialogTitle id="DeleteTaskTitle">{"Delete Task?"}</DialogTitle>
         <DialogContent>
@@ -425,6 +432,7 @@ const Profile = props => {
         onClose={handleCloseDeleteUser}
         aria-labelledby="alert-delete-user"
         aria-describedby="alert-are-you-sure?"
+        fullWidth
       >
         <DialogTitle id="DeleteUserTitle">{"Delete Account?"}</DialogTitle>
         <DialogContent>

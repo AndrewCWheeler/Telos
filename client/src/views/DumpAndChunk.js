@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import {navigate} from '@reach/router';
 // My components and modified material-ui components:
 import AllDumpedList from '../components/AllDumpedList';
 import DumpComponent from '../components/DumpComponent';
@@ -23,10 +24,17 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const DumpAndChunk = props => {
+  const inputRef = useRef();
+  const dumpRef = useRef();
+  const editRef = useRef();
   const classes = useStyles();
+  const { navValue, setNavValue } = props;
+  const [sessionUserId, setSessionUserId] = useState('');
+  const [allTasks, setAllTasks] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
+  const [load, setLoad] = useState(0);
   const [openDumpSubmit, setOpenDumpSubmit] = useState(false);
   const [openDumpEdit, setOpenDumpEdit] = useState(false);
-  const { navValue, setNavValue, allTasks, setAllTasks, allCategories, sessionUserId, load, setLoad } = props;
   const [selectedCategory, setSelectedCategory] = useState('');
   const [open, setOpen] = useState(false);
   const [openSnack, setOpenSnack] = useState(false);
@@ -45,16 +53,57 @@ const DumpAndChunk = props => {
   });
 
   useEffect(() => {
-    if (navValue === 'dump'){
-      load === 1 ? (setLoad(0)) : setLoad(1);
-      return
-    }
-    else if (navValue !== 'dump'){
-      load === 1 ? (setLoad(0)) : setLoad(1);
+    let isMounted = true;
+    if (navValue !== 'dump'){
       setNavValue('dump');
     }
-    return
-  }, []);
+    let one = 'http://localhost:8000/api/users/one';
+    const requestOne = axios.get(one, { withCredentials: true });
+    requestOne
+      .then(response => {
+        if (response.data.message === 'success' && isMounted) {
+          setSessionUserId(response.data.results._id);
+        }
+      })
+      .catch(()=> {
+        navigate('/');
+      });
+    let two = 'http://localhost:8000/api/tasks/user';
+    const requestTwo = axios.get(two, { withCredentials: true });
+    requestTwo
+      .then(response => {
+        if (response.data.message === 'success' && isMounted){
+          let orderedTasks = response.data.results;
+          orderedTasks.sort((a,b) => a.priority - b.priority)
+          setAllTasks(orderedTasks);
+        }
+      })
+      .catch(()=> {
+        navigate('/');
+      });
+    let three = 'http://localhost:8000/api/categories/user';
+    const requestThree = axios.get(three, {withCredentials: true });
+    requestThree
+      .then(response => {
+        if (isMounted) setAllCategories(response.data.results);
+      })
+      .catch(()=> {
+        navigate('/');
+      });
+    axios
+      .all([requestOne, requestTwo, requestThree])
+      .then(
+        axios.spread((...responses) => {
+          const responseOne = responses[0];
+          const responseTwo = responses[1];
+          const responseThree = responses[2];
+        })
+      )
+      .catch(()=> {
+        navigate('/');
+      });
+      return () => { isMounted = false }
+  }, [load]);
 
   const handleOpenDumpSubmit = () => {
     setOpenDumpSubmit(true);
@@ -76,6 +125,7 @@ const DumpAndChunk = props => {
       scheduled: false,
       scheduledAt: '',
       completed: false,
+      priority: 0,
       completedAt: '',
       owner: '',
     });
@@ -183,7 +233,7 @@ const DumpAndChunk = props => {
     }
     let catId = '';
     catId = cat._id;
-    task.labelIdentity = cat._id;
+    // task.labelIdentity = cat._id;
     task.category = cat.name;
     task.chunked = true;
     // Split up axios calls to update both task component and category component:
@@ -200,7 +250,7 @@ const DumpAndChunk = props => {
       })
       .catch();
     let two = `http://localhost:8000/api/categories/${catId}`;
-    const requestTwo = axios.patch(two, task, { withCredentials: true});
+    const requestTwo = axios.put(two, task, { withCredentials: true});
     requestTwo
       .then(res => {
       }).catch();
@@ -252,6 +302,8 @@ const DumpAndChunk = props => {
       </div>
       <DumpComponent
         task={task}
+        dumpRef={dumpRef}
+        inputRef={inputRef}
         onChangeHandler={onChangeHandler}
         onSubmitHandler={onSubmitHandler}
         handleKeyDown={handleKeyDown}
@@ -261,6 +313,7 @@ const DumpAndChunk = props => {
         handleCloseDumpSubmit={handleCloseDumpSubmit}
       />
       <AllDumpedList
+        editRef={editRef}
         open={open}
         setOpen={setOpen}
         handleOpen={handleOpen}

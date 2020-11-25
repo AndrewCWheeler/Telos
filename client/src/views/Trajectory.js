@@ -1,4 +1,5 @@
-import React, {useEffect} from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { navigate } from '@reach/router';
 import { Radar }  from 'react-chartjs-2';
 import { makeStyles } from '@material-ui/core/styles';
@@ -24,21 +25,68 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Trajectory = props => {
-  const { navigatePage, load, setLoad, navValue, setNavValue, allTasks, allCategories } = props;
+  const { navValue, setNavValue } = props;
 
   const classes = useStyles();
+  const [sessionUserId, setSessionUserId] = useState('');
+  const [sessionUser, setSessionUser] = useState('');
+  const [allTasks, setAllTasks] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
+  const [load, setLoad] = useState(0);
 
   useEffect(() => {
-    if (navValue === 'trajectory'){
-      load === 1 ? (setLoad(0)) : setLoad(1);
-      return
-    }
-    else if (navValue !== 'trajectory'){
-      load === 1 ? (setLoad(0)) : setLoad(1);
+    let isMounted = true;
+    if (navValue !== 'trajectory'){
       setNavValue('trajectory');
     }
-    return
-  }, []);
+    let one = 'http://localhost:8000/api/users/one';
+    const requestOne = axios.get(one, { withCredentials: true });
+    requestOne
+      .then(response => {
+        if (response.data.message === 'success' && isMounted) {
+          setSessionUserId(response.data.results._id);
+          setSessionUser(response.data.results);
+        }
+      })
+      .catch(()=> {
+        navigate('/');
+      });
+    let two = 'http://localhost:8000/api/tasks/user';
+    const requestTwo = axios.get(two, { withCredentials: true });
+    requestTwo
+      .then(response => {
+        if (response.data.message === 'success' && isMounted){
+          let orderedTasks = response.data.results;
+          orderedTasks.sort((a,b) => a.priority - b.priority)
+          setAllTasks(orderedTasks);
+        }
+      })
+      .catch(()=> {
+        navigate('/');
+      });
+    let three = 'http://localhost:8000/api/categories/user';
+    const requestThree = axios.get(three, {withCredentials: true });
+    requestThree
+      .then(response => {
+        if (isMounted) setAllCategories(response.data.results);
+      })
+      .catch(()=> {
+        navigate('/');
+      });
+    axios
+      .all([requestOne, requestTwo, requestThree])
+      .then(
+        axios.spread((...responses) => {
+          const responseOne = responses[0];
+          const responseTwo = responses[1];
+          const responseThree = responses[2];
+        })
+      )
+      .catch(()=> {
+        navigate('/');
+      });
+      return () => { isMounted = false }
+  }, [load]);
 
   const getCategoryNames = (arr) => {
     let names = [];

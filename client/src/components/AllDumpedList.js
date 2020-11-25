@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 // Material-ui core components:
-import Backdrop from '@material-ui/core/Backdrop';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControl from '@material-ui/core/FormControl';
 import Grid from '@material-ui/core/Grid';
@@ -49,7 +49,6 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(3, 0),
   },
   title: {
-    margin: theme.spacing(4, 0, 2),
     color: theme.palette.primary.main,
   },
   link: {
@@ -61,6 +60,7 @@ const useStyles = makeStyles(theme => ({
     "&:hover": {
       color: theme.palette.info.main,
       textDecoration: 'none',
+      cursor: 'pointer',
     }
   },
   name: {
@@ -101,11 +101,13 @@ const useStyles = makeStyles(theme => ({
   formControl: {
     margin: theme.spacing(1),
     minWidth: 250,
+    marginBottom: 60,
   },
 }));
 
 const AllDumpedList = props => {
   const {
+    editRef,
     task, 
     open,
     handleOpen,
@@ -141,7 +143,6 @@ const AllDumpedList = props => {
               <ListItem
                 className={classes.listItem}
                 key={i}
-                button="true"
               >
                   <ListItemIcon style={{marginRight: -24, marginTop: -30}} type='button' onClick={e => handleOpen(e, task._id)}>
                     <LabelIcon
@@ -154,7 +155,6 @@ const AllDumpedList = props => {
                   className={classes.text}
                   primary={
                   <Link
-                    button="true"
                     onClick={e => handleOpenDumpEdit(e, task._id)}
                     style={{textDecoration:'none'}}
                   >
@@ -187,36 +187,31 @@ const AllDumpedList = props => {
       className={classes.modal}
       open={openDumpEdit}
       onClose={handleCloseDumpEdit}
-      closeAfterTransition
       fullWidth
-      BackdropComponent={Backdrop}
-      BackdropProps={{
-        timeout: 500,
-      }}
     >
       <DialogTitle className={classes.title}>{"Edit Task Name"}</DialogTitle>
       <DialogContent className={classes.dialogStyle}>
-      {/* <Grid container direction='row' justify='center' alignItems='center'>
-        <Grid item xs={12} className={classes.root}> */}
-          <TextField
-            style={{marginTop: 6}}
-            fullWidth
-            id='dump'
-            label='Dump...'
-            variant='outlined'
-            onChange={e => {
-              onChangeHandler(e);
-            }}
-            onKeyPress={e => {handleKeyDownEdit(e, task._id)}}
-            name='name'
-            value={task.name}
-          />
-        {/* </Grid>
-      </Grid> */}
+      <FormControl
+        variant='standard'
+        className={classes.formControl}
+      >
+        <TextField
+          autoFocus
+          fullWidth
+          inputRef={editRef}
+          id='dump'
+          label='Dump...'
+          onChange={e => {
+            onChangeHandler(e);
+          }}
+          onKeyPress={e => {handleKeyDownEdit(e, task._id)}}
+          name='name'
+          value={task.name}
+        />
+      </FormControl>
       </DialogContent>
       <DialogActions>
         <Button
-          autoFocus
           onClick={handleCloseDumpEdit}
           color="primary"
           >
@@ -237,17 +232,15 @@ const AllDumpedList = props => {
       className={classes.modal}
       open={open}
       onClose={handleClose}
-      closeAfterTransition
-      BackdropComponent={Backdrop}
-      BackdropProps={{
-        timeout: 500,
-      }}
+      fullWidth
     >
-      <DialogTitle className={classes.title}>{"Chunk"}</DialogTitle>
+      <DialogTitle className={classes.title}>{"Chunk Task"}</DialogTitle>
       <DialogContent className={classes.dialogStyle}>
-        <Typography className={classes.name}>
+        <DialogContentText>
+          <Typography variant='body1' className={classes.name}>
             {task.name}
-        </Typography>
+          </Typography>
+        </DialogContentText>
         <FormControl
           variant='standard'
           className={classes.formControl}
@@ -274,10 +267,10 @@ const AllDumpedList = props => {
                 placeholder={category.name}
                 style={{color:category.color}}
               >
-                  <LabelIcon
-                    style={{fontSize:18,marginRight:12}}
-                  />
-                  {category.name}
+                <LabelIcon
+                  style={{fontSize:18,marginRight:12}}
+                />
+                {category.name}
               </MenuItem>
             )}
           </Select>
@@ -287,22 +280,21 @@ const AllDumpedList = props => {
         <Button
           autoFocus
           onClick={e => {handleClose(e)}}
-          color="primary"
+          color="secondary"
           >
           Cancel
         </Button>
-        <IconButton
-          className={classes.icon}
+        <Button
+          color="primary"
           aria-label='update task'
           onClick={e => {
             onPatchHandler(e, task._id, selectedCategory, 'Task Chunked!', "success");
           }}
           >
-          <LibraryAddIcon />
-        </IconButton>
+          Confirm
+        </Button>
       </DialogActions>
     </Dialog>
-
     </div>
   );
 };

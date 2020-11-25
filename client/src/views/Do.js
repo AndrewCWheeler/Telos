@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { navigate } from '@reach/router';
+import {navigate} from '@reach/router';
 // Material-ui core components:
-import Backdrop from '@material-ui/core/Backdrop';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControl from '@material-ui/core/FormControl';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
@@ -21,12 +21,12 @@ import { makeStyles } from '@material-ui/core/styles';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
+import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 // Material-ui icons:
 import EventIcon from '@material-ui/icons/Event';
 import EditIcon from '@material-ui/icons/Edit';
 import LabelIcon from '@material-ui/icons/Label';
-import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 import Undo from '@material-ui/icons/Undo';
 // Date components and dependencies:
 import DateFnsUtils from '@date-io/date-fns';
@@ -48,9 +48,6 @@ const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
     maxWidth: 840,
-  },
-  radioStyle: {
-    fontSize: 30,
   },
   round: {
     position: 'relative',
@@ -90,16 +87,6 @@ const useStyles = makeStyles(theme => ({
       opacity: 1,
     },
   },  
-  fab: {
-    margin: theme.spacing(2),
-    color: theme.palette.primary.main,
-  },
-  rootList: {
-    width: '100%',
-    maxWidth: 752,
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-  },
   modal: {
     display: 'flex',
     alignItems: 'center',
@@ -107,6 +94,14 @@ const useStyles = makeStyles(theme => ({
   },
   dialogStyle: {
     backgroundColor: theme.palette.background.paper,
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 250,
+    marginBottom: 60,
+  },
+  dialogTitle: {
+    color: theme.palette.primary.main,
   },
   title: {
     margin: theme.spacing(4, 0, 2),
@@ -126,11 +121,11 @@ const useStyles = makeStyles(theme => ({
     height: '100%',
     marginTop: 12,
   },
-  select: {
-    color: theme.palette.primary.main,
-    backgroundColor: theme.palette.primary.main,
-  },
   link: {
+    background: 'none!important',
+    border: 'none',
+    padding: '0!important',
+    // fontFamily: arial, sansSerif,
     textDecoration: 'none',
     color: theme.palette.info.main,
     "&:active": {
@@ -139,6 +134,7 @@ const useStyles = makeStyles(theme => ({
     "&:hover": {
       color: theme.palette.info.main,
       textDecoration: 'none',
+      cursor: 'pointer',
     }
   },
   list: {
@@ -159,34 +155,21 @@ const useStyles = makeStyles(theme => ({
     fontSize:24,
     color: theme.palette.primary.main,
   },
-  secondaryIconStyle: {
-    fontSize:24,
-    color: theme.palette.secondary.main,
-  },
   neutralIconStyle: {
     fontSize:24,
     color: theme.palette.text.secondary,
   },
-  inline: {
-    display: 'inline',
-    overflow: 'hidden',
-    overflowWrap: 'ellipsis',
-  },
-  formControl: {
-    // margin: theme.spacing(1),
-    // minWidth: 150,
-  },
-  selectEmpty: {
-    marginTop: theme.spacing(2),
-  },
   undo: {
     color: theme.palette.secondary.main,
-  }
+  },
 }));
 
 const Do = props => {
+  const myRef = useRef();
+  const editModalRef = useRef();
+  const doRef = useRef();
   const classes = useStyles();
-  const { navValue, setNavValue, allTasks, setAllTasks, allCategories, sessionUserId, load, setLoad } = props;
+  const { navValue, setNavValue } = props;
   const [task, setTask] = useState({
     name: '',
     category: '',
@@ -198,6 +181,10 @@ const Do = props => {
     owner: '',
     priority: 0,
   });
+  const [sessionUserId, setSessionUserId] = useState('');
+  const [allTasks, setAllTasks] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
+  const [load, setLoad] = useState(0);
   const [openEdit, setOpenEdit] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [dateParameter, setDateParameter] = useState(new Date());
@@ -207,16 +194,57 @@ const Do = props => {
   const [severity, setSeverity] = useState('');
   
   useEffect(() => {
-    if (navValue === 'do'){
-      load === 1 ? (setLoad(0)) : setLoad(1);
-      return
-    }
-    else if (navValue !== 'do'){
+    let isMounted = true;
+    if (navValue !== 'do'){
       setNavValue('do');
-      load === 1 ? (setLoad(0)) : setLoad(1);
     }
-    return
-  }, []);
+    let one = 'http://localhost:8000/api/users/one';
+    const requestOne = axios.get(one, { withCredentials: true });
+    requestOne
+      .then(response => {
+        if (response.data.message === 'success' && isMounted) {
+          setSessionUserId(response.data.results._id);
+        }
+      })
+      .catch(()=> {
+        navigate('/');
+      });
+    let two = 'http://localhost:8000/api/tasks/user';
+    const requestTwo = axios.get(two, { withCredentials: true });
+    requestTwo
+      .then(response => {
+        if (response.data.message === 'success' && isMounted){
+          let orderedTasks = response.data.results;
+          orderedTasks.sort((a,b) => a.priority - b.priority)
+          setAllTasks(orderedTasks);
+        }
+      })
+      .catch(()=> {
+        navigate('/');
+      });
+    let three = 'http://localhost:8000/api/categories/user';
+    const requestThree = axios.get(three, {withCredentials: true });
+    requestThree
+      .then(response => {
+        if (isMounted) setAllCategories(response.data.results);
+      })
+      .catch(()=> {
+        navigate('/');
+      });
+    axios
+      .all([requestOne, requestTwo, requestThree])
+      .then(
+        axios.spread((...responses) => {
+          const responseOne = responses[0];
+          const responseTwo = responses[1];
+          const responseThree = responses[2];
+        })
+      )
+      .catch(()=> {
+        navigate('/');
+      });
+      return () => { isMounted = false }
+  }, [load]);
 
   // Filter, sort, reorder task functions:
   const FilteredTasks = allTasks.filter(tasks => {
@@ -340,7 +368,8 @@ const Do = props => {
       .patch('http://localhost:8000/api/tasks/' + id, task, {
         withCredentials: true,
       })
-      .then()
+      .then(res => {
+      })
       .catch();
   };
 
@@ -379,6 +408,35 @@ const Do = props => {
       .catch();
   };
 
+  const onPatchEditTaskHandler = (e, id, snack, severity) => {
+    if (task.name === '' || task.category === ''){
+      handleOpenSnackBar("Task must have a name and category!", "error");
+      return
+    }
+    else {
+      axios.patch('http://localhost:8000/api/tasks' + id, task, {withCredentials: true})
+      .then(res => {
+        if (res.data.message === 'success') {
+          handleOpenSnackBar(snack, severity);
+          handleCloseEdit();
+          setTask({
+            name: '',
+            category: '',
+            chunked: '',
+            scheduled: '',
+            scheduledAt: '',
+            completed: '',
+            completedAt: '',
+            owner: '',
+            priority: 0,
+          });
+        }
+      }).catch(err => {
+        handleOpenSnackBar("Nothing changed. Please try again or cancel", "warning");
+      })
+    }
+  }
+
   const onPatchDateHandler = (e, id, snack, severity) => {
     task.scheduledAt = selectedDate;
     task.scheduled = true;
@@ -414,7 +472,7 @@ const Do = props => {
   };
 
   return (
-    <div>
+    <div ref={doRef}>
       <CssBaseline />
       <div style={{marginTop:'90px'}}>
         <Typography 
@@ -440,7 +498,7 @@ const Do = props => {
               <KeyboardDatePicker
                 className={classes.primaryIconStyle}
                 margin='normal'
-                id='Selected a date...'
+                id='Select a date...'
                 format='MM/dd/yyyy'
                 value={dateParameter}
                 onChange={e => {
@@ -473,9 +531,7 @@ const Do = props => {
                   >
                   {provided => (
                     <ListItem
-                      
                       className={classes.listItem}
-                      // button
                       ref={provided.innerRef}
                       id='DoTask'
                       {...provided.draggableProps}
@@ -486,28 +542,12 @@ const Do = props => {
                       <ListItemIcon style={{marginRight: -24, marginTop: -30}}
                       onClick={e => onCompleteHandler(e,task._id,"Task Completed!", "success")}
                       >
-                        <div class='container'>
+                        <div className='container'>
                           <div className={classes.round}>
                             <input type='checkbox' />
-                            <label for='checkbox'></label>
+                            <label htmlFor='checkbox'></label>
                           </div>
                         </div>
-                        {/* <FormControlLabel style={{paddingLeft: -12}}
-                          control={
-                            <Checkbox style={{marginBottom: 27}}
-                              icon={
-                                <RadioButtonUncheckedRoundedIcon 
-                                className={classes.radioStyle}
-                                />
-                              }
-                              checkedIcon={<CheckCircleRoundedIcon
-                                className={classes.radioStyle}
-                              />}
-                              name="completed"
-                            />
-                          }
-                          label=""
-                        /> */}
                       </ListItemIcon>
                       {allCategories.map((category, catIdx) => 
                         task.category === category.name ? (
@@ -520,49 +560,25 @@ const Do = props => {
                           <Typography 
                             style={{fontSize:12, color:category.color}}
                           >
-                            <a
-                              onMouseOver=''
-                              style={{cursor: 'pointer'}}
-                              role="button"
+                            <button
                               onClick={e => {handleOpenCal(e, task._id)}}
                               className={classes.link}
                             >
-                              <Grid container direction='row' alignItems='center'>
-                                <Grid item>
-                                  <EventIcon style={{fontSize: 15, marginTop: 3, marginRight: 3, marginLeft: -1}}/>
-                                </Grid>
-                                <Grid item>
-                                  <Moment format='MMM Do' style={{fontSize: 12, textTransform: 'capitalize', marginBottom: 10}}>
-                                    {task.scheduledAt}
-                                  </Moment>
-                                </Grid>
-                              </Grid>
-                            </a>
-                            {task.category}
+                              <EventIcon style={{fontSize: 15, marginTop: 3, marginRight: 3, marginLeft: -1}}/>
+                              <Moment format='MMM Do' style={{fontSize: 12, textTransform: 'capitalize', marginBottom: 10}}>
+                                {task.scheduledAt}
+                              </Moment>
+                            </button>
+                            <br></br>
+                              {task.category}
                           </Typography>
                           }
                         />
                         ) : null
                       )}
-                      {/* <ListItemText
-                        primary={
-                        <Tooltip title="Change Date" placement="right">
-                          <Button
-                            onClick={e => {handleOpenCal(e, task._id)}}
-                            className={classes.link}
-                            >
-                            <div>
-                              <Moment format='dddd' style={{fontSize: '15px', textTransform: 'capitalize', float: 'left'}}>
-                                {task.scheduledAt}
-                              </Moment>
-                            </div>
-                          </Button>
-                        </Tooltip>
-                        }
-                      /> */}
                       <div>
-                        <IconButton 
-                        edge="end" 
+                        <IconButton
+                        edge="end"
                         aria-label="edit-task"
                         type='button'
                         onClick={e => handleOpenEdit(e, task._id)} 
@@ -586,48 +602,54 @@ const Do = props => {
       </Grid>
       {/* Edit Task Dialog */}
       <Dialog
+        ref={editModalRef}
         aria-labelledby='modal-edit-select'
         aria-describedby='choose-edit-category'
+        fullWidth
         className={classes.modal}
         open={openEdit}
         onClose={handleCloseEdit}
-        closeAfterTransition
-        BackdropComponent={Backdrop}
-        BackdropProps={{
-          timeout: 500,
-        }}
       >
+        <div style={{float: 'left'}}>
+          <Tooltip title="Un-schedule" placement="top">
+              <Button
+                role='button'
+                onClick={e => {onPatchUnScheduleHandler(e, task._id, "Removed from Calendar!", "success")}}
+                >
+                <Undo
+                className={classes.undo}/>
+              </Button>
+          </Tooltip>
+        </div>
+        <DialogTitle className={classes.dialogTitle}>
+          {"Edit Task"}
+        </DialogTitle>
         <DialogContent
           className={classes.dialogStyle}
         >
-          <Button
-            className={classes.undo}
-            role='button'
-            onClick={e => {onPatchUnScheduleHandler(e, task._id, "Removed from Calendar!", "success")}}
+          <DialogContentText>
+            {task.name}
+          </DialogContentText>
+          <FormControl
+          variant='standard'
+          className={classes.formControl}
           >
-            <Undo />
-            Un-schedule
-          </Button>
-          <Typography className={classes.title}>
-              {task.name}
-          </Typography>
-          <TextField
-            id='dump'
-            label='Edit task here...'
-            multiline
-            rowsMax={2}
-            size='medium'
-            variant='outlined'
-            onChange={e => {
-              onChangeHandler(e);
-            }}
-            onBlur={e => {
-              onPatchEditNameHandler(e, task._id);
-            }}
-            placeholder={task.name}
-            name='name'
-            value={task.name}
-          />
+            <TextField
+              inputRef={myRef}
+              autoFocus
+              id='dump'
+              label='Edit task here...'
+              onChange={e => {
+                onChangeHandler(e);
+              }}
+              onBlur={e => {
+                onPatchEditNameHandler(e, task._id);
+              }}
+              placeholder={task.name}
+              name='name'
+              value={task.name}
+            />
+          </FormControl>
           <FormControl
             variant='standard'
             className={classes.formControl}
@@ -661,33 +683,32 @@ const Do = props => {
         </DialogContent>
         <DialogActions>
           <Button 
-            autoFocus 
             onClick={handleCloseEdit}
-            color="primary"
+            color="secondary"
           >
             Cancel
           </Button>
-          <IconButton
-            aria-label='update task'
-            onClick={handleCloseEdit}
+          <Button
+            aria-label='confirm-update-task'
+            onClick={e => {onPatchEditTaskHandler(e, task._id, "Task Updated!", "success")}}
             color="primary"
           >
-            <LibraryAddIcon />
-          </IconButton>
+            Confirm
+          </Button>
         </DialogActions>
       </Dialog>
-      <Dialog open={openCal} onClose={handleCloseCal}>
+      <Dialog 
+        open={openCal} 
+        onClose={handleCloseCal}
+        fullWidth
+      >
+        <DialogTitle className={classes.dialogTitle}>{"Select a date..."}</DialogTitle>
         <DialogContent
           className={classes.dialogStyle}
         >
-          <Typography variant='h5' className={classes.title}>
+          <Typography variant='body1'>
               {task.name}
           </Typography>
-          <DialogContentText
-          color="secondary"
-          >
-            Please select a date...
-          </DialogContentText>
         </DialogContent>
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
           <CssBaseline />
@@ -716,18 +737,19 @@ const Do = props => {
         <Button 
             autoFocus 
             onClick={handleCloseCal}
-            color="primary"
+            color="secondary"
             >
             Cancel
           </Button>
-          <IconButton
+          <Button
             aria-label='add to calendar'
             onClick={e => {
               onPatchDateHandler(e, task._id, "Date Changed!", "success");
             }}
+            color="primary"
           >
-            <LibraryAddIcon />
-          </IconButton>
+            Confirm
+          </Button>
         </DialogActions>
       </Dialog>
       <SimpleSnackbar 

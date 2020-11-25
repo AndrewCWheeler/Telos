@@ -18,6 +18,7 @@ module.exports = app => {
   app.get('/api/categories/:id', authenticate, CategoryController.oneCategory);
   app.patch('/api/categories/color/:id', authenticate, CategoryController.updateCategory);
   app.patch('/api/categories/:id', authenticate, CategoryController.editCategory);
+  app.patch('/api/categories/refresh/:id', authenticate, CategoryController.refreshCategory);
   app.post('/api/categories/:id', authenticate, CategoryController.newCategory);
   app.delete('/api/categories/:id', authenticate, CategoryController.deleteCategory);
 };

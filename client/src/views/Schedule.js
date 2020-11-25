@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { navigate } from '@reach/router';
 // Material-ui core components:
-import Backdrop from '@material-ui/core/Backdrop';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Grid from '@material-ui/core/Grid';
@@ -24,12 +24,12 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
+import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 // Material-ui icons:
 import EditIcon from '@material-ui/icons/Edit';
 import EventIcon from '@material-ui/icons/Event';
 import LabelIcon from '@material-ui/icons/Label';
-import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 import Undo from '@material-ui/icons/Undo';
 // react-beautiful-dnd
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -58,16 +58,15 @@ const useStyles = makeStyles(theme => ({
   dialogStyle: {
     backgroundColor: theme.palette.background.paper,
   },
+  dialogTitle: {
+    color: theme.palette.primary.main,
+  },
   title: {
     margin: theme.spacing(4, 0, 2),
   },
   subtitle: {
     margin: theme.spacing(-1, 0, 0),
     color: theme.palette.primary.main,
-  },
-  select: {
-    color: theme.palette.primary.main,
-    backgroundColor: theme.palette.primary.main,
   },
   list: {
     marginBottom: 90,
@@ -78,10 +77,6 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
     backgroundColor: theme.palette.background.default,
     borderBottom: `.5px solid ${theme.palette.background.paper}`,
-  },
-  primaryIconStyle: {
-    fontSize:24,
-    color: theme.palette.primary.main,
   },
   radioStyle: {
     justifyContent: 'center',
@@ -101,26 +96,14 @@ const useStyles = makeStyles(theme => ({
   textPrimary: {
     color: theme.palette.text.primary,
   },
-  secondaryIconStyle: {
-    fontSize:24,
-    color: theme.palette.secondary.main,
-  },
   neutralIconStyle: {
     fontSize:24,
     color: theme.palette.text.secondary,
-  },
-  inline: {
-    display: 'inline',
-    overflow: 'hidden',
-    overflowWrap: 'ellipsis',
   },
   formControl: {
     margin: theme.spacing(1),
     minWidth: 250,
     marginBottom: 60,
-  },
-  selectEmpty: {
-    marginTop: theme.spacing(2),
   },
   undo: {
     color: theme.palette.secondary.main,
@@ -128,8 +111,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Schedule = props => {
+  const myRef = useRef();
   const classes = useStyles();
-  const { navigatePage, navValue, setNavValue, allTasks, setAllTasks, allCategories, sessionUserId, load, setLoad } = props;
+  const { navValue, setNavValue} = props;
 
   // STATES
   const [task, setTask] = useState({
@@ -143,7 +127,9 @@ const Schedule = props => {
     owner: '',
     priority: 0,
   });
-  const [selectedIndex, setSelectedIndex] = useState([]);
+  const [allTasks, setAllTasks] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
+  const [sessionUserId, setSessionUserId] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [openCal, setOpenCal] = useState(false);
@@ -151,18 +137,60 @@ const Schedule = props => {
   const [snack, setSnack] = useState('');
   const [severity, setSeverity] = useState('');
   const [openEdit, setOpenEdit] = useState(false);
+  const [load, setLoad] = useState(0);
 
   useEffect(() => {
-    if (navValue === 'schedule'){
-      load === 1 ? (setLoad(0)) : setLoad(1);
-      return
-    }
-    else if (navValue !== 'schedule'){
-      load === 1 ? (setLoad(0)) : setLoad(1);
+    let isMounted = true;
+    if (navValue !== 'schedule'){
       setNavValue('schedule');
     }
-    return
-  }, []);
+    let one = 'http://localhost:8000/api/users/one';
+    const requestOne = axios.get(one, { withCredentials: true });
+    requestOne
+      .then(response => {
+        if (response.data.message === 'success' && isMounted) {
+          setSessionUserId(response.data.results._id);
+        }
+      })
+      .catch(()=> {
+        navigate('/');
+      });
+    let two = 'http://localhost:8000/api/tasks/user';
+    const requestTwo = axios.get(two, { withCredentials: true });
+    requestTwo
+      .then(response => {
+        if (response.data.message === 'success' && isMounted){
+          let orderedTasks = response.data.results;
+          orderedTasks.sort((a,b) => a.priority - b.priority)
+          setAllTasks(orderedTasks);
+        }
+      })
+      .catch(()=> {
+        navigate('/');
+      });
+    let three = 'http://localhost:8000/api/categories/user';
+    const requestThree = axios.get(three, {withCredentials: true });
+    requestThree
+      .then(response => {
+        if (isMounted) setAllCategories(response.data.results);
+      })
+      .catch(()=> {
+        navigate('/');
+      });
+    axios
+      .all([requestOne, requestTwo, requestThree])
+      .then(
+        axios.spread((...responses) => {
+          const responseOne = responses[0];
+          const responseTwo = responses[1];
+          const responseThree = responses[2];
+        })
+      )
+      .catch(()=> {
+        navigate('/');
+      });
+      return () => { isMounted = false }
+  }, [load]);
 
   // DIALOG AND SNACK HANDLERS
   const handleOpenSnackBar = (snack, severity) => {
@@ -193,10 +221,10 @@ const Schedule = props => {
 
   // FILTER, SORT, TASK REORDER FUNCTIONS
 
-  // This filter returns a number (arr.length) of tasks that have not yet been scheduled within each category:
+  // This filter returns a number (arr.length) of tasks that have been chunked but not scheduled within each category:
   const unscheduledTasks = (arr, category) => {
     let filtered = '';
-    filtered = arr.filter(t => t.scheduled !== true && t.category === category);
+    filtered = arr.filter(t => !t.scheduled && t.category === category && t.chunked);
     if (filtered.length > 0){
       return filtered.length;
     } else return null;
@@ -267,7 +295,7 @@ const Schedule = props => {
 
   const onSelectHandler = e => {
     setSelectedCategory(e.target.value);
-    load === 1 ? (setLoad(0)) : setLoad(1);
+    // load === 1 ? (setLoad(0)) : setLoad(1);
   };
 
   // GET and PATCH axios calls:
@@ -277,18 +305,26 @@ const Schedule = props => {
       .then(res => {
         if (res.data.message === 'success') {
           setTask(res.data.results);
-          setSelectedIndex(res.data.results);
         }
       })
       .catch();
   };
 
   const onPatchEditNameHandler = (e, id) => {
+    if (e.target.value === ''){
+      handleOpenSnackBar("Task cannot be blank!", "error");
+      return
+    }
     axios
       .patch('http://localhost:8000/api/tasks/' + id, task, {
         withCredentials: true,
       })
-      .then()
+      .then(res => {
+        if (res.data.message === 'success'){
+          // handleOpenSnackBar("Task name updated!", "success");
+          load === 1 ? (setLoad(0)) : setLoad(1);
+        }
+      })
       .catch();
   };
 
@@ -313,19 +349,46 @@ const Schedule = props => {
   const onPatchUnChunkHandler = (e, id, snack, severity) => {
     task.category = '';
     task.chunked = false;
-    axios
-      .patch('http://localhost:8000/api/tasks/' + id, task, {
-        withCredentials: true,
-      })
+    axios.patch(`http://localhost:8000/api/tasks/${id}`, task, {withCredentials: true})
       .then(res => {
         if (res.data.message === 'success') {
           removeFromDom(id);
           handleCloseEdit();
           handleOpenSnackBar(snack, severity);
+          // load === 1 ? (setLoad(0)) : setLoad(1);
         }
       })
       .catch();
   };
+
+  const onPatchEditTaskHandler = (e, id, snack, severity) => {
+    if (task.name === '' || task.category === ''){
+      handleOpenSnackBar("Task must have a name and category!", "error");
+      return
+    }
+    else {
+      axios.patch('http://localhost:8000/api/tasks' + id, task, {withCredentials: true})
+      .then(res => {
+        if (res.data.message === 'success') {
+          handleOpenSnackBar(snack, severity);
+          handleCloseEdit();
+          setTask({
+            name: '',
+            category: '',
+            chunked: '',
+            scheduled: '',
+            scheduledAt: '',
+            completed: '',
+            completedAt: '',
+            owner: '',
+            priority: 0,
+          });
+        }
+      }).catch(err => {
+          handleOpenSnackBar("Nothing changed. Please try again or cancel", "warning");
+        })
+      }
+    }
 
   const onPatchDateHandler = (e, id) => {
     task.scheduledAt = selectedDate;
@@ -361,8 +424,8 @@ const Schedule = props => {
         Select a category:
       </Typography>
       </div>
-      <Grid container direction='row' justify='center' alignItems='center'>
-        <Grid item xs={12} wrap="nowrap" className={classes.root}>
+      <Grid container direction='row' justify='center' alignItems='center' wrap="nowrap">
+        <Grid item xs={12} className={classes.root}>
           <FormControl component="fieldset" className={classes.formControl}>
             <RadioGroup 
               row aria-label="category" 
@@ -379,10 +442,10 @@ const Schedule = props => {
                   className={classes.textPrimary}
                   value={category.name}
                   label={
-                    <Typography style={{fontSize:15}}>
-                      {category.name}<br></br>
-                      {unscheduledTasks(allTasks, category.name)}
-                    </Typography>
+                  <Typography style={{fontSize:15}}>
+                    {category.name}<br></br>
+                    {unscheduledTasks(allTasks, category.name)}
+                  </Typography>
                 }
                 labelPlacement="bottom"
                 control={<Radio style={{color:category.color, fontSize:15}}/>}
@@ -405,14 +468,13 @@ const Schedule = props => {
                     {SortedTasks.map((task, i) =>
                       task.category === selectedCategory ? (
                         <Draggable
-                          draggableId={task._id}
-                          index={i}
-                          key={task._id}
+                        draggableId={task._id}
+                        index={i}
+                        key={task._id}
                         >
                           {provided => (
                             <ListItem
                               className={classes.listItem}
-                              
                               ref={provided.innerRef}
                               id='ScheduleTask'
                               {...provided.draggableProps}
@@ -422,36 +484,36 @@ const Schedule = props => {
                             >
                               <ListItemIcon button style={{marginRight: -24, marginTop: -30, cursor: 'pointer'}}
                                 onClick={e => {handleOpenCal(e, task._id)}}
-                              >
+                                >
                                 <EventIcon className={classes.neutralIconStyle} />
                               </ListItemIcon>
-                              {allCategories.map((category, catIdx) => 
-                                task.category === category.name ?
-                                (
-                              <ListItemText
-                              key={catIdx}
-                              className={classes.text}
-                              disableTypography
-                              textoverflow='ellipsis'
-                              overflow='hidden'
-                              primary={<Typography style={{fontSize:15}}>{task.name}</Typography>}
-                              secondary={<Typography style={{fontSize:12, color:category.color}}>{task.category}</Typography>}
-                              />
-                              ) : null
-                              )}
-                              <div>
+                            {allCategories.map((category, catIdx) => 
+                              task.category === category.name ?
+                              (
+                              <>
+                                <ListItemText
+                                key={catIdx}
+                                className={classes.text}
+                                disableTypography
+                                textoverflow='ellipsis'
+                                overflow='hidden'
+                                primary={<Typography style={{fontSize:15}}>{task.name}</Typography>}
+                                secondary={<Typography style={{fontSize:12, color:category.color}}>{task.category}</Typography>}
+                                />
                                 <IconButton
                                   type='button'
                                   edge='end'
                                   onClick={e => {
                                     handleOpenEdit(e, task._id);
                                   }}
-                                >
+                                  >
                                   <EditIcon 
                                   className={classes.neutralIconStyle}
                                   />
                                 </IconButton>
-                              </div>
+                              </>
+                              ) : null
+                            )}
                             </ListItem>
                           )}
                         </Draggable>
@@ -471,43 +533,48 @@ const Schedule = props => {
         className={classes.modal}
         open={openEdit}
         onClose={handleCloseEdit}
-        closeAfterTransition
-        BackdropComponent={Backdrop}
-        BackdropProps={{
-          timeout: 500,
-        }}
+        fullWidth
       >
+        <div style={{float: 'left'}}>
+          <Tooltip title="Un-chunk" placement="top">
+            <Button
+            style={{float: 'left'}}
+            role='button'
+            onClick={e => {onPatchUnChunkHandler(e, task._id, "Task un-chunked!", "success")}}
+            >
+              <Undo className={classes.undo} />
+            </Button>
+          </Tooltip>
+        </div>
+        <DialogTitle className={classes.dialogTitle}>
+          {"Edit Task"}
+        </DialogTitle>
         <DialogContent
           className={classes.dialogStyle}
         >
-          <Button 
-          className={classes.undo}
-          role='button'
-          onClick={e => {onPatchUnChunkHandler(e, task._id, "Task un-chunked!", "success")}}
-          >
-            <Undo />
-            Un-chunk
-          </Button>
-          <Typography className={classes.title}>
+          <DialogContentText className={classes.title}>
             {task.name}
-          </Typography>
-          <TextField
-            id='dump'
-            label='Edit task here...'
-            multiline
-            rowsMax={2}
-            size='medium'
-            variant='outlined'
-            onChange={e => {
-              onChangeHandler(e);
-            }}
-            onBlur={e => {
-              onPatchEditNameHandler(e, task._id);
-            }}
-            placeholder={task.name}
-            name='name'
-            value={task.name}
-          />
+          </DialogContentText>
+          <FormControl
+          variant='standard'
+          className={classes.formControl}
+          >
+            <TextField
+              inputRef={myRef}
+              autoFocus
+              id='dump'
+              label='Edit task here...'
+              onChange={e => {
+                onChangeHandler(e);
+              }}
+              onBlur={e => {
+                onPatchEditNameHandler(e, task._id);
+              }}
+              placeholder={task.name}
+              name='name'
+              value={task.name}
+            />
+          </FormControl>
           <FormControl
             variant='standard'
             className={classes.formControl}
@@ -541,74 +608,77 @@ const Schedule = props => {
         </DialogContent>
         <DialogActions>
         <Button 
-          autoFocus 
           onClick={handleCloseEdit}
-          color="primary"
+          color="secondary"
         >
           Cancel
         </Button>
-          <IconButton
+          <Button
             aria-label='update task'
-            onClick={handleCloseEdit}
+            onClick={e => {onPatchEditTaskHandler(e, task._id, "Task Updated!", "success")}}
             color="primary"
           >
-            <LibraryAddIcon />
-          </IconButton>
+            Confirm
+          </Button>
         </DialogActions>
       </Dialog>
-
       {/* Date Assign Dialog */}
-      <Dialog open={openCal} onClose={handleCloseCal}>
-        <DialogContent
-          className={classes.dialogStyle}
-        >
-          <Typography variant='h5' className={classes.title}>
-              {task.name}
-          </Typography>
-          <DialogContentText 
-          color="secondary">
-            Please select a date...
+      <Dialog
+        open={openCal}
+        onClose={handleCloseCal}
+        fullWidth
+      >
+          <DialogTitle className={classes.dialogTitle}>
+            {"Schedule Task"}
+          </DialogTitle>
+          <DialogContent
+            className={classes.dialogStyle}
+          >
+          <DialogContentText>
+            <Typography variant='body1'>
+                {task.name}
+            </Typography>
           </DialogContentText>
+          <MuiPickersUtilsProvider color="primary" utils={DateFnsUtils}>
+            <CssBaseline />
+            <KeyboardDatePicker
+              key={task.scheduledAt}
+              margin='normal'
+              InputAdornmentProps={{
+                position: 'start',
+              }}
+              id='date-picker-dialog'
+              format='MM/dd/yyyy'
+              value={selectedDate}
+              onClick={e => {
+                onClickHandler(e, task._id);
+              }}
+              onChange={e => {
+                onChangeDate(e, task._id);
+              }}
+              KeyboardButtonProps={{
+                'aria-label': 'change date',
+              }}
+            />
+          </MuiPickersUtilsProvider>
         </DialogContent>
-        <MuiPickersUtilsProvider color="primary" utils={DateFnsUtils}>
-          <CssBaseline />
-          <KeyboardDatePicker
-            key={task.scheduledAt}
-            margin='normal'
-            InputAdornmentProps={{
-              position: 'start',
-            }}
-            id='date-picker-dialog'
-            format='MM/dd/yyyy'
-            value={selectedDate}
-            onClick={e => {
-              onClickHandler(e, task._id);
-            }}
-            onChange={e => {
-              onChangeDate(e, task._id);
-            }}
-            KeyboardButtonProps={{
-              'aria-label': 'change date',
-            }}
-          />
-        </MuiPickersUtilsProvider>
         <DialogActions>
           <Button
             autoFocus
             onClick={handleCloseCal}
-            color="primary"
+            color="secondary"
             >
             Cancel
           </Button>
-          <IconButton
+          <Button
             aria-label='add to calendar'
             onClick={e => {
               onPatchDateHandler(e, task._id);
             }}
             color="primary"
           >
-            <LibraryAddIcon />
-          </IconButton>
+            Confirm
+          </Button>
         </DialogActions>
       </Dialog>
       <SimpleSnackbar
@@ -617,7 +687,7 @@ const Schedule = props => {
         snack={snack}
         openSnack={openSnack}
         handleOpenSnackBar={handleOpenSnackBar}
-        handleCloseSnackBar={handleCloseSnackBar} 
+        handleCloseSnackBar={handleCloseSnackBar}
       />
     </div>
   );

@@ -61,6 +61,7 @@ const useDarkMode = () => {
   }
   return [theme, toggleDarkMode]
 }
+
 const App = () => {
   const [theme, toggleDarkMode] = useDarkMode();
   const themeConfig = createMuiTheme(theme);
@@ -75,7 +76,7 @@ const App = () => {
           <LandingPage path='/' />
           <SignInSide path='/signin' />
           <SignUp path='/signup' />
-          <Main 
+          <Main
             path='/*'
             toggleDarkMode={toggleDarkMode}
           />

@@ -1,6 +1,5 @@
-import React, {useState} from 'react';
+import React from 'react';
 // Material-ui core components:
-import Backdrop from '@material-ui/core/Backdrop';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Dialog from '@material-ui/core/Dialog';
@@ -17,16 +16,6 @@ import AddIcon from '@material-ui/icons/Add';
 import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 
 const useStyles = makeStyles(theme => ({
-  root: {
-    maxWidth: 840,
-    width: '100%',
-    overflow: 'hidden',
-    '& .MuiTextField-root': {
-      margin: theme.spacing(1),
-      maxWidth: '33ch',
-      color: theme.palette.text.primary,
-    },
-  },
   add: {
     margin: theme.spacing(2),
     color: theme.palette.primary.main,
@@ -44,11 +33,6 @@ const useStyles = makeStyles(theme => ({
       backgroundColor: green[600],
     },
   },
-  paper: {
-    maxWidth: 500,
-    margin: `${theme.spacing(2)}px auto`,
-    padding: theme.spacing(3, 0),
-  },
   title: {
     margin: theme.spacing(4, 0, 2),
     color: theme.palette.primary.main,
@@ -59,14 +43,11 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const DumpComponent = props => {
-  
   const classes = useStyles();
-  const { openDumpSubmit, setOpenDumpSubmit, handleOpenDumpSubmit, handleCloseDumpSubmit, onChangeHandler, task, handleKeyDown, onSubmitHandler } = props;
-
-
+  const { inputRef, dumpRef, openDumpSubmit, handleOpenDumpSubmit, handleCloseDumpSubmit, onChangeHandler, task, handleKeyDown, onSubmitHandler } = props;
 
   return (
-    <div>
+    <div ref={dumpRef}>
       <CssBaseline />
       <Fab className={classes.fab} onClick={handleOpenDumpSubmit}>
         <AddIcon className={classes.extraLarge}/>
@@ -76,33 +57,28 @@ const DumpComponent = props => {
         className={classes.modal}
         open={openDumpSubmit}
         onClose={handleCloseDumpSubmit}
-        closeAfterTransition
         fullWidth
-        BackdropComponent={Backdrop}
-        BackdropProps={{
-          timeout: 500,
-        }}
       >
       <DialogTitle className={classes.title}>{"Dump"}</DialogTitle>
       <DialogContent className={classes.dialogStyle}>
         <TextField
+          autoFocus
+          inputRef={inputRef}
           style={{marginTop: 6}}
           fullWidth
           id='dump'
           label='Dump...'
-          variant='outlined'
           onChange={e => {
             onChangeHandler(e);
           }}
           onKeyPress={e => {handleKeyDown(e)}}
           name='name'
           value={task.name}
-          autoFocus='true'
+          type="text"
         />
       </DialogContent>
       <DialogActions>
         <Button
-          autoFocus
           onClick={handleCloseDumpSubmit}
           color="primary"
           >

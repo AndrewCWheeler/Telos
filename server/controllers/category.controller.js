@@ -55,6 +55,17 @@ module.exports = {
       .catch(err => res.json({ message: 'error', results: err }));
   },
 
+  refreshCategory: (req, res) => {
+    Category.findByIdAndUpdate({ _id: req.params.id }, 
+      { $pull: { tasks: req.body._id }}, {
+      runValidators: true,
+      new: true,
+      useFindAndModify: false,
+    })
+      .then(category => res.json({ message: 'success', results: category }))
+      .catch(err => res.json({ message: 'error', results: err }));
+  },
+
   //Delete methods --> app.delete
   deleteCategory: (req, res) => {
     Category.findByIdAndDelete({ _id: req.params.id })

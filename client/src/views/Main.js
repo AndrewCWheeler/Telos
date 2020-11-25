@@ -22,58 +22,22 @@ const Main = (props) => {
   const [sessionUser, setSessionUser] = useState({});
   const [sessionUserId, setSessionUserId] = useState('');
   const [sessionUserFirstName, setSessionUserFirstName] = useState('');
-  const [allTasks, setAllTasks] = useState([]);
-  const [allCategories, setAllCategories] = useState([]);
   const [load, setLoad] = useState(0);
   const [navValue, setNavValue] = useState('');
   
   useEffect(() => {
-    let isMounted = true;
-    let one = 'http://localhost:8000/api/users/one';
-    const requestOne = axios.get(one, { withCredentials: true });
-    requestOne
+    axios.get('http://localhost:8000/api/users/one', { withCredentials: true })
       .then(response => {
-        if (response.data.message === 'success' && isMounted) {
+        if (response.data.message === 'success') {
           setSessionUserId(response.data.results._id);
           setSessionUser(response.data.results);
           setFirstInitial(response.data.results.firstName.charAt());
           setSessionUserFirstName(response.data.results.firstName);
         }
       })
-      .catch(() => {
+      .catch(()=> {
         navigate('/');
       });
-    let two = 'http://localhost:8000/api/tasks/user';
-    const requestTwo = axios.get(two, { withCredentials: true });
-    requestTwo
-      .then(response => {
-        if (response.data.message === 'success' && isMounted){
-          let orderedTasks = response.data.results;
-          orderedTasks.sort((a,b) => a.priority - b.priority)
-          setAllTasks(orderedTasks);
-        }
-      })
-      .catch();
-    let three = 'http://localhost:8000/api/categories/user';
-    const requestThree = axios.get(three, {withCredentials: true });
-    requestThree
-      .then(response => {
-        if (isMounted) setAllCategories(response.data.results);
-      })
-      .catch();
-    axios
-      .all([requestOne, requestTwo, requestThree])
-      .then(
-        axios.spread((...responses) => {
-          const responseOne = responses[0];
-          const responseTwo = responses[1];
-          const responseThree = responses[2];
-        })
-      )
-      .catch(() => {
-        navigate('/');
-      });
-      return () => { isMounted = false }
   }, [load]);
   
   const navigatePage = (e, navValue) => {
@@ -108,78 +72,39 @@ const Main = (props) => {
       <Router>
         <Vision
           path='/vision'
-          navigatePage={navigatePage}
           navValue={navValue}
           setNavValue={setNavValue}
-          sessionUser={sessionUser}
+          navigatePage={navigatePage}
         />
         <Category
           path='/category'
-          navigatePage={navigatePage}
           navValue={navValue}
           setNavValue={setNavValue}
-          sessionUserId={sessionUserId}
-          allCategories={allCategories}
-          setAllCategories={setAllCategories}
-          load={load}
-          setLoad={setLoad}
         />
         <DumpAndChunk
           path='/dump'
-          navigatePage={navigatePage}
           navValue={navValue}
           setNavValue={setNavValue}
-          allTasks={allTasks}
-          setAllTasks={setAllTasks}
-          allCategories={allCategories}
-          sessionUserId={sessionUserId}
-          load={load}
-          setLoad={setLoad}
         />
         <Schedule 
           path='/schedule'
-          navigatePage={navigatePage}
           navValue={navValue}
           setNavValue={setNavValue}
-          allTasks={allTasks}
-          setAllTasks={setAllTasks}
-          allCategories={allCategories}
-          sessionUserId={sessionUserId}
-          load={load}
-          setLoad={setLoad}
         />
         <Do 
           path='/do'
-          navigatePage={navigatePage}
           navValue={navValue}
           setNavValue={setNavValue}
-          allTasks={allTasks}
-          setAllTasks={setAllTasks}
-          allCategories={allCategories}
-          sessionUserId={sessionUserId}
-          load={load}
-          setLoad={setLoad}
         />
         <Trajectory
           path='/trajectory'
-          navigatePage={navigatePage}
           navValue={navValue}
           setNavValue={setNavValue}
-          allTasks={allTasks}
-          allCategories={allCategories}
-          load={load}
-          setLoad={setLoad}
         />
         <Profile
           path='/profile'
-          navigatePage={navigatePage}
           navValue={navValue}
           setNavValue={setNavValue}
-          allTasks={allTasks}
-          setAllTasks={setAllTasks}
-          allCategories={allCategories}
-          sessionUser={sessionUser}
-          firstInitial={firstInitial}
         />
       </Router>
       <BottomNavComponent
@@ -188,7 +113,7 @@ const Main = (props) => {
         setNavValue={setNavValue}
         position="fixed"
       />
-      <PersistentDrawer 
+      <PersistentDrawer
         navigatePage={navigatePage}
         navValue={navValue}
         firstInitial={firstInitial}

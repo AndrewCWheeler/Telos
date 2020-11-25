@@ -14,9 +14,8 @@ import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 
-import AddCircleIcon from '@material-ui/icons/AddCircle';
 import InfoIcon from '@material-ui/icons/Info';
-import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
+import UpdateIcon from '@material-ui/icons/Update';
 
 import SimpleSnackbar from '../components/SimpleSnackBar';
 import { IconButton } from '@material-ui/core';
@@ -60,14 +59,33 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Vision = props => {
-  const { navigatePage, navValue, sessionUser } = props;
+  const { navValue, setNavValue, navigatePage } = props;
   const domRef = useRef();
   const classes = useStyles();
+  const [sessionUser, setSessionUser] = useState({});
+  const [load, setLoad] = useState(0);
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
   const [severity, setSeverity] = useState('');
   const [vision, setVision] = useState('');
   const [openVisionDialog, setOpenVisionDialog] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    if (navValue !== 'vision'){
+      setNavValue('vision');
+    }
+    axios.get('http://localhost:8000/api/users/one', { withCredentials: true })
+      .then(response => {
+        if (response.data.message === 'success' && isMounted) {
+          setSessionUser(response.data.results);
+        }
+      })
+      .catch(()=> {
+        navigate('/');
+      });
+      return () => { isMounted = false }
+  }, [load]);
 
   const handleOpenSnackBar = (snack, severity) => {
     setOpenSnack(true);
@@ -151,7 +169,7 @@ const Vision = props => {
               onClick={e => {onSubmitHandler(e, "Vision updated!", "success")}} 
               className={classes.fab}
             >
-              <LibraryAddIcon style={{fontSize: 60}}/>
+              <UpdateIcon style={{fontSize: 60}}/>
             </IconButton>
           </Tooltip>
         </Grid>
@@ -170,11 +188,12 @@ const Vision = props => {
         onClose={handleCloseVisionDialog}
         aria-labelledby="alert-vision-dialog"
         aria-describedby="alert-vision-explanation"
+        fullWidth
       >
         <DialogTitle id="VisionDialogTitle">{"Vision"}</DialogTitle>
         <DialogContent>
           <DialogContentText id="VisionDialogAlert">
-          Aristotle famously said, "We are what we repeatedly do." What if the reverse were also true? "We do what we repeatedly tell ourselves we are." In other words, we act out of who we perceive ourselves to be. Before you begin creating task lists, take a moment to create your own personal vision statement. Then let this vision influence the <Button role='link' className={classes.link} onClick={e => {navigatePage(e, 'category')}}>categories</Button> you create.
+          Aristotle famously said, "We are what we repeatedly do." What if the reverse were also true? "We do what we repeatedly tell ourselves we are." In other words, we act out of who we perceive ourselves to be. Before you begin creating task lists, take a moment to create your own personal vision statement. This is your vision of you. Who do you repeatedly tell yourself you are? Then let this vision influence the <Button role='link' className={classes.link} onClick={e => {navigatePage(e, 'category')}}>categories</Button> you create.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

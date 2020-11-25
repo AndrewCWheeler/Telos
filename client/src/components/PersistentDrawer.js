@@ -204,7 +204,7 @@ const PersistentDrawer = (props) => {
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
   const [severity, setSeverity] = useState('');
-  
+
   const handleOpenSnackBar = (snack, severity) => {
     setOpenSnack(true);
     setSnack(snack);

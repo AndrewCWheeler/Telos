@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
+import {navigate} from '@reach/router';
 // Material-ui core components:
-import Backdrop from '@material-ui/core/Backdrop';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Dialog from '@material-ui/core/Dialog';
@@ -112,7 +112,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Category = (props) => {
-  const { navValue, setNavValue, sessionUserId, allCategories, setAllCategories, load, setLoad } = props;
+  const { navValue, setNavValue } = props;
   const classes = useStyles();
   const [category, setCategory] = useState({
     name: '',
@@ -125,18 +125,47 @@ const Category = (props) => {
   const [selectedColor, setSelectedColor] = useState('');
   const [openDeleteCategory, setOpenDeleteCategory] = useState(false);
   const [openCategorySubmit, setOpenCategorySubmit] = useState(false);
+  const [sessionUserId, setSessionUserId] = useState('');
+  const [allCategories, setAllCategories] = useState([]);
+  const [load, setLoad] = useState(0);
 
   useEffect(() => {
-    if (navValue === 'category'){
-      load === 1 ? (setLoad(0)) : setLoad(1);
-      return
-    }
-    else if (navValue !== 'category'){
+    let isMounted = true;
+    if (navValue !== 'category'){
       setNavValue('category');
-      load === 1 ? (setLoad(0)) : setLoad(1);
     }
-    return
-  }, []);
+    let one = 'http://localhost:8000/api/users/one';
+    const requestOne = axios.get(one, { withCredentials: true });
+    requestOne
+      .then(response => {
+        if (response.data.message === 'success' && isMounted) {
+          setSessionUserId(response.data.results._id);
+        }
+      })
+      .catch(() => {
+        navigate('/');
+      });
+    let two = 'http://localhost:8000/api/categories/user';
+    const requestTwo = axios.get(two, {withCredentials: true });
+    requestTwo
+      .then(response => {
+        if (isMounted) setAllCategories(response.data.results);
+      })
+      .catch();
+    axios
+      .all([requestOne, requestTwo])
+      .then(
+        axios.spread((...responses) => {
+          const responseOne = responses[0];
+          const responseTwo = responses[1];
+        })
+      )
+      .catch(() => {
+        navigate('/');
+      });
+      return () => { isMounted = false }
+  }, [load]);
+
 
   const handleChangeColor = (e) => {
     setSelectedColor(e.target.value);
@@ -322,12 +351,7 @@ const Category = (props) => {
         className={classes.modal}
         open={openCategorySubmit}
         onClose={handleCloseCategorySubmit}
-        closeAfterTransition
         fullWidth
-        BackdropComponent={Backdrop}
-        BackdropProps={{
-          timeout: 500,
-        }}
       >
         <DialogTitle className={classes.title}>{"Category"}</DialogTitle>
         <DialogContent className={classes.dialogStyle}>
@@ -369,12 +393,8 @@ const Category = (props) => {
         aria-describedby='choose-edit-category'
         className={classes.modal}
         open={openEdit}
+        fullWidth
         onClose={handleCloseEdit}
-        closeAfterTransition
-        BackdropComponent={Backdrop}
-        BackdropProps={{
-          timeout: 500,
-        }}
       >
         <DialogContent
           className={classes.dialogStyle}
@@ -389,9 +409,7 @@ const Category = (props) => {
           <TextField
             id='dump'
             label='Edit category here...'
-            multiline
-            rowsMax={2}
-            size='medium'
+            fullWidth
             variant='outlined'
             onChange={e => {
               onChangeHandler(e);
@@ -429,6 +447,7 @@ const Category = (props) => {
       <Dialog
         open={openDeleteCategory}
         onClose={handleCloseDeleteCategory}
+        fullWidth
         aria-labelledby="alert-delete-category"
         aria-describedby="alert-are-you-sure?"
       >
