@@ -8,13 +8,17 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Fab from '@material-ui/core/Fab';
+import { green } from '@material-ui/core/colors';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 
+import AddIcon from '@material-ui/icons/Add';
 import InfoIcon from '@material-ui/icons/Info';
+import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 import UpdateIcon from '@material-ui/icons/Update';
 
 import SimpleSnackbar from '../components/SimpleSnackBar';
@@ -31,12 +35,25 @@ const useStyles = makeStyles(theme => ({
       color: theme.palette.text.primary,
     },
   },
+  dialogStyle: {
+    backgroundColor: theme.palette.background.paper,
+  },
+  extraLarge: {
+    fontSize: 32,
+  },
   fab: {
+    position: 'sticky',
+    bottom: theme.spacing(9),
+    right: theme.spacing(3),
+    color: theme.palette.common.white,
+    backgroundColor: green[500],
+    '&:hover': {
+      backgroundColor: green[600],
+    },
+  },
+  icon: {
     margin: theme.spacing(2),
     color: theme.palette.primary.main,
-  },
-  title: {
-    marginTop: theme.spacing(4),
   },
   link: {
     textDecoration: 'none',
@@ -49,12 +66,38 @@ const useStyles = makeStyles(theme => ({
       textDecoration: 'none',
     },
   },
+  layout: {
+    flexGrow: 1,
+    overflow: 'scroll',
+    padding: theme.spacing(0, 3),
+  },
+  modal: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  neutralIconStyle: {
+    fontSize:24,
+  },
+  title: {
+    margin: theme.spacing(4, 0, 2),
+  },
+  submit: {
+    margin: theme.spacing(2),
+    color: theme.palette.primary.main,
+  },
   visionStyle: {
     maxWidth: 519,
     marginTop: 30,
     marginBottom: 300,
     overflow: 'scroll',
     padding: 9,
+  },
+  formControl: {
+    maxWidth: 300,
+  },
+  error: {
+    color: theme.palette.error.main,
   },
 }));
 
@@ -67,8 +110,8 @@ const Vision = props => {
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
   const [severity, setSeverity] = useState('');
-  const [vision, setVision] = useState('');
-  const [openVisionDialog, setOpenVisionDialog] = useState(false);
+  const [openVisionInfo, setOpenVisionInfo] = useState(false);
+  const [openVisionCreate, setOpenVisionCreate] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -99,24 +142,38 @@ const Vision = props => {
     setOpenSnack(false);
   };
 
-  const handleOpenVisionDialog = () => {
-    setOpenVisionDialog(true);
+  const handleOpenVisionInfo = () => {
+    setOpenVisionInfo(true);
   };
-  const handleCloseVisionDialog = () => {
-    setOpenVisionDialog(false);
+  const handleCloseVisionInfo = () => {
+    setOpenVisionInfo(false);
   };
 
-  const handleKeyDown = (e) => {
+  const handleOpenVisionCreate = () => {
+    setOpenVisionCreate(true);
+  }
+  const handleCloseVisionCreate = () => {
+    setOpenVisionCreate(false);
+  }
+
+  const onChangeHandler = (e) => {
+    setSessionUser({
+      ...sessionUser,
+      [e.target.name]: e.target.value,
+    })
+    console.log(sessionUser);
+  }
+
+  const handleKeyDown = (e, snack, severity) => {
     if (e.key === 'Enter') {
-      onSubmitHandler(e, "Vision updated!", "success");
+      onSubmitHandler(e, snack, severity);
     }
   }
   const onSubmitHandler = (e, snack, severity) => {
-    if (vision === ''){
+    if (sessionUser.vision === ''){
       handleOpenSnackBar("You have no vision?", "warning")
       return
     }
-    sessionUser.vision = vision;
     axios
       .patch('http://localhost:8000/api/users/one', sessionUser, {
         withCredentials: true,
@@ -124,56 +181,32 @@ const Vision = props => {
       .then(res => {
         if(res.data.message === 'success'){
           handleOpenSnackBar(snack, severity);
-          setVision('');
+          handleCloseVisionCreate();
         }}).catch();
   };
 
   return (
     <div>
       <CssBaseline />
-      <Grid container direction='row' justify='center' alignItems='center' style={{marginTop: 60}}>
-        <Grid item xs={12}>
-          <Typography
-          className={classes.title}
-          variant='h5'>
-            Vision 
-            <IconButton onClick={e => {handleOpenVisionDialog(e)}}>
-              <InfoIcon color="primary"/>
+      <div style={{marginTop: 90}}>
+        <Typography
+        className={classes.title}
+        variant='h5'>
+          Vision
+          <IconButton onClick={e => {handleOpenVisionInfo(e)}}>
+            <InfoIcon color="primary"/>
           </IconButton>
-          </Typography>
-        </Grid>
-      </Grid>
-      <Grid container direction="row" justify='center' alignItems='center'>
-        <Grid item xs={12} className={classes.root}>
-          <TextField
-            placeholder="I am..."
-            id='vision'
-            label='Vision here...'
-            multiline
-            rows={3}
-            fullWidth
-            variant='outlined'
-            onChange={e => {
-              setVision(e.target.value);
-            }}
-            onKeyPress={e => {handleKeyDown(e)}}
-            name='vision'
-            value={vision}
-          />
-        </Grid>
-      </Grid>
-      <Grid container direction="row" justify='center' alignItems='center' style={{marginTop: 12}}>
-        <Grid item xs={12} style={{marginBottom: 30}}>
-          <Tooltip ref={domRef} title="Add/Update" placement="right">  
-            <IconButton
-              onClick={e => {onSubmitHandler(e, "Vision updated!", "success")}} 
-              className={classes.fab}
-            >
-              <UpdateIcon style={{fontSize: 60}}/>
-            </IconButton>
-          </Tooltip>
-        </Grid>
-      </Grid>
+        </Typography>
+      </div>
+      <Tooltip ref={domRef} title="Add/Update" placement="right">  
+        <Fab className={classes.fab} onClick={handleOpenVisionCreate}>
+          {sessionUser.vision === '' ? (
+            <AddIcon className={classes.extraLarge}/>
+          ) : (
+            <UpdateIcon className={classes.extraLarge}/>
+          )}
+        </Fab>
+      </Tooltip>
       <Grid container direction="row" justify='center' alignItems='center' style={{marginTop: 12, marginBottom: 6}}>
         <Grid item item xs={12} className={classes.visionStyle}>
           <Typography 
@@ -183,10 +216,56 @@ const Vision = props => {
           </Typography>
         </Grid>
       </Grid>
+      {/* Create / Update Vision Dialog */}
       <Dialog
-        open={openVisionDialog}
-        onClose={handleCloseVisionDialog}
-        aria-labelledby="alert-vision-dialog"
+        ref={domRef}
+        aria-labelledby='vision-modal-create'
+        className={classes.modal}
+        open={openVisionCreate}
+        onClose={handleCloseVisionCreate}
+        fullWidth
+      >
+        <DialogTitle className={classes.title}>{"Vision"}</DialogTitle>
+        <DialogContent className={classes.dialogStyle}>
+          <TextField
+            style={{marginTop: 6}}
+            fullWidth
+            label='Vision...'
+            variant='outlined'
+            multiline
+            rows={4}
+            rowsMax={8}
+            onChange={e => {
+              onChangeHandler(e);
+            }}
+            onKeyPress={e => {handleKeyDown(e, "Vision Updated!", "success")}}
+            name='vision'
+            value={sessionUser.vision}
+            autoFocus
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleCloseVisionCreate}
+            color="secondary"
+            >
+            Cancel
+          </Button>
+          <Button
+            className={classes.submit}
+            onClick={e => {
+              onSubmitHandler(e, "Vision Updated!", "success");
+            }}
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Vision Explanation Dialog */}
+      <Dialog
+        open={openVisionInfo}
+        onClose={handleCloseVisionInfo}
+        aria-labelledby="alert-vision-info"
         aria-describedby="alert-vision-explanation"
         fullWidth
       >
@@ -197,7 +276,7 @@ const Vision = props => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseVisionDialog} color="primary">
+          <Button onClick={handleCloseVisionInfo} color="secondary">
             Close
           </Button>
         </DialogActions>
