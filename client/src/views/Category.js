@@ -1,6 +1,5 @@
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
-import {navigate} from '@reach/router';
 // Material-ui core components:
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -112,7 +111,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Category = (props) => {
-  const { navValue, setNavValue } = props;
+  const { navValue, setNavValue, logoutUser } = props;
   const classes = useStyles();
   const [category, setCategory] = useState({
     name: '',
@@ -143,7 +142,7 @@ const Category = (props) => {
         }
       })
       .catch(() => {
-        navigate('/');
+        logoutUser();
       });
     let two = 'http://localhost:8000/api/categories/user';
     const requestTwo = axios.get(two, {withCredentials: true });
@@ -160,9 +159,7 @@ const Category = (props) => {
           const responseTwo = responses[1];
         })
       )
-      .catch(() => {
-        navigate('/');
-      });
+      .catch();
       return () => { isMounted = false }
   }, [load]);
 
@@ -259,7 +256,7 @@ const Category = (props) => {
       .catch();
   };
 
-  const onPutHandler = (e, id, snack, severity) => {
+  const onCategoryUpdateHandler = (e, id, snack, severity) => {
     category.color = selectedColor;
     axios
       .patch('http://localhost:8000/api/categories/color/' + id, category, {
@@ -292,7 +289,8 @@ const Category = (props) => {
           name: '',
           color: '',
         });
-      }).catch();
+      })
+      .catch();
   };
 
   return (
@@ -433,7 +431,7 @@ const Category = (props) => {
           Cancel
         </Button>
           <IconButton
-            onClick={e => {onPutHandler(e, category._id, "Category Updated!", "success")}}
+            onClick={e => {onCategoryUpdateHandler(e, category._id, "Category Updated!", "success")}}
             aria-label='update category'
             color="primary"
           >

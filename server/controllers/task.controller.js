@@ -40,7 +40,6 @@ module.exports = {
       new: true,
       useFindAndModify: false,
     })
-    // .then(task=> { return })
       .then(task => res.json({ message: 'success', results: task }))
       .catch(err => res.json({ message: 'error', results: err }));
   },

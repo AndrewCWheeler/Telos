@@ -28,7 +28,7 @@ const DumpAndChunk = props => {
   const dumpRef = useRef();
   const editRef = useRef();
   const classes = useStyles();
-  const { navValue, setNavValue } = props;
+  const { navValue, setNavValue, logoutUser } = props;
   const [sessionUserId, setSessionUserId] = useState('');
   const [allTasks, setAllTasks] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
@@ -65,8 +65,8 @@ const DumpAndChunk = props => {
           setSessionUserId(response.data.results._id);
         }
       })
-      .catch(()=> {
-        navigate('/');
+      .catch(()=>{
+        logoutUser();
       });
     let two = 'http://localhost:8000/api/tasks/user';
     const requestTwo = axios.get(two, { withCredentials: true });
@@ -78,18 +78,14 @@ const DumpAndChunk = props => {
           setAllTasks(orderedTasks);
         }
       })
-      .catch(()=> {
-        navigate('/');
-      });
+      .catch();
     let three = 'http://localhost:8000/api/categories/user';
     const requestThree = axios.get(three, {withCredentials: true });
     requestThree
       .then(response => {
         if (isMounted) setAllCategories(response.data.results);
       })
-      .catch(()=> {
-        navigate('/');
-      });
+      .catch();
     axios
       .all([requestOne, requestTwo, requestThree])
       .then(
@@ -99,9 +95,7 @@ const DumpAndChunk = props => {
           const responseThree = responses[2];
         })
       )
-      .catch(()=> {
-        navigate('/');
-      });
+      .catch();
       return () => { isMounted = false }
   }, [load]);
 
@@ -174,8 +168,7 @@ const DumpAndChunk = props => {
         if (res.data.message === 'success') {
           setTask(res.data.results);
         }
-      })
-      .catch();
+      }).catch();
   };
 
   const onChangeHandler = e => {
@@ -253,7 +246,8 @@ const DumpAndChunk = props => {
     const requestTwo = axios.patch(two, task, { withCredentials: true});
     requestTwo
       .then(res => {
-      }).catch();
+      })
+      .catch();
     axios
       .all([requestOne, requestTwo])
       .then(
@@ -261,7 +255,8 @@ const DumpAndChunk = props => {
           const responseOne = responses[0];
           const responseTwo = responses[1];
         })
-      ).catch();
+      )
+      .catch();
   };
 
   const onPatchEditNameHandler = (e, id) => {

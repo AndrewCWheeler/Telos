@@ -70,9 +70,9 @@ export default function SignUp() {
   const [severity, setSeverity] = useState('');
   
   const handleOpenSnackBar = (snack, severity) => {
-    setOpenSnack(true);
     setSnack(snack);
     setSeverity(severity);
+    setOpenSnack(true);
   };
 
   const handleCloseSnackBar = (event, reason) => {

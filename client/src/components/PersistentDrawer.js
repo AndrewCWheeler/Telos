@@ -1,6 +1,5 @@
-import React, {useState, useEffect } from 'react';
+import React, {useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { navigate } from '@reach/router';
 import clsx from 'clsx';
 // Material-ui core components:
 import AppBar from '@material-ui/core/AppBar';
@@ -19,7 +18,6 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { red } from '@material-ui/core/colors';
-import RootRef from '@material-ui/core/RootRef';
 import Snackbar from '@material-ui/core/Snackbar';
 import Slide from '@material-ui/core/Slide';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -97,9 +95,6 @@ const useStyles = makeStyles((theme) => ({
   },
   grow: {
     flexGrow: 1,
-  },
-  menuButton: {
-    marginRight: theme.spacing(2),
   },
   title: {
     display: 'none',
@@ -194,16 +189,33 @@ function HideOnScroll(props) {
 }
 
 const PersistentDrawer = (props) => {
+  const menuRef=useRef();
   const classes = useStyles();
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-  const {toggleDarkMode, navigatePage, sessionUserFirstName, firstInitial, handleDrawerOpen, handleDrawerClose, open, setOpen, navValue} = props;
+  const [firstInitial, setFirstInitial] = useState('');
+  const [sessionUserFirstName, setSessionUserFirstName] = useState('');
+  const [load, setLoad] = useState(0);
+  const {toggleDarkMode, navigatePage, handleDrawerOpen, handleDrawerClose, open, logoutUser, setOpen, navValue} = props;
   const [openSnack, setOpenSnack] = useState(false);
   const [snack, setSnack] = useState('');
   const [severity, setSeverity] = useState('');
+
+  useEffect(() => {
+    axios.get('http://localhost:8000/api/users/one', { withCredentials: true })
+      .then(response => {
+        if (response.data.message === 'success') {
+          setFirstInitial(response.data.results.firstName.charAt());
+          setSessionUserFirstName(response.data.results.firstName);
+        }
+      })
+      .catch(()=>{
+        logoutUser();
+      });
+  }, [load]);
 
   const handleOpenSnackBar = (snack, severity) => {
     setOpenSnack(true);
@@ -239,21 +251,10 @@ const PersistentDrawer = (props) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
-  const logoutUser = (e, snack) => {
-    axios
-      .get('http://localhost:8000/api/users/logout', { withCredentials: true })
-      .then(res => {
-        if (res.data.message === 'success') {
-          handleOpenSnackBar(snack);
-        }
-        navigate('/');
-      })
-      .catch();
-  };
-
   const menuId = 'primary-search-account-menu';
   const renderMenu = (
     <Menu
+      ref={menuRef}
       anchorEl={anchorEl}
       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       id={menuId}
@@ -270,7 +271,7 @@ const PersistentDrawer = (props) => {
         <Typography>
           <Link
           className={classes.link}
-          onClick={e => {logoutUser(e, "Successfully logged out!", "info")}}
+          onClick={e => {logoutUser(e)}}
           >
             Logout
           </Link>

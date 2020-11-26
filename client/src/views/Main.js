@@ -18,27 +18,7 @@ import "../assets/scss/material-kit-pro-react.scss";
 const Main = (props) => {
   const { toggleDarkMode } = props;
   const [open, setOpen] = useState(false);
-  const [firstInitial, setFirstInitial] = useState('');
-  const [sessionUser, setSessionUser] = useState({});
-  const [sessionUserId, setSessionUserId] = useState('');
-  const [sessionUserFirstName, setSessionUserFirstName] = useState('');
-  const [load, setLoad] = useState(0);
   const [navValue, setNavValue] = useState('');
-  
-  useEffect(() => {
-    axios.get('http://localhost:8000/api/users/one', { withCredentials: true })
-      .then(response => {
-        if (response.data.message === 'success') {
-          setSessionUserId(response.data.results._id);
-          setSessionUser(response.data.results);
-          setFirstInitial(response.data.results.firstName.charAt());
-          setSessionUserFirstName(response.data.results.firstName);
-        }
-      })
-      .catch(()=> {
-        navigate('/');
-      });
-  }, [load]);
   
   const navigatePage = (e, navValue) => {
     setNavValue(navValue);
@@ -66,6 +46,17 @@ const Main = (props) => {
     setOpen(false);
   };
 
+  const logoutUser = (e) => {
+    axios
+      .get('http://localhost:8000/api/users/logout', { withCredentials: true })
+      .then(res => {
+        if (res.data.message === 'success') {
+          navigate('/signin');
+        }
+      })
+      .catch(navigate('/'));
+  };
+
   return (
     <div className='center'>
       <CssBaseline />
@@ -75,36 +66,43 @@ const Main = (props) => {
           navValue={navValue}
           setNavValue={setNavValue}
           navigatePage={navigatePage}
+          logoutUser={logoutUser}
         />
         <Category
           path='/category'
           navValue={navValue}
           setNavValue={setNavValue}
+          logoutUser={logoutUser}
         />
         <DumpAndChunk
           path='/dump'
           navValue={navValue}
           setNavValue={setNavValue}
+          logoutUser={logoutUser}
         />
         <Schedule 
           path='/schedule'
           navValue={navValue}
           setNavValue={setNavValue}
+          logoutUser={logoutUser}
         />
         <Do 
           path='/do'
           navValue={navValue}
           setNavValue={setNavValue}
+          logoutUser={logoutUser}
         />
         <Trajectory
           path='/trajectory'
           navValue={navValue}
           setNavValue={setNavValue}
+          logoutUser={logoutUser}
         />
         <Profile
           path='/profile'
           navValue={navValue}
           setNavValue={setNavValue}
+          logoutUser={logoutUser}
         />
       </Router>
       <BottomNavComponent
@@ -116,14 +114,13 @@ const Main = (props) => {
       <PersistentDrawer
         navigatePage={navigatePage}
         navValue={navValue}
-        firstInitial={firstInitial}
-        sessionUserFirstName={sessionUserFirstName}
+        setNavValue={setNavValue}
         handleDrawerOpen={handleDrawerOpen}
         handleDrawerClose={handleDrawerClose}
         open={open}
         setOpen={setOpen}
-        setNavValue={setNavValue}
         toggleDarkMode={toggleDarkMode}
+        logoutUser={logoutUser}
       />
     </div>
   );

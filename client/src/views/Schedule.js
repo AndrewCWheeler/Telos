@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { navigate } from '@reach/router';
 // Material-ui core components:
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -113,7 +112,7 @@ const useStyles = makeStyles(theme => ({
 const Schedule = props => {
   const myRef = useRef();
   const classes = useStyles();
-  const { navValue, setNavValue} = props;
+  const { navValue, setNavValue, logoutUser} = props;
 
   // STATES
   const [task, setTask] = useState({
@@ -152,8 +151,8 @@ const Schedule = props => {
           setSessionUserId(response.data.results._id);
         }
       })
-      .catch(()=> {
-        navigate('/');
+      .catch(()=>{
+        logoutUser();
       });
     let two = 'http://localhost:8000/api/tasks/user';
     const requestTwo = axios.get(two, { withCredentials: true });
@@ -165,18 +164,14 @@ const Schedule = props => {
           setAllTasks(orderedTasks);
         }
       })
-      .catch(()=> {
-        navigate('/');
-      });
+      .catch();
     let three = 'http://localhost:8000/api/categories/user';
     const requestThree = axios.get(three, {withCredentials: true });
     requestThree
       .then(response => {
         if (isMounted) setAllCategories(response.data.results);
       })
-      .catch(()=> {
-        navigate('/');
-      });
+      .catch();
     axios
       .all([requestOne, requestTwo, requestThree])
       .then(
@@ -186,17 +181,15 @@ const Schedule = props => {
           const responseThree = responses[2];
         })
       )
-      .catch(()=> {
-        navigate('/');
-      });
+      .catch();
       return () => { isMounted = false }
   }, [load]);
 
   // DIALOG AND SNACK HANDLERS
   const handleOpenSnackBar = (snack, severity) => {
-    setOpenSnack(true);
     setSnack(snack); 
     setSeverity(severity);
+    setOpenSnack(true);
   };
   const handleCloseSnackBar = (event, reason) => {
     if (reason === 'clickaway') {
@@ -261,25 +254,29 @@ const Schedule = props => {
       result.source.index,
       result.destination.index
     );
+    assignPriority(items);
     setAllTasks(items);
+
   };
   // Assign priority to tasks according to DOM state index and update priority property in db:
   const assignPriority = (arr) => {
+    
     for (let i=0; i<arr.length; i++){
       arr[i].priority = i;
     }
     axios.put('http://localhost:8000/api/bulk/' + sessionUserId, arr, {withCredentials: true})
     .then()
-    .catch();
+    .catch(err => {
+    });
     return arr;
-    }
-  const SortedTasks = assignPriority(FilteredTasks).sort((a, b) => a.priority - b.priority);
+  }
+
+  const SortedTasks = FilteredTasks.sort((a, b) => a.priority - b.priority);
 
   // onCHANGE HANDLERS
   const onChangeHandler = e => {
     setTask({
       ...task,
-      owner: sessionUserId,
       [e.target.name]: e.target.value,
     });
   };
@@ -295,7 +292,6 @@ const Schedule = props => {
 
   const onSelectHandler = e => {
     setSelectedCategory(e.target.value);
-    // load === 1 ? (setLoad(0)) : setLoad(1);
   };
 
   // GET and PATCH axios calls:
@@ -307,7 +303,8 @@ const Schedule = props => {
           setTask(res.data.results);
         }
       })
-      .catch();
+      .catch(()=>{
+      });
   };
 
   const onPatchEditNameHandler = (e, id) => {
@@ -325,7 +322,9 @@ const Schedule = props => {
           load === 1 ? (setLoad(0)) : setLoad(1);
         }
       })
-      .catch();
+      .catch(()=>{
+        handleOpenSnackBar("Something went wrong updating your task.", "error");
+      });
   };
 
   const onPatchEditChunkHandler = (e, id) => {
@@ -355,23 +354,23 @@ const Schedule = props => {
           removeFromDom(id);
           handleCloseEdit();
           handleOpenSnackBar(snack, severity);
-          // load === 1 ? (setLoad(0)) : setLoad(1);
+          load === 1 ? (setLoad(0)) : setLoad(1);
         }
       })
       .catch();
   };
 
   const onPatchEditTaskHandler = (e, id, snack, severity) => {
-    if (task.name === '' || task.category === ''){
-      handleOpenSnackBar("Task must have a name and category!", "error");
+    if (task.name === ''){
+      handleOpenSnackBar("Task must have a name!", "error");
       return
     }
     else {
-      axios.patch('http://localhost:8000/api/tasks' + id, task, {withCredentials: true})
+      axios.patch('http://localhost:8000/api/tasks/' + id, task, {withCredentials: true})
       .then(res => {
         if (res.data.message === 'success') {
-          handleOpenSnackBar(snack, severity);
           handleCloseEdit();
+          handleOpenSnackBar(snack, severity);
           setTask({
             name: '',
             category: '',
@@ -383,8 +382,9 @@ const Schedule = props => {
             owner: '',
             priority: 0,
           });
+          load === 1 ? (setLoad(0)) : setLoad(1);
         }
-      }).catch(err => {
+      }).catch(() => {
           handleOpenSnackBar("Nothing changed. Please try again or cancel", "warning");
         })
       }
@@ -409,7 +409,7 @@ const Schedule = props => {
   };
 
   return (
-    <div>
+    <>
       <CssBaseline />
       <div style={{marginTop:'90px'}}>
       <Typography
@@ -482,7 +482,7 @@ const Schedule = props => {
                               key={task._id}
                               index={i}
                             >
-                              <ListItemIcon button style={{marginRight: -24, marginTop: -30, cursor: 'pointer'}}
+                              <ListItemIcon style={{marginRight: -24, marginTop: -30, cursor: 'pointer'}}
                                 onClick={e => {handleOpenCal(e, task._id)}}
                                 >
                                 <EventIcon className={classes.neutralIconStyle} />
@@ -688,7 +688,7 @@ const Schedule = props => {
         handleOpenSnackBar={handleOpenSnackBar}
         handleCloseSnackBar={handleCloseSnackBar}
       />
-    </div>
+    </>
   );
 };
 

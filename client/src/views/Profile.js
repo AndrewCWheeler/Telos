@@ -117,7 +117,7 @@ const useStyles = makeStyles(theme => ({
 
 const Profile = props => {
   const classes = useStyles();
-  const { navValue, setNavValue } = props;
+  const { navValue, setNavValue, logoutUser } = props;
   const [firstInitial, setFirstInitial] = useState('');
   const [sessionUser, setSessionUser] = useState({});
   const [allTasks, setAllTasks] = useState([]);
@@ -154,8 +154,8 @@ const Profile = props => {
           setFirstInitial(response.data.results.firstName.charAt());
         }
       })
-      .catch(()=> {
-        navigate('/');
+      .catch(()=>{
+        logoutUser();
       });
     let two = 'http://localhost:8000/api/tasks/user';
     const requestTwo = axios.get(two, { withCredentials: true });
@@ -167,18 +167,14 @@ const Profile = props => {
           setAllTasks(orderedTasks);
         }
       })
-      .catch(()=> {
-        navigate('/');
-      });
+      .catch();
     let three = 'http://localhost:8000/api/categories/user';
     const requestThree = axios.get(three, {withCredentials: true });
     requestThree
       .then(response => {
         if (isMounted) setAllCategories(response.data.results);
       })
-      .catch(()=> {
-        navigate('/');
-      });
+      .catch();
     axios
       .all([requestOne, requestTwo, requestThree])
       .then(
@@ -188,16 +184,14 @@ const Profile = props => {
           const responseThree = responses[2];
         })
       )
-      .catch(()=> {
-        navigate('/');
-      });
+      .catch();
       return () => { isMounted = false }
   }, [load]);
   
   const handleOpenSnackBar = (snack, severity) => {
-    setOpenSnack(true);
     setSnack(snack);
     setSeverity(severity)
+    setOpenSnack(true);
   };
   const handleCloseSnackBar = (event, reason) => {
     if (reason === 'clickaway') {
@@ -251,7 +245,9 @@ const Profile = props => {
           handleOpenSnackBar(snack, severity);
         }
       }).catch();
-    }).catch();
+    }).catch(()=>{
+      logoutUser();
+    });
   };
 
   const deleteTask = (e,id, snack, severity) => {
@@ -281,7 +277,9 @@ const Profile = props => {
                 navigate('/landing');
               }
             })
-            .catch();
+            .catch(()=>{
+              logoutUser();
+            });
         };
       }).catch();
   };

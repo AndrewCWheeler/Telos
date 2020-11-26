@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { navigate } from '@reach/router';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Dialog from '@material-ui/core/Dialog';
@@ -18,7 +17,6 @@ import Typography from '@material-ui/core/Typography';
 
 import AddIcon from '@material-ui/icons/Add';
 import InfoIcon from '@material-ui/icons/Info';
-import LibraryAddIcon from '@material-ui/icons/LibraryAdd';
 import UpdateIcon from '@material-ui/icons/Update';
 
 import SimpleSnackbar from '../components/SimpleSnackBar';
@@ -102,7 +100,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Vision = props => {
-  const { navValue, setNavValue, navigatePage } = props;
+  const { navValue, setNavValue, navigatePage, logoutUser } = props;
   const domRef = useRef();
   const classes = useStyles();
   const [sessionUser, setSessionUser] = useState({});
@@ -125,15 +123,15 @@ const Vision = props => {
         }
       })
       .catch(()=> {
-        navigate('/');
+        logoutUser();
       });
       return () => { isMounted = false }
   }, [load]);
 
   const handleOpenSnackBar = (snack, severity) => {
-    setOpenSnack(true);
-    setSnack(snack);
     setSeverity(severity);
+    setSnack(snack);
+    setOpenSnack(true);
   };
   const handleCloseSnackBar = (event, reason) => {
     if (reason === 'clickaway') {
@@ -161,7 +159,6 @@ const Vision = props => {
       ...sessionUser,
       [e.target.name]: e.target.value,
     })
-    console.log(sessionUser);
   }
 
   const handleKeyDown = (e, snack, severity) => {
@@ -180,13 +177,14 @@ const Vision = props => {
       })
       .then(res => {
         if(res.data.message === 'success'){
-          handleOpenSnackBar(snack, severity);
           handleCloseVisionCreate();
-        }}).catch();
+          handleOpenSnackBar("Vision Updated!", "success");
+        }})
+        .catch();
   };
 
   return (
-    <div>
+    <>
       <CssBaseline />
       <div style={{marginTop: 90}}>
         <Typography
@@ -289,8 +287,7 @@ const Vision = props => {
         handleOpenSnackBar={handleOpenSnackBar}
         handleCloseSnackBar={handleCloseSnackBar}
       />
-
-    </div>
+    </>
   );
 };
 

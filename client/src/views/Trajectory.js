@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { navigate } from '@reach/router';
 import { Radar }  from 'react-chartjs-2';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
@@ -25,7 +24,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Trajectory = props => {
-  const { navValue, setNavValue } = props;
+  const { navValue, setNavValue, logoutUser } = props;
 
   const classes = useStyles();
   const [sessionUserId, setSessionUserId] = useState('');
@@ -48,8 +47,8 @@ const Trajectory = props => {
           setSessionUser(response.data.results);
         }
       })
-      .catch(()=> {
-        navigate('/');
+      .catch(()=>{
+        logoutUser();
       });
     let two = 'http://localhost:8000/api/tasks/user';
     const requestTwo = axios.get(two, { withCredentials: true });
@@ -61,18 +60,14 @@ const Trajectory = props => {
           setAllTasks(orderedTasks);
         }
       })
-      .catch(()=> {
-        navigate('/');
-      });
+      .catch();
     let three = 'http://localhost:8000/api/categories/user';
     const requestThree = axios.get(three, {withCredentials: true });
     requestThree
       .then(response => {
         if (isMounted) setAllCategories(response.data.results);
       })
-      .catch(()=> {
-        navigate('/');
-      });
+      .catch();
     axios
       .all([requestOne, requestTwo, requestThree])
       .then(
@@ -82,9 +77,7 @@ const Trajectory = props => {
           const responseThree = responses[2];
         })
       )
-      .catch(()=> {
-        navigate('/');
-      });
+      .catch();
       return () => { isMounted = false }
   }, [load]);
 

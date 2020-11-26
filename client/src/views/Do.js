@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import {navigate} from '@reach/router';
 // Material-ui core components:
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -125,7 +124,6 @@ const useStyles = makeStyles(theme => ({
     background: 'none!important',
     border: 'none',
     padding: '0!important',
-    // fontFamily: arial, sansSerif,
     textDecoration: 'none',
     color: theme.palette.info.main,
     "&:active": {
@@ -167,9 +165,8 @@ const useStyles = makeStyles(theme => ({
 const Do = props => {
   const myRef = useRef();
   const editModalRef = useRef();
-  const doRef = useRef();
   const classes = useStyles();
-  const { navValue, setNavValue } = props;
+  const { navValue, setNavValue, logoutUser } = props;
   const [task, setTask] = useState({
     name: '',
     category: '',
@@ -206,8 +203,8 @@ const Do = props => {
           setSessionUserId(response.data.results._id);
         }
       })
-      .catch(()=> {
-        navigate('/');
+      .catch(()=>{
+        logoutUser();
       });
     let two = 'http://localhost:8000/api/tasks/user';
     const requestTwo = axios.get(two, { withCredentials: true });
@@ -219,18 +216,14 @@ const Do = props => {
           setAllTasks(orderedTasks);
         }
       })
-      .catch(()=> {
-        navigate('/');
-      });
+      .catch();
     let three = 'http://localhost:8000/api/categories/user';
     const requestThree = axios.get(three, {withCredentials: true });
     requestThree
       .then(response => {
         if (isMounted) setAllCategories(response.data.results);
       })
-      .catch(()=> {
-        navigate('/');
-      });
+      .catch();
     axios
       .all([requestOne, requestTwo, requestThree])
       .then(
@@ -240,9 +233,7 @@ const Do = props => {
           const responseThree = responses[2];
         })
       )
-      .catch(()=> {
-        navigate('/');
-      });
+      .catch();
       return () => { isMounted = false }
   }, [load]);
 
@@ -281,6 +272,7 @@ const Do = props => {
       result.source.index,
       result.destination.index
     );
+    assignPriority(items);
     setAllTasks(items);
   };
       
@@ -291,18 +283,20 @@ const Do = props => {
     }
     axios.put('http://localhost:8000/api/bulk/' + sessionUserId, arr, {withCredentials: true})
     .then()
-    .catch();
+    .catch(err => {
+      
+    });
     return arr;
   }
     
-  const SortedTasks = assignPriority(FilteredTasks).sort((a, b) => a.priority - b.priority);
+  const SortedTasks = FilteredTasks.sort((a, b) => a.priority - b.priority);
   
   // Dialog and Snack Handlers:
 
   const handleOpenSnackBar = (snack, severity) => {
-    setOpenSnack(true);
     setSnack(snack); 
     setSeverity(severity)
+    setOpenSnack(true);
   };
 
   const handleCloseSnackBar = (event, reason) => {
@@ -414,7 +408,7 @@ const Do = props => {
       return
     }
     else {
-      axios.patch('http://localhost:8000/api/tasks' + id, task, {withCredentials: true})
+      axios.patch('http://localhost:8000/api/tasks/' + id, task, {withCredentials: true})
       .then(res => {
         if (res.data.message === 'success') {
           handleOpenSnackBar(snack, severity);
@@ -430,8 +424,9 @@ const Do = props => {
             owner: '',
             priority: 0,
           });
+          load === 1 ? (setLoad(0)) : setLoad(1);
         }
-      }).catch(err => {
+      }).catch(() => {
         handleOpenSnackBar("Nothing changed. Please try again or cancel", "warning");
       })
     }
@@ -472,7 +467,7 @@ const Do = props => {
   };
 
   return (
-    <div ref={doRef}>
+    <>
       <CssBaseline />
       <div style={{marginTop:'90px'}}>
         <Typography 
@@ -759,7 +754,7 @@ const Do = props => {
         handleOpenSnackBar={handleOpenSnackBar}
         handleCloseSnackBar={handleCloseSnackBar} 
       />
-    </div>
+    </>
   );
 };
 
