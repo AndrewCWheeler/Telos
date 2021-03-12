@@ -40,426 +40,501 @@ import 'moment-timezone';
 import landingBackground from '../images/landingBackground.jpg';
 
 const useStyles = makeStyles(theme => ({
-  root: {
-    width: '100%',
-    maxWidth: 840,
-  },
-  card: {
-    maxWidth: 519,
-    marginTop: 90,
-  },
-  media: {
-    height: 0,
-    paddingTop: '56.25%', // 16:9
-  },
-  expand: {
-    transform: 'rotate(0deg)',
-    marginLeft: 'auto',
-    transition: theme.transitions.create('transform', {
-      duration: theme.transitions.duration.shortest,
-    }),
-  },
-  expandOpen: {
-    transform: 'rotate(180deg)',
-  },
-  avatar: {
-    backgroundColor: red[500],
-  },
-  text: {
-    color: theme.palette.text.primary,
-    display: 'inline-block',
-    overflowX: 'scroll',
-    overflowY: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    padding: 0,
-    margin: '0 5px 0 0',
-    width: '120px',
-    height: '100%',
-  },
-  link: {
-    textDecoration: 'none',
-    color: theme.palette.text.primary,
-    "&:active": {
-      color: theme.palette.secondary.dark,
+    root: {
+        width: '100%',
+        maxWidth: 840,
     },
-    "&:hover": {
-      color: theme.palette.info.main,
-      textDecoration: 'none',
-    }
-  },
-  list: {
-    marginBottom: 90,
-    marginTop: 30,
-  },
-  listItem: {
-    maxHeight: '100%',
-    width: '100%',
-    backgroundColor: theme.palette.background.default,
-    borderBottom: '1px solid #e1dfdc',
-    paddingLeft: 0,
-  },
-  secondaryIconStyle: {
-    fontSize:24,
-    color: theme.palette.secondary.main,
-  },
-  success: {
-    color: theme.palette.success.main,
-  },
-  cardActionStyle: {
-    marginTop: 30,
-    float: 'right',
-  },
-  error: {
-    color: theme.palette.error.main,
-  },
+    card: {
+        maxWidth: 519,
+        marginTop: 90,
+    },
+    media: {
+        height: 0,
+        paddingTop: '56.25%', // 16:9
+    },
+    expand: {
+        transform: 'rotate(0deg)',
+        marginLeft: 'auto',
+        transition: theme.transitions.create('transform', {
+            duration: theme.transitions.duration.shortest,
+        }),
+    },
+    expandOpen: {
+        transform: 'rotate(180deg)',
+    },
+    avatar: {
+        backgroundColor: red[500],
+    },
+    text: {
+        color: theme.palette.text.primary,
+        display: 'inline-block',
+        overflowX: 'scroll',
+        overflowY: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        padding: 0,
+        margin: '0 5px 0 0',
+        width: '120px',
+        height: '100%',
+    },
+    link: {
+        textDecoration: 'none',
+        color: theme.palette.text.primary,
+        '&:active': {
+            color: theme.palette.secondary.dark,
+        },
+        '&:hover': {
+            color: theme.palette.info.main,
+            textDecoration: 'none',
+        },
+    },
+    list: {
+        marginBottom: 90,
+        marginTop: 30,
+    },
+    listItem: {
+        maxHeight: '100%',
+        width: '100%',
+        backgroundColor: theme.palette.background.default,
+        borderBottom: '1px solid #e1dfdc',
+        paddingLeft: 0,
+    },
+    secondaryIconStyle: {
+        fontSize: 24,
+        color: theme.palette.secondary.main,
+    },
+    success: {
+        color: theme.palette.success.main,
+    },
+    cardActionStyle: {
+        marginTop: 30,
+        float: 'right',
+    },
+    error: {
+        color: theme.palette.error.main,
+    },
 }));
 
 const Profile = props => {
-  const classes = useStyles();
-  const { navValue, setNavValue, logoutUser } = props;
-  const [firstInitial, setFirstInitial] = useState('');
-  const [sessionUser, setSessionUser] = useState({});
-  const [allTasks, setAllTasks] = useState([]);
-  const [allCategories, setAllCategories] = useState([]);
-  const [load, setLoad] = useState(0);
-  const [openDeleteUser, setOpenDeleteUser] = useState(false);
-  const [openDeleteTask, setOpenDeleteTask] = useState(false);
-  const [task, setTask] = useState({
-    name: '',
-    category: '',
-    chunked: '',
-    scheduled: '',
-    scheduledAt: '',
-    completed: '',
-    completedAt: '',
-    owner: '',
-    priority: 0,
-  });
-  const [openSnack, setOpenSnack] = useState(false);
-  const [snack, setSnack] = useState('');
-  const [severity, setSeverity] = useState('');
-
-  useEffect(() => {
-    let isMounted = true;
-    if (navValue !== 'profile'){
-      setNavValue('profile');
-    }
-    let one = 'http://localhost:8000/api/users/one';
-    const requestOne = axios.get(one, { withCredentials: true });
-    requestOne
-      .then(response => {
-        if (response.data.message === 'success' && isMounted) {
-          setSessionUser(response.data.results);
-          setFirstInitial(response.data.results.firstName.charAt());
-        }
-      })
-      .catch(()=>{
-        logoutUser();
-      });
-    let two = 'http://localhost:8000/api/tasks/user';
-    const requestTwo = axios.get(two, { withCredentials: true });
-    requestTwo
-      .then(response => {
-        if (response.data.message === 'success' && isMounted){
-          let orderedTasks = response.data.results;
-          orderedTasks.sort((a,b) => a.priority - b.priority)
-          setAllTasks(orderedTasks);
-        }
-      })
-      .catch();
-    let three = 'http://localhost:8000/api/categories/user';
-    const requestThree = axios.get(three, {withCredentials: true });
-    requestThree
-      .then(response => {
-        if (isMounted) setAllCategories(response.data.results);
-      })
-      .catch();
-    axios
-      .all([requestOne, requestTwo, requestThree])
-      .then(
-        axios.spread((...responses) => {
-          const responseOne = responses[0];
-          const responseTwo = responses[1];
-          const responseThree = responses[2];
-        })
-      )
-      .catch();
-      return () => { isMounted = false }
-  }, [load]);
-  
-  const handleOpenSnackBar = (snack, severity) => {
-    setSnack(snack);
-    setSeverity(severity)
-    setOpenSnack(true);
-  };
-  const handleCloseSnackBar = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setOpenSnack(false);
-  };
-
-  const handleOpenDeleteUser = (e, id) => {
-    setOpenDeleteUser(true);
-  };
-
-  const handleCloseDeleteUser = () => {
-    setOpenDeleteUser(false);
-  };
-
-  const handleOpenDeleteTask = (e, id) => {
-    onClickHandler(e, id);
-    setOpenDeleteTask(true);
-  };
-  const handleCloseDeleteTask = () => {
-    setOpenDeleteTask(false);
-  };
-
-  const removeFromDom = taskId => {
-    setAllTasks(allTasks.filter(task => task._id !== taskId));
-  };
-
-
-  const onClickHandler = (e, id) => {
-    axios
-      .get(`http://localhost:8000/api/tasks/${id}`, { withCredentials: true })
-      .then(res => {
-        if (res.data.message === 'success') {
-          setTask(res.data.results);
-        }
-      })
-      .catch();
-  };
-
-  const handleUndoComplete = (e,id,snack, severity) => {
-    axios.get(`http://localhost:8000/api/tasks/${id}`, {withCredentials: true})
-    .then(res => { 
-      let completedTask = {};
-      completedTask = res.data.results;
-      completedTask.completed = false;
-      return axios.patch(`http://localhost:8000/api/tasks/${id}`, completedTask, {withCredentials: true})
-      .then(res => {
-        if (res.data.message === 'success'){
-          removeFromDom(id);
-          handleOpenSnackBar(snack, severity);
-        }
-      }).catch();
-    }).catch(()=>{
-      logoutUser();
+    const classes = useStyles();
+    const { navValue, setNavValue, logoutUser } = props;
+    const [firstInitial, setFirstInitial] = useState('');
+    const [sessionUser, setSessionUser] = useState({});
+    const [allTasks, setAllTasks] = useState([]);
+    const [allCategories, setAllCategories] = useState([]);
+    const [load, setLoad] = useState(0);
+    const [openDeleteUser, setOpenDeleteUser] = useState(false);
+    const [openDeleteTask, setOpenDeleteTask] = useState(false);
+    const [task, setTask] = useState({
+        name: '',
+        category: '',
+        chunked: '',
+        scheduled: '',
+        scheduledAt: '',
+        completed: '',
+        completedAt: '',
+        owner: '',
+        priority: 0,
     });
-  };
+    const [openSnack, setOpenSnack] = useState(false);
+    const [snack, setSnack] = useState('');
+    const [severity, setSeverity] = useState('');
 
-  const deleteTask = (e,id, snack, severity) => {
-    axios
-      .delete(`http://localhost:8000/api/tasks/${id}`,
-        {withCredentials: true,
-      })
-      .then(res => {
-        if(res.data.message==='success'){
-        handleCloseDeleteTask(snack);
-        removeFromDom(id);
-        handleOpenSnackBar(snack, severity);
-      }
-      }).catch();
-  };
-
-  const deleteUser = (e, id) => {
-    axios
-      .delete('http://localhost:8000/api/users/' + id, {
-        withCredentials: true,
-      })
-      .then(res => {
-        if (res.data.message === 'success') {
-          return axios.get('http://localhost:8000/api/users/logout', { withCredentials: true })
-            .then(res => {
-              if (res.data.message === 'success') {
-                navigate('/landing');
-              }
+    useEffect(() => {
+        let isMounted = true;
+        if (navValue !== 'profile') {
+            setNavValue('profile');
+        }
+        let one = 'http://localhost:8000/api/users/one';
+        const requestOne = axios.get(one, { withCredentials: true });
+        requestOne
+            .then(response => {
+                if (response.data.message === 'success' && isMounted) {
+                    setSessionUser(response.data.results);
+                    setFirstInitial(response.data.results.firstName.charAt());
+                }
             })
-            .catch(()=>{
-              logoutUser();
+            .catch(() => {
+                logoutUser();
             });
+        let two = 'http://localhost:8000/api/tasks/user';
+        const requestTwo = axios.get(two, { withCredentials: true });
+        requestTwo
+            .then(response => {
+                if (response.data.message === 'success' && isMounted) {
+                    let orderedTasks = response.data.results;
+                    orderedTasks.sort((a, b) => a.priority - b.priority);
+                    setAllTasks(orderedTasks);
+                }
+            })
+            .catch();
+        let three = 'http://localhost:8000/api/categories/user';
+        const requestThree = axios.get(three, { withCredentials: true });
+        requestThree
+            .then(response => {
+                if (isMounted) setAllCategories(response.data.results);
+            })
+            .catch();
+        axios
+            .all([requestOne, requestTwo, requestThree])
+            .then(
+                axios.spread((...responses) => {
+                    const responseOne = responses[0];
+                    const responseTwo = responses[1];
+                    const responseThree = responses[2];
+                })
+            )
+            .catch();
+        return () => {
+            isMounted = false;
         };
-      }).catch();
-  };
+    }, [load]);
 
-  return (
-    <Container className={classes.root}>
-      <GridContainer justify="center">
-        <GridItem xs={12} sm={8} md={8}>
-          <Card className={classes.card}>
-            <CardHeader
-              avatar={
-                <Avatar aria-label="user" className={classes.avatar}>
-                  {firstInitial}
-                </Avatar>
-              }
-              title={<Typography>
-                {sessionUser.firstName}&nbsp;{sessionUser.lastName}
-              </Typography>}
-              subheader={<Typography>
-                {sessionUser.email}
-              </Typography>}
-            />
-            <CardMedia
-              className={classes.media}
-              image={landingBackground}
-            />
-            <CardContent>
-              <Typography variant="subtitle1">
-                <Link to="/vision" textDecoration="none" className={classes.link}>
-                  My Vision
-                </Link>
-              </Typography>
-              <Typography variant="body2" component="p">
-                {sessionUser.vision}
-              </Typography>
-            </CardContent>
-            <CardActions
-              className={classes.cardActionStyle}
+    const handleOpenSnackBar = (snack, severity) => {
+        setSnack(snack);
+        setSeverity(severity);
+        setOpenSnack(true);
+    };
+    const handleCloseSnackBar = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpenSnack(false);
+    };
+
+    const handleOpenDeleteUser = (e, id) => {
+        setOpenDeleteUser(true);
+    };
+
+    const handleCloseDeleteUser = () => {
+        setOpenDeleteUser(false);
+    };
+
+    const handleOpenDeleteTask = (e, id) => {
+        onClickHandler(e, id);
+        setOpenDeleteTask(true);
+    };
+    const handleCloseDeleteTask = () => {
+        setOpenDeleteTask(false);
+    };
+
+    const removeFromDom = taskId => {
+        setAllTasks(allTasks.filter(task => task._id !== taskId));
+    };
+
+    const onClickHandler = (e, id) => {
+        axios
+            .get(`http://localhost:8000/api/tasks/${id}`, {
+                withCredentials: true,
+            })
+            .then(res => {
+                if (res.data.message === 'success') {
+                    setTask(res.data.results);
+                }
+            })
+            .catch();
+    };
+
+    const handleUndoComplete = (e, id, snack, severity) => {
+        axios
+            .get(`http://localhost:8000/api/tasks/${id}`, {
+                withCredentials: true,
+            })
+            .then(res => {
+                let completedTask = {};
+                completedTask = res.data.results;
+                completedTask.completed = false;
+                return axios
+                    .patch(
+                        `http://localhost:8000/api/tasks/${id}`,
+                        completedTask,
+                        { withCredentials: true }
+                    )
+                    .then(res => {
+                        if (res.data.message === 'success') {
+                            removeFromDom(id);
+                            handleOpenSnackBar(snack, severity);
+                        }
+                    })
+                    .catch();
+            })
+            .catch(() => {
+                logoutUser();
+            });
+    };
+
+    const deleteTask = (e, id, snack, severity) => {
+        axios
+            .delete(`http://localhost:8000/api/tasks/${id}`, {
+                withCredentials: true,
+            })
+            .then(res => {
+                if (res.data.message === 'success') {
+                    handleCloseDeleteTask(snack);
+                    removeFromDom(id);
+                    handleOpenSnackBar(snack, severity);
+                }
+            })
+            .catch();
+    };
+
+    const deleteUser = (e, id) => {
+        axios
+            .delete('http://localhost:8000/api/users/' + id, {
+                withCredentials: true,
+            })
+            .then(res => {
+                if (res.data.message === 'success') {
+                    return axios
+                        .get('http://localhost:8000/api/users/logout', {
+                            withCredentials: true,
+                        })
+                        .then(res => {
+                            if (res.data.message === 'success') {
+                                navigate('/landing');
+                            }
+                        })
+                        .catch(() => {
+                            logoutUser();
+                        });
+                }
+            })
+            .catch();
+    };
+
+    return (
+        <Container className={classes.root}>
+            <GridContainer justify='center'>
+                <GridItem xs={12} sm={8} md={8}>
+                    <Card className={classes.card}>
+                        <CardHeader
+                            avatar={
+                                <Avatar
+                                    aria-label='user'
+                                    className={classes.avatar}
+                                >
+                                    {firstInitial}
+                                </Avatar>
+                            }
+                            title={
+                                <Typography>
+                                    {sessionUser.firstName}&nbsp;
+                                    {sessionUser.lastName}
+                                </Typography>
+                            }
+                            subheader={
+                                <Typography>{sessionUser.email}</Typography>
+                            }
+                        />
+                        <CardMedia
+                            className={classes.media}
+                            image='https://images.unsplash.com/photo-1468276311594-df7cb65d8df6?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=3900&q=80'
+                        />
+                        <CardContent>
+                            <Typography variant='subtitle1'>
+                                <Link
+                                    to='/vision'
+                                    textDecoration='none'
+                                    className={classes.link}
+                                >
+                                    My Vision
+                                </Link>
+                            </Typography>
+                            <Typography variant='body2' component='p'>
+                                {sessionUser.vision}
+                            </Typography>
+                        </CardContent>
+                        <CardActions className={classes.cardActionStyle}>
+                            <Button
+                                className={classes.error}
+                                onClick={handleOpenDeleteUser}
+                            >
+                                Delete Account
+                            </Button>
+                        </CardActions>
+                    </Card>
+                </GridItem>
+            </GridContainer>
+            <div style={{ marginTop: 30 }}>
+                <Typography variant='h5'>Completed Tasks</Typography>
+                <List dense secondary='true' className={classes.list}>
+                    {allTasks.map((task, i) =>
+                        task.completed ? (
+                            <ListItem
+                                className={classes.listItem}
+                                key={task._id}
+                                index={i}
+                                button
+                            >
+                                <Tooltip
+                                    title='Task completed!'
+                                    placement='left'
+                                >
+                                    <IconButton type='button'>
+                                        <CheckIcon
+                                            className={classes.success}
+                                        />
+                                    </IconButton>
+                                </Tooltip>
+                                {allCategories.map((category, catIdx) =>
+                                    task.category === category.name ? (
+                                        <ListItemText
+                                            key={catIdx}
+                                            disableTypography
+                                            className={classes.text}
+                                            overflow='hidden'
+                                            primary={
+                                                <Typography
+                                                    style={{
+                                                        fontSize: 15,
+                                                        textDecoration:
+                                                            'line-through',
+                                                    }}
+                                                >
+                                                    {task.name}
+                                                </Typography>
+                                            }
+                                            secondary={
+                                                <Typography
+                                                    style={{
+                                                        fontSize: 12,
+                                                        color: category.color,
+                                                    }}
+                                                >
+                                                    {task.category}
+                                                </Typography>
+                                            }
+                                        />
+                                    ) : null
+                                )}{' '}
+                                <ListItemText>
+                                    <ListItemText
+                                        disableTypography
+                                        primary={
+                                            <Typography
+                                                style={{ fontSize: 15 }}
+                                            >
+                                                Completed: &nbsp;
+                                                <Moment format='LL'>
+                                                    {task.completedAt}
+                                                </Moment>
+                                            </Typography>
+                                        }
+                                    ></ListItemText>
+                                </ListItemText>
+                                <Tooltip
+                                    title='Undo completed?'
+                                    placement='left'
+                                >
+                                    <IconButton
+                                        className={classes.secondaryIconStyle}
+                                        edge='end'
+                                        aria-label='undo completed'
+                                        onClick={e => {
+                                            handleUndoComplete(
+                                                e,
+                                                task._id,
+                                                'Task marked incomplete.',
+                                                'success'
+                                            );
+                                        }}
+                                    >
+                                        <UndoIcon></UndoIcon>
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title='Delete Task' placement='right'>
+                                    <IconButton
+                                        className={classes.deleteStyle}
+                                        edge='end'
+                                        aria-label='delete'
+                                        onClick={e => {
+                                            handleOpenDeleteTask(e, task._id);
+                                        }}
+                                    >
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            </ListItem>
+                        ) : null
+                    )}
+                </List>
+            </div>
+            {/* DELETE USER Dialog */}
+            <Dialog
+                open={openDeleteTask}
+                onClose={handleCloseDeleteTask}
+                aria-labelledby='alert-delete-task'
+                aria-describedby='alert-are-you-sure?'
+                fullWidth
             >
-              <Button
-                className={classes.error}
-                onClick={handleOpenDeleteUser}
-              >
-                Delete Account
-              </Button>
-            </CardActions>
-          </Card>
-        </GridItem>
-      </GridContainer>
-      <div style={{marginTop: 30}}>
-      <Typography variant='h5'>
-        Completed Tasks
-      </Typography>
-      <List dense secondary = 'true' className={classes.list}>
-        {allTasks.map((task, i) =>
-        task.completed ?
-          (
-            <ListItem
-              className={classes.listItem}
-              key={task._id}
-              index={i}
-              button
+                <DialogTitle id='DeleteTaskTitle'>{'Delete Task?'}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id='DeleteTaskAlert'>
+                        This action cannot be undone. Your task will be removed
+                        from its category, calendar, and trajectory stats. Are
+                        you sure you want to delete this task?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDeleteTask} color='primary'>
+                        Cancel
+                    </Button>
+                    <Button
+                        className={classes.error}
+                        onClick={e => {
+                            deleteTask(
+                                e,
+                                task._id,
+                                'Task deleted successfully.',
+                                'success'
+                            );
+                        }}
+                    >
+                        Delete Task
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog
+                open={openDeleteUser}
+                onClose={handleCloseDeleteUser}
+                aria-labelledby='alert-delete-user'
+                aria-describedby='alert-are-you-sure?'
+                fullWidth
             >
-              <Tooltip title="Task completed!" placement="left">
-                <IconButton type='button' 
-                >
-                  <CheckIcon
-                  className={classes.success}
-                  />
-                </IconButton>
-              </Tooltip>
-              {allCategories.map((category, catIdx) => 
-                task.category === category.name ? (
-                  <ListItemText
-                    key={catIdx}
-                    disableTypography
-                    className={classes.text}
-                    overflow='hidden'
-                    primary={<Typography style={{fontSize:15, textDecoration: 'line-through'}}>{task.name}</Typography>}
-                    secondary={<Typography style={{fontSize:12, color:category.color}}>{task.category}</Typography>}
-                  />
-                ) : null
-              )}  <ListItemText >
-              <ListItemText
-                disableTypography
-                primary={
-                  <Typography style={{fontSize: 15}}>
-                    Completed: &nbsp;
-                    <Moment format='LL'>
-                      {task.completedAt}
-                    </Moment>
-                  </Typography>}
-              >
-              </ListItemText>
-              </ListItemText>
-              <Tooltip title="Undo completed?" placement="left">
-                <IconButton 
-                  className={classes.secondaryIconStyle} 
-                  edge='end' 
-                  aria-label='undo completed'
-                  onClick={e => {handleUndoComplete(e, task._id, "Task marked incomplete.", "success")}}
-                >
-                  <UndoIcon></UndoIcon> 
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Delete Task" placement="right">
-                <IconButton 
-                  className={classes.deleteStyle} 
-                  edge='end' 
-                  aria-label='delete'
-                  onClick={e => {handleOpenDeleteTask(e, task._id)}}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Tooltip>
-            </ListItem>
-          ) : (null)
-        )}
-      </List>
-      </div>
-      {/* DELETE USER Dialog */}
-      <Dialog
-        open={openDeleteTask}
-        onClose={handleCloseDeleteTask}
-        aria-labelledby="alert-delete-task"
-        aria-describedby="alert-are-you-sure?"
-        fullWidth
-      >
-        <DialogTitle id="DeleteTaskTitle">{"Delete Task?"}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="DeleteTaskAlert">
-            This action cannot be undone. Your task will be removed from its category, calendar, and trajectory stats. Are you sure you want to delete this task?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDeleteTask} color="primary">
-            Cancel
-          </Button>
-          <Button
-            className={classes.error} 
-            onClick={e => {deleteTask(e, task._id, "Task deleted successfully.", "success")}}>
-            Delete Task
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog
-        open={openDeleteUser}
-        onClose={handleCloseDeleteUser}
-        aria-labelledby="alert-delete-user"
-        aria-describedby="alert-are-you-sure?"
-        fullWidth
-      >
-        <DialogTitle id="DeleteUserTitle">{"Delete Account?"}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="DeleteUserAlert">
-            This action cannot be undone. All of your data will be permanently removed. Are you sure you want to delete your account?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDeleteUser} color="primary">
-            Cancel
-          </Button>
-          <Button 
-            className={classes.error}
-            onClick={e => {deleteUser(e, sessionUser._id)}}
-          >
-            Delete Account
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <SimpleSnackbar 
-        severity={severity}
-        setSeverity={setSeverity}
-        snack={snack}
-        openSnack={openSnack}
-        handleOpenSnackBar={handleOpenSnackBar}
-        handleCloseSnackBar={handleCloseSnackBar}
-      />
-    </Container>
-  );
+                <DialogTitle id='DeleteUserTitle'>
+                    {'Delete Account?'}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id='DeleteUserAlert'>
+                        This action cannot be undone. All of your data will be
+                        permanently removed. Are you sure you want to delete
+                        your account?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDeleteUser} color='primary'>
+                        Cancel
+                    </Button>
+                    <Button
+                        className={classes.error}
+                        onClick={e => {
+                            deleteUser(e, sessionUser._id);
+                        }}
+                    >
+                        Delete Account
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            <SimpleSnackbar
+                severity={severity}
+                setSeverity={setSeverity}
+                snack={snack}
+                openSnack={openSnack}
+                handleOpenSnackBar={handleOpenSnackBar}
+                handleCloseSnackBar={handleCloseSnackBar}
+            />
+        </Container>
+    );
 };
 
 export default Profile;
